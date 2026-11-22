@@ -1,0 +1,10 @@
+{
+  "description": "An immersive personal portfolio showcasing a creative developer’s projects, skills, and journey through interactive visuals, cinematic storytelling, and direct contact links.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

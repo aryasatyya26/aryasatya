@@ -1,0 +1,916 @@
+import { FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
+
+type Project = {
+  title: string;
+  label: string;
+  description: string;
+  image?: string;
+  technologies: string[];
+  role: string;
+  live?: string;
+};
+
+const projects: Project[] = [
+  {
+    title: "Lumen",
+    label: "Digital flagship",
+    description:
+      "A spatial commerce experience for a future-facing architectural lighting company.",
+    technologies: ["Next.js", "WebGL", "GSAP"],
+    role: "Creative development",
+  },
+  {
+    title: "Web Profile",
+    label: "Brand experience",
+    description:
+      "A modern digital profile showcasing personal identity, professional capabilities, and an interactive web experience.",
+    image: "/portfolio/NewNws.png",
+    technologies: ["React", "Motion", "Sanity"],
+    role: "Web development",
+    live: "https://aryasatyanaryama-id.vercel.app",
+  },
+  {
+    title: "Content Creation",
+    label: "Social media",
+    description:
+      "Creative visual storytelling through cinematic video editing, digital content production, and engaging multimedia experiences.",
+    image: "/portfolio/Soviet1.jpg",
+    technologies: ["Video editing", "Storytelling", "Social media"],
+    role: "Content creation",
+  },
+  {
+    title: "Data Analysis",
+    label: "Data visualization",
+    description:
+      "An interactive data workspace that transforms complex spreadsheets into dynamic, real-time visual insights.",
+    image: "/portfolio/Excel1.jpg",
+    technologies: ["TypeScript", "Canvas", "Node.js"],
+    role: "Data analysis",
+  },
+];
+
+const skills = [
+  {
+    group: "Frontend",
+    name: "React / Next.js",
+    detail: "Modern interfaces shaped around speed, clarity, and human interaction.",
+  },
+  {
+    group: "Language",
+    name: "TypeScript",
+    detail: "Structured, maintainable foundations for complex web experiences.",
+  },
+  {
+    group: "Creative",
+    name: "WebGL / Canvas",
+    detail: "Visual systems that add depth, motion, and atmosphere to the web.",
+  },
+  {
+    group: "Motion",
+    name: "GSAP / Motion",
+    detail: "Purposeful movement that guides attention and strengthens storytelling.",
+  },
+  {
+    group: "Backend",
+    name: "Node.js",
+    detail: "APIs, architecture, and connected digital platforms.",
+  },
+  {
+    group: "Design",
+    name: "Figma",
+    detail: "Prototyping, design systems, interface thinking, and art direction.",
+  },
+  {
+    group: "Web",
+    name: "HTML · CSS · JavaScript",
+    detail: "The core craft behind responsive, accessible, and useful websites.",
+  },
+  {
+    group: "Tools",
+    name: "VS Code · Creative Cloud",
+    detail: "A practical toolkit for development, editing, and digital production.",
+  },
+];
+
+const journey = [
+  {
+    date: "2026 — Now",
+    title: "Data Analyst & Web Developer",
+    place: "PT Astadeca Baswara Persada",
+    text: "Analyzing raw material reports, building the company profile site, and designing a raw material ordering catalog.",
+  },
+  {
+    date: "2025 — Now",
+    title: "Undergraduate (S1), Digital Business",
+    place: "National University of the Republic of Indonesia",
+    text: "Focused on digital transformation, e-commerce strategy, and technology-driven business innovation.",
+  },
+  {
+    date: "2021 — 2024",
+    title: "Social Sciences Major",
+    place: "State Senior High School 1 Telukjambe Timur",
+    text: "Completed upper secondary education with a focus on social sciences.",
+  },
+];
+
+const navItems = ["home", "about", "skills", "projects", "journey", "contact"];
+
+function Icon({
+  name,
+  size = 18,
+}: {
+  name: "arrow" | "play" | "pause" | "volume" | "mute" | "close" | "copy" | "menu";
+  size?: number;
+}) {
+  const paths: Record<string, React.ReactNode> = {
+    arrow: (
+      <>
+        <path d="M5 19 19 5" />
+        <path d="M9 5h10v10" />
+      </>
+    ),
+    play: <path d="m8 5 11 7-11 7V5Z" />,
+    pause: (
+      <>
+        <path d="M9 5v14" />
+        <path d="M15 5v14" />
+      </>
+    ),
+    volume: (
+      <>
+        <path d="M5 9v6h4l5 4V5L9 9H5Z" />
+        <path d="M18 9a5 5 0 0 1 0 6" />
+      </>
+    ),
+    mute: (
+      <>
+        <path d="M5 9v6h4l5 4V5L9 9H5Z" />
+        <path d="m18 10 4 4m0-4-4 4" />
+      </>
+    ),
+    close: (
+      <>
+        <path d="m6 6 12 12" />
+        <path d="M18 6 6 18" />
+      </>
+    ),
+    copy: (
+      <>
+        <rect x="8" y="8" width="11" height="11" rx="2" />
+        <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+      </>
+    ),
+    menu: (
+      <>
+        <path d="M4 8h16" />
+        <path d="M4 16h16" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      aria-hidden="true"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {paths[name]}
+    </svg>
+  );
+}
+
+function Bird({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 72 32" aria-hidden="true">
+      <path className="wing wing-left" d="M35 18C24 4 9 3 2 10c13-1 20 7 30 14Z" />
+      <path className="wing wing-right" d="M37 18C47 5 61 5 70 12 57 10 50 17 39 24Z" />
+      <path className="bird-body" d="M27 19c7-5 16-4 22 1-8 1-13 5-17 10l1-7Z" />
+    </svg>
+  );
+}
+
+function AtmosphericWorld({ entered }: { entered: boolean }) {
+  const stars = Array.from({ length: 28 }, (_, i) => ({
+    left: `${(i * 37) % 100}%`,
+    top: `${(i * 53) % 72}%`,
+    delay: `${(i % 9) * -0.7}s`,
+  }));
+  return (
+    <div className={`world ${entered ? "world-entered" : ""}`} aria-hidden="true">
+      <div className="sky" />
+      <div className="moon">
+        <span />
+      </div>
+      <div className="stars">
+        {stars.map((star, i) => (
+          <i key={i} style={star} />
+        ))}
+      </div>
+      <div className="cloud cloud-a" />
+      <div className="cloud cloud-b" />
+      <div className="light-ray ray-a" />
+      <div className="mountain mountain-back" />
+      <div className="mountain mountain-mid" />
+      <div className="forest" />
+      <div className="fog fog-a" />
+      <div className="fog fog-b" />
+      <div className="dust">
+        {Array.from({ length: 18 }, (_, i) => (
+          <i key={i} style={{ "--i": i } as React.CSSProperties} />
+        ))}
+      </div>
+      <div className="environment-bird bird-flight-1">
+        <Bird />
+      </div>
+      <div className="foreground" />
+    </div>
+  );
+}
+
+function BirdCursor() {
+  const birdRef = useRef<HTMLDivElement>(null);
+  const target = useRef({ x: -100, y: -100 });
+  const current = useRef({ x: -100, y: -100 });
+  const last = useRef({ x: -100, y: -100 });
+
+  useEffect(() => {
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    let frame = 0;
+    const move = (event: PointerEvent) => {
+      target.current = { x: event.clientX, y: event.clientY };
+    };
+    const down = () => birdRef.current?.classList.add("cursor-click");
+    const up = () => birdRef.current?.classList.remove("cursor-click");
+    const over = (event: PointerEvent) => {
+      const interactive = (event.target as HTMLElement).closest(
+        "a,button,input,textarea,[role='button']",
+      );
+      birdRef.current?.classList.toggle("cursor-hover", Boolean(interactive));
+    };
+    const tick = () => {
+      current.current.x += (target.current.x - current.current.x) * 0.16;
+      current.current.y += (target.current.y - current.current.y) * 0.16;
+      const dx = current.current.x - last.current.x;
+      const dy = current.current.y - last.current.y;
+      const angle = Math.atan2(dy, Math.abs(dx)) * (180 / Math.PI);
+      if (birdRef.current) {
+        birdRef.current.style.transform = `translate3d(${current.current.x}px, ${current.current.y}px, 0) rotate(${angle * 0.35}deg) scaleX(${dx < -0.2 ? -1 : 1})`;
+        birdRef.current.style.setProperty("--speed", `${Math.min(Math.hypot(dx, dy), 18)}`);
+      }
+      last.current = { ...current.current };
+      frame = requestAnimationFrame(tick);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerdown", down);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointerover", over);
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerdown", down);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointerover", over);
+    };
+  }, []);
+
+  return (
+    <div ref={birdRef} className="bird-cursor">
+      <span className="cursor-aura" />
+      <Bird />
+      <i />
+      <i />
+      <i />
+    </div>
+  );
+}
+
+function Intro({
+  onEnter,
+  onSkip,
+}: {
+  onEnter: () => void;
+  onSkip: () => void;
+}) {
+  return (
+    <div className="intro" role="dialog" aria-label="Enter portfolio experience">
+      <div className="intro-orbit orbit-one" />
+      <div className="intro-orbit orbit-two" />
+      <p className="intro-kicker">A digital journey by</p>
+      <h1>
+        Aryasatya
+        <span>Naryama</span>
+      </h1>
+      <p className="intro-title">Data analyst · Web developer · Creative thinker</p>
+      <div className="intro-actions">
+        <button className="enter-button magnetic" onClick={onEnter}>
+          <span>Click to enter</span>
+          <i />
+        </button>
+        <button className="skip-button" onClick={onSkip}>
+          Skip intro
+        </button>
+      </div>
+      <p className="intro-caption">Enter the unknown</p>
+    </div>
+  );
+}
+
+function MusicPlayer({
+  audioRef,
+  musicOn,
+  setMusicOn,
+  sfxOn,
+  setSfxOn,
+}: {
+  audioRef: React.RefObject<HTMLAudioElement | null>;
+  musicOn: boolean;
+  setMusicOn: (value: boolean) => void;
+  sfxOn: boolean;
+  setSfxOn: (value: boolean) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [volume, setVolume] = useState(0.36);
+  const [muted, setMuted] = useState(false);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume;
+    audioRef.current.muted = muted;
+  }, [audioRef, volume, muted]);
+
+  return (
+    <aside className={`music-player ${expanded ? "expanded" : ""}`}>
+      <audio ref={audioRef} src="/portfolio/Bye.mp3" loop preload="metadata" />
+      <button
+        className="music-main"
+        aria-label={musicOn ? "Pause ambient music" : "Play ambient music"}
+        onClick={() => setMusicOn(!musicOn)}
+      >
+        <span className={`waveform ${musicOn ? "playing" : ""}`}>
+          {Array.from({ length: 6 }, (_, i) => (
+            <i key={i} />
+          ))}
+        </span>
+        <Icon name={musicOn ? "pause" : "play"} size={14} />
+      </button>
+      <button
+        className="track-info"
+        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+      >
+        <span>Atmosphere</span>
+        <strong>BYE · AMBIENT EDIT</strong>
+      </button>
+      <div className="music-extra">
+        <button
+          className="icon-button"
+          onClick={() => setMuted(!muted)}
+          aria-label={muted ? "Unmute music" : "Mute music"}
+        >
+          <Icon name={muted ? "mute" : "volume"} size={15} />
+        </button>
+        <label>
+          <span className="sr-only">Music volume</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value={volume}
+            onChange={(event) => setVolume(Number(event.target.value))}
+          />
+        </label>
+        <button
+          className={`sfx-toggle ${sfxOn ? "active" : ""}`}
+          onClick={() => setSfxOn(!sfxOn)}
+          aria-pressed={sfxOn}
+        >
+          SFX {sfxOn ? "ON" : "OFF"}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function ProjectModal({
+  project,
+  onClose,
+}: {
+  project: Project;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const key = (event: KeyboardEvent) => event.key === "Escape" && onClose();
+    document.body.classList.add("modal-open");
+    window.addEventListener("keydown", key);
+    return () => {
+      document.body.classList.remove("modal-open");
+      window.removeEventListener("keydown", key);
+    };
+  }, [onClose]);
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+      <article
+        className="project-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-title"
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <button className="modal-close" onClick={onClose} aria-label="Close project details">
+          <Icon name="close" />
+        </button>
+        <div className="modal-visual">
+          {project.image ? (
+            <img src={project.image} alt={`${project.title} project preview`} />
+          ) : (
+            <div className="lumen-art">
+              <i />
+              <span>L</span>
+            </div>
+          )}
+        </div>
+        <div className="modal-copy">
+          <p className="eyebrow">{project.label}</p>
+          <h2 id="project-title">{project.title}</h2>
+          <p className="modal-lead">{project.description}</p>
+          <div className="modal-facts">
+            <div>
+              <span>Role</span>
+              <strong>{project.role}</strong>
+            </div>
+            <div>
+              <span>Technology</span>
+              <strong>{project.technologies.join(" · ")}</strong>
+            </div>
+          </div>
+          <p className="verified-note">
+            This overview reflects the information available in the original portfolio.
+          </p>
+          {project.live && (
+            <a href={project.live} target="_blank" rel="noreferrer" className="text-link">
+              Visit live project <Icon name="arrow" size={14} />
+            </a>
+          )}
+        </div>
+      </article>
+    </div>
+  );
+}
+
+export default function App() {
+  const [entered, setEntered] = useState(false);
+  const [introVisible, setIntroVisible] = useState(true);
+  const [active, setActive] = useState("home");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
+  const [musicOn, setMusicOnState] = useState(false);
+  const [sfxOn, setSfxOn] = useState(true);
+  const [toast, setToast] = useState("");
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioContext = useRef<AudioContext | null>(null);
+
+  const sound = (frequency = 520, duration = 0.08) => {
+    if (!sfxOn) return;
+    const Context = window.AudioContext || window.webkitAudioContext;
+    if (!Context) return;
+    const context = audioContext.current || new Context();
+    audioContext.current = context;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(frequency, context.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      frequency * 0.72,
+      context.currentTime + duration,
+    );
+    gain.gain.setValueAtTime(0.035, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + duration);
+  };
+
+  const setMusicOn = async (value: boolean) => {
+    setMusicOnState(value);
+    if (!audioRef.current) return;
+    if (value) {
+      try {
+        await audioRef.current.play();
+      } catch {
+        setMusicOnState(false);
+      }
+    } else {
+      audioRef.current.pause();
+    }
+  };
+
+  const enter = (withMusic: boolean) => {
+    setEntered(true);
+    sound(180, 0.45);
+    if (withMusic) setMusicOn(true);
+    window.setTimeout(() => setIntroVisible(false), 950);
+  };
+
+  useEffect(() => {
+    const onScroll = () => {
+      const total = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(total > 0 ? window.scrollY / total : 0);
+      document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
+    };
+    const onPointer = (event: PointerEvent) => {
+      document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
+      document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
+      document.documentElement.style.setProperty(
+        "--parallax-x",
+        `${(event.clientX / window.innerWidth - 0.5) * 18}px`,
+      );
+      document.documentElement.style.setProperty(
+        "--parallax-y",
+        `${(event.clientY / window.innerHeight - 0.5) * 12}px`,
+      );
+    };
+    const observer = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActive(entry.target.id);
+            entry.target.classList.add("in-view");
+          }
+        }),
+      { rootMargin: "-35% 0px -50%", threshold: 0.05 },
+    );
+    document.querySelectorAll("section[id]").forEach((section) => observer.observe(section));
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    onScroll();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("pointermove", onPointer);
+    };
+  }, []);
+
+  useEffect(() => {
+    const click = (event: Event) => {
+      if ((event.target as HTMLElement).closest("button,a")) sound(610, 0.06);
+    };
+    document.addEventListener("click", click);
+    return () => document.removeEventListener("click", click);
+  });
+
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setMenuOpen(false);
+  };
+
+  const copyEmail = async () => {
+    await navigator.clipboard.writeText("aryasatyya26@gmail.com");
+    setToast("Email copied to clipboard");
+    sound(880, 0.14);
+    window.setTimeout(() => setToast(""), 2600);
+  };
+
+  const submitContact = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const subject = String(data.get("subject") || "Portfolio inquiry");
+    const message = String(data.get("message") || "");
+    window.location.href = `mailto:aryasatyya26@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+  };
+
+  return (
+    <div className={`app ${entered ? "experience-entered" : ""}`}>
+      <AtmosphericWorld entered={entered} />
+      <BirdCursor />
+      {introVisible && (
+        <div className={entered ? "intro-leaving" : ""}>
+          <Intro onEnter={() => enter(true)} onSkip={() => enter(false)} />
+        </div>
+      )}
+
+      <div className="scroll-progress" aria-hidden="true">
+        <span style={{ transform: `scaleX(${scrollProgress})` }} />
+      </div>
+
+      <header className="site-header">
+        <button className="monogram" onClick={() => scrollTo("home")} aria-label="Go to home">
+          AN<span>.</span>
+        </button>
+        <nav className={menuOpen ? "open" : ""} aria-label="Primary navigation">
+          {navItems.map((item, index) => (
+            <button
+              key={item}
+              className={active === item ? "active" : ""}
+              onClick={() => scrollTo(item)}
+              aria-current={active === item ? "location" : undefined}
+            >
+              <i>0{index + 1}</i>
+              {item}
+            </button>
+          ))}
+        </nav>
+        <button
+          className="menu-button"
+          onClick={() => setMenuOpen(!menuOpen)}
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+        >
+          <Icon name={menuOpen ? "close" : "menu"} />
+        </button>
+        <p className="availability">
+          <i />
+          Indonesia · Open to select work
+        </p>
+      </header>
+
+      <main>
+        <section id="home" className="hero">
+          <div className="hero-coordinates">
+            <span>06.2088° S</span>
+            <span>106.8456° E</span>
+          </div>
+          <div className="hero-content reveal">
+            <p className="eyebrow">Data analyst · Web developer</p>
+            <h1>
+              <span>Aryasatya</span>
+              <em>Naryama</em>
+            </h1>
+            <div className="hero-bottom">
+              <p>
+                Building modern websites, useful digital experiences, and clear stories from
+                complex information.
+              </p>
+              <div className="hero-actions">
+                <button className="primary-button magnetic" onClick={() => scrollTo("projects")}>
+                  Explore projects <Icon name="arrow" size={15} />
+                </button>
+                <button className="quiet-button" onClick={() => scrollTo("contact")}>
+                  Start a conversation
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="hero-portrait reveal">
+            <img src="/portfolio/Aryasatya.jpg" alt="Aryasatya Naryama outdoors" />
+            <span>Between data & imagination</span>
+          </div>
+          <button className="scroll-cue" onClick={() => scrollTo("about")}>
+            <span>Scroll to journey</span>
+            <i />
+          </button>
+        </section>
+
+        <section id="about" className="chapter about">
+          <div className="section-label reveal">
+            <span>01</span>
+            <i />
+            <p>Beyond the surface</p>
+          </div>
+          <div className="about-grid">
+            <div className="about-portrait reveal">
+              <img src="/portfolio/THEGREAT.jpg" alt="Aryasatya Naryama portrait" loading="lazy" />
+              <span>Based in Indonesia · Working globally</span>
+            </div>
+            <div className="about-copy reveal">
+              <p className="eyebrow">A story shaped by persistence</p>
+              <h2>
+                Curiosity becomes craft when it is given <em>purpose.</em>
+              </h2>
+              <p className="lead">
+                I’m a web developer, data analyst, and content creator who turns ambitious ideas
+                into modern websites and engaging digital content.
+              </p>
+              <div className="body-columns">
+                <p>
+                  Part engineer, part designer, always curious. I develop fast, responsive, and
+                  user-friendly websites using modern technologies.
+                </p>
+                <p>
+                  My approach combines practical problem-solving with careful implementation,
+                  from the first analysis through the final polished experience.
+                </p>
+              </div>
+              <blockquote>
+                Strength is built through mental perseverance—and through honoring the people who
+                make the journey worth continuing.
+              </blockquote>
+              <a className="text-link" href="/portfolio/Aryasatya%20-%20CV.txt" download>
+                Download résumé <Icon name="arrow" size={14} />
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section id="skills" className="chapter skills">
+          <div className="section-label reveal">
+            <span>02</span>
+            <i />
+            <p>Constellation of craft</p>
+          </div>
+          <div className="skills-heading reveal">
+            <h2>
+              Ideas need
+              <em>craft.</em>
+            </h2>
+            <p>
+              A focused toolkit for making complex digital experiences feel clear, fast, and
+              distinctly human. Select a node to discover its role.
+            </p>
+          </div>
+          <div className="skill-world reveal">
+            <div className="skill-orbit orbit-a" />
+            <div className="skill-orbit orbit-b" />
+            <span className="skill-core">AN</span>
+            {skills.map((skill, index) => (
+              <button
+                className={`skill-node node-${index + 1}`}
+                key={skill.name}
+                style={{ "--node": index } as React.CSSProperties}
+              >
+                <i />
+                <span>{skill.group}</span>
+                <strong>{skill.name}</strong>
+                <small>{skill.detail}</small>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section id="projects" className="chapter projects">
+          <div className="section-label reveal">
+            <span>03</span>
+            <i />
+            <p>Selected work</p>
+          </div>
+          <div className="projects-heading reveal">
+            <h2>Projects</h2>
+            <p>Proof of thought, shaped into experiences.</p>
+          </div>
+          <div className="project-list">
+            {projects.map((item, index) => (
+              <article className="project-card reveal" key={item.title}>
+                <button
+                  className="project-visual"
+                  onClick={() => setProject(item)}
+                  aria-label={`Open ${item.title} project details`}
+                >
+                  {item.image ? (
+                    <img src={item.image} alt={`${item.title} preview`} loading="lazy" />
+                  ) : (
+                    <div className="lumen-art">
+                      <i />
+                      <span>L</span>
+                    </div>
+                  )}
+                  <span className="project-number">0{index + 1}</span>
+                  <span className="project-open">
+                    View case <Icon name="arrow" />
+                  </span>
+                </button>
+                <div className="project-copy">
+                  <p className="eyebrow">{item.label}</p>
+                  <h3>{item.title}</h3>
+                  <p>{item.description}</p>
+                  <div>
+                    {item.technologies.map((technology) => (
+                      <span key={technology}>{technology}</span>
+                    ))}
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section id="journey" className="chapter journey">
+          <div className="section-label reveal">
+            <span>04</span>
+            <i />
+            <p>Journey</p>
+          </div>
+          <div className="journey-layout">
+            <div className="journey-sticky reveal">
+              <h2>
+                Built through
+                <em>practice.</em>
+              </h2>
+              <p>
+                A path through social science, digital business, analysis, development, and
+                creative production.
+              </p>
+            </div>
+            <div className="timeline">
+              {journey.map((item, index) => (
+                <article className="timeline-item reveal" key={item.date}>
+                  <span className="timeline-index">0{index + 1}</span>
+                  <time>{item.date}</time>
+                  <h3>{item.title}</h3>
+                  <h4>{item.place}</h4>
+                  <p>{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="chapter contact">
+          <div className="contact-bird">
+            <Bird />
+          </div>
+          <div className="section-label reveal">
+            <span>05</span>
+            <i />
+            <p>Final chapter</p>
+          </div>
+          <div className="contact-heading reveal">
+            <p className="eyebrow">The horizon is open</p>
+            <h2>
+              Let’s create
+              <br />
+              <em>something meaningful.</em>
+            </h2>
+          </div>
+          <div className="contact-grid reveal">
+            <div className="contact-copy">
+              <p>
+                Have a bold idea, an impossible brief, or simply want to say hello? My inbox is
+                open.
+              </p>
+              <a href="mailto:aryasatyya26@gmail.com">aryasatyya26@gmail.com</a>
+              <div className="contact-actions">
+                <button className="primary-button" onClick={copyEmail}>
+                  Copy email <Icon name="copy" size={15} />
+                </button>
+                <a
+                  className="quiet-button"
+                  href="https://www.instagram.com/steadynai"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Instagram @steadynai <Icon name="arrow" size={14} />
+                </a>
+              </div>
+            </div>
+            <form onSubmit={submitContact}>
+              <label>
+                <span>Your name</span>
+                <input name="name" required placeholder="Your name" />
+              </label>
+              <label>
+                <span>Email address</span>
+                <input name="email" required type="email" placeholder="you@example.com" />
+              </label>
+              <label>
+                <span>Subject</span>
+                <input name="subject" required placeholder="A new digital experience" />
+              </label>
+              <label>
+                <span>Tell me about it</span>
+                <textarea
+                  name="message"
+                  required
+                  rows={3}
+                  placeholder="A few details about your idea..."
+                />
+              </label>
+              <button className="primary-button" type="submit">
+                Open email draft <Icon name="arrow" size={15} />
+              </button>
+            </form>
+          </div>
+          <footer>
+            <p>© 2026 Aryasatya Naryama</p>
+            <button onClick={() => scrollTo("home")}>Back to the beginning ↑</button>
+            <p>Data · Design · Digital</p>
+          </footer>
+        </section>
+      </main>
+
+      <MusicPlayer
+        audioRef={audioRef}
+        musicOn={musicOn}
+        setMusicOn={setMusicOn}
+        sfxOn={sfxOn}
+        setSfxOn={setSfxOn}
+      />
+      {project && <ProjectModal project={project} onClose={() => setProject(null)} />}
+      <div className={`toast ${toast ? "visible" : ""}`} role="status">
+        {toast}
+      </div>
+    </div>
+  );
+}
+
+declare global {
+  interface Window {
+    webkitAudioContext?: typeof AudioContext;
+  }
+}
