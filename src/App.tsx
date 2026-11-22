@@ -1,4 +1,5 @@
 import { FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
+import Lenis from "lenis";
 
 type Project = {
   title: string;
@@ -518,6 +519,42 @@ function ProjectModal({
   );
 }
 
+function PerformanceHud() {
+  const [fps, setFps] = useState<number | null>(null);
+
+  useEffect(() => {
+    let frame = 0;
+    let frames = 0;
+    let intervalStart = performance.now();
+
+    const measure = (now: number) => {
+      frames += 1;
+      const elapsed = now - intervalStart;
+      if (elapsed >= 500) {
+        setFps(Math.round((frames * 1000) / elapsed));
+        frames = 0;
+        intervalStart = now;
+      }
+      frame = requestAnimationFrame(measure);
+    };
+
+    frame = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <output
+      className={`performance-hud${fps !== null && fps < 50 ? " is-low" : ""}`}
+      aria-label={`Current frame rate: ${fps ?? "measuring"} frames per second`}
+      aria-live="off"
+    >
+      <i />
+      <span>{fps ?? "--"}</span>
+      <small>FPS</small>
+    </output>
+  );
+}
+
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [introVisible, setIntroVisible] = useState(true);
@@ -527,8 +564,9 @@ export default function App() {
   const [musicOn, setMusicOnState] = useState(false);
   const [sfxOn, setSfxOn] = useState(true);
   const [toast, setToast] = useState("");
-  const [scrollProgress, setScrollProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const lenisRef = useRef<Lenis | null>(null);
+  const scrollProgressRef = useRef<HTMLSpanElement>(null);
   const audioContext = useRef<AudioContext | null>(null);
 
   const sound = (frequency = 520, duration = 0.08) => {
@@ -574,9 +612,37 @@ export default function App() {
   };
 
   useEffect(() => {
+    const lenis = new Lenis({
+      autoRaf: true,
+      lerp: 0.1,
+      smoothWheel: true,
+      syncTouch: true,
+      syncTouchLerp: 0.075,
+      stopInertiaOnNavigate: true,
+    });
+    lenisRef.current = lenis;
+    return () => {
+      lenis.destroy();
+      lenisRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (introVisible || project) {
+      lenisRef.current?.stop();
+    } else {
+      lenisRef.current?.start();
+    }
+  }, [introVisible, project]);
+
+  useEffect(() => {
     const onScroll = () => {
       const total = document.documentElement.scrollHeight - window.innerHeight;
-      setScrollProgress(total > 0 ? window.scrollY / total : 0);
+      const progress = total > 0 ? window.scrollY / total : 0;
+      scrollProgressRef.current?.style.setProperty(
+        "transform",
+        `scaleX(${Math.min(1, Math.max(0, progress))})`,
+      );
       document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
     };
     const onPointer = (event: PointerEvent) => {
@@ -591,7 +657,7 @@ export default function App() {
         `${(event.clientY / window.innerHeight - 0.5) * 12}px`,
       );
     };
-    const observer = new IntersectionObserver(
+    const sectionObserver = new IntersectionObserver(
       (entries) =>
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -601,12 +667,24 @@ export default function App() {
         }),
       { rootMargin: "-35% 0px -50%", threshold: 0.01 },
     );
-    document.querySelectorAll("section[id]").forEach((section) => observer.observe(section));
+    const revealObserver = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("in-view", entry.isIntersecting);
+        }),
+      { rootMargin: "-10% 0px -15%", threshold: 0.01 },
+    );
+    document.querySelectorAll("section[id]").forEach((section) => sectionObserver.observe(section));
+    document.querySelectorAll<HTMLElement>(".reveal").forEach((element, index) => {
+      element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
+      revealObserver.observe(element);
+    });
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onPointer, { passive: true });
     onScroll();
     return () => {
-      observer.disconnect();
+      sectionObserver.disconnect();
+      revealObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
     };
@@ -621,7 +699,14 @@ export default function App() {
   });
 
   const scrollTo = (id: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(id);
+    if (target) {
+      if (lenisRef.current) {
+        lenisRef.current.scrollTo(target, { duration: 1.1 });
+      } else {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
     setMenuOpen(false);
   };
 
@@ -644,6 +729,7 @@ export default function App() {
     <div className={`app ${entered ? "experience-entered" : ""}`}>
       <AtmosphericWorld entered={entered} />
       <BirdCursor />
+      <PerformanceHud />
       {introVisible && (
         <div className={entered ? "intro-leaving" : ""}>
           <Intro onEnter={() => enter(true)} onSkip={() => enter(false)} />
@@ -651,7 +737,7 @@ export default function App() {
       )}
 
       <div className="scroll-progress" aria-hidden="true">
-        <span style={{ transform: `scaleX(${scrollProgress})` }} />
+        <span ref={scrollProgressRef} />
       </div>
 
       <header className="site-header">
