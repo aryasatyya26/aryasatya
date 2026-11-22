@@ -1,2 +1,12 @@
 # AgentPlat packages this default favicon directly from source without LFS hydration.
 favicon.png -filter -diff -merge -text
+
+# Vercel serves these portfolio images directly and does not hydrate Git LFS pointers.
+Aryasatya.jpg -filter -diff -merge -text
+Excel1.jpg -filter -diff -merge -text
+portfolio/Aryasatya.jpg -filter -diff -merge -text
+portfolio/Excel1.jpg -filter -diff -merge -text
+"portfolio/NewNws copy.png" -filter -diff -merge -text
+portfolio/NewNws.png -filter -diff -merge -text
+portfolio/Soviet1.jpg -filter -diff -merge -text
+portfolio/THEGREAT.jpg -filter -diff -merge -text
