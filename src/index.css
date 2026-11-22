@@ -536,13 +536,54 @@
   animation-duration: 34s;
 }
 
+.intro-birds {
+  --intro-flight-x: clamp(150px, 27vw, 360px);
+  --intro-flight-y: clamp(72px, 12vh, 120px);
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.intro-bird {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  width: clamp(36px, 4vw, 56px);
+  opacity: 0.98;
+  filter:
+    drop-shadow(0 0 7px rgba(248, 220, 163, 0.92))
+    drop-shadow(0 0 17px rgba(196, 154, 86, 0.68));
+  animation: introBirdFlight 13.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.intro-bird svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.intro-birds .wing,
+.intro-birds .bird-body {
+  fill: #f5dfb2;
+}
+
+.intro-bird-two {
+  width: clamp(30px, 3.2vw, 46px);
+  animation-duration: 17s;
+  animation-delay: -8.5s;
+  animation-direction: reverse;
+}
+
 .intro-kicker,
 .intro-title,
 .intro-caption,
 .intro h1,
 .intro-actions {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   animation: introReveal 1.2s 0.3s both;
 }
 
@@ -2210,6 +2251,22 @@ blockquote {
   }
 }
 
+@keyframes introBirdFlight {
+  0%,
+  100% {
+    transform: translate3d(calc(-50% - var(--intro-flight-x)), -50%, 0) rotate(-10deg);
+  }
+  25% {
+    transform: translate3d(-50%, calc(-50% - var(--intro-flight-y)), 0) rotate(8deg);
+  }
+  50% {
+    transform: translate3d(calc(-50% + var(--intro-flight-x)), -50%, 0) rotate(12deg);
+  }
+  75% {
+    transform: translate3d(-50%, calc(-50% + var(--intro-flight-y)), 0) rotate(-8deg);
+  }
+}
+
 @keyframes cursorTrail {
   to {
     opacity: 0;
@@ -2458,6 +2515,20 @@ blockquote {
 }
 
 @media (max-width: 680px) {
+  .intro-birds {
+    --intro-flight-x: clamp(132px, 38vw, 250px);
+    --intro-flight-y: clamp(54px, 9vh, 76px);
+  }
+
+  .intro-bird {
+    top: 36%;
+    width: clamp(30px, 8vw, 42px);
+  }
+
+  .intro-bird-two {
+    width: clamp(27px, 7vw, 36px);
+  }
+
   .intro h1 {
     font-size: clamp(3rem, 17vw, 5.5rem);
     line-height: 0.78;

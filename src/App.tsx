@@ -381,6 +381,14 @@ function Intro({
     <div className="intro" role="dialog" aria-label="Enter portfolio experience">
       <div className="intro-orbit orbit-one" />
       <div className="intro-orbit orbit-two" />
+      <div className="intro-birds" aria-hidden="true">
+        <div className="intro-bird intro-bird-one">
+          <Bird />
+        </div>
+        <div className="intro-bird intro-bird-two">
+          <Bird />
+        </div>
+      </div>
       <p className="intro-kicker">A digital journey by</p>
       <h1>
         Aryasatya
