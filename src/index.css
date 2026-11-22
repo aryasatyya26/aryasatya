@@ -958,13 +958,26 @@ section {
 }
 
 .hero-greeting {
+  display: inline-block;
+  width: max-content;
+  max-width: 100%;
+  position: relative;
+  z-index: 4;
+  top: clamp(-180px, -23vh, -120px);
+  left: 0;
   margin-bottom: clamp(18px, 2.2vw, 30px);
   color: var(--amber);
   font-family: "Italiana", serif;
   font-size: clamp(3.2rem, 8.4vw, 8rem);
   line-height: 0.9;
   letter-spacing: -0.045em;
-  text-shadow: 0 0 24px rgba(196, 154, 86, 0.28);
+  text-shadow:
+    0 0 8px rgba(196, 154, 86, 0.68),
+    0 0 22px rgba(196, 154, 86, 0.38);
+  filter: drop-shadow(0 0 10px rgba(196, 154, 86, 0.38));
+  transform: rotate(-5deg);
+  transform-origin: left center;
+  animation: brandGlowPulse 2.8s ease-in-out infinite;
 }
 
 .eyebrow {
@@ -2575,8 +2588,11 @@ blockquote {
   }
 
   .hero-greeting {
+    top: clamp(-160px, -19vh, -100px);
+    left: clamp(68px, 22vw, 100px);
     margin-bottom: 12px;
-    font-size: clamp(3rem, 12vw, 5.2rem);
+    font-size: clamp(2.5rem, 12vw, 3.8rem);
+    transform: rotate(-4deg);
   }
 
   .hero h1 em {
