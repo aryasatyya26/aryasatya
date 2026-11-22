@@ -916,7 +916,11 @@ export default function App() {
             />
             <span>Between data & imagination</span>
           </div>
-          <button className="scroll-cue" onClick={() => scrollTo("about")}>
+          <button
+            className="scroll-cue"
+            onClick={() => scrollTo("about")}
+            aria-label="Scroll to the journey section"
+          >
             <span>Scroll to journey</span>
             <i />
           </button>

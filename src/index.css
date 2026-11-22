@@ -1079,18 +1079,26 @@ section {
 
 .scroll-cue i {
   width: 1px;
-  height: 45px;
+  height: 68px;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(
+    180deg,
+    rgba(196, 154, 86, 0.08),
+    rgba(255, 255, 255, 0.2),
+    rgba(196, 154, 86, 0.08)
+  );
 }
 
 .scroll-cue i::after {
   content: "";
   display: block;
   width: 1px;
-  height: 20px;
+  height: 24px;
   background: var(--amber);
-  animation: scrollLine 2s ease-in-out infinite;
+  box-shadow:
+    0 0 8px rgba(196, 154, 86, 0.82),
+    0 0 18px rgba(196, 154, 86, 0.38);
+  animation: scrollLine 2.2s cubic-bezier(0.42, 0, 0.58, 1) infinite;
 }
 
 .chapter {
@@ -2237,10 +2245,10 @@ blockquote {
 
 @keyframes scrollLine {
   from {
-    transform: translateY(-22px);
+    transform: translateY(-25px);
   }
   to {
-    transform: translateY(48px);
+    transform: translateY(68px);
   }
 }
 
@@ -2476,6 +2484,10 @@ blockquote {
     width: clamp(160px, 44vw, 280px);
   }
 
+  .hero {
+    --hero-portrait-height: clamp(195px, 53.66vw, 342px);
+  }
+
   .hero h1 {
     font-size: clamp(3.6rem, 19vw, 6.8rem);
     line-height: 0.74;
@@ -2501,7 +2513,27 @@ blockquote {
   }
 
   .scroll-cue {
+    top: calc(12% + var(--hero-portrait-height) + 8px);
+    right: 2%;
+    bottom: auto;
+    display: flex;
+    width: 24px;
+    height: 48px;
+    justify-content: center;
+    gap: 0;
+    writing-mode: horizontal-tb;
+  }
+
+  .scroll-cue span {
     display: none;
+  }
+
+  .scroll-cue i {
+    height: 44px;
+  }
+
+  .scroll-cue i::after {
+    height: 16px;
   }
 
   .chapter {
