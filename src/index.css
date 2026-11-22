@@ -2031,8 +2031,19 @@ blockquote {
   }
 }
 
-@media (pointer: coarse) {
+@media (pointer: coarse), (max-width: 680px) {
   .bird-cursor {
+    z-index: 40;
+    top: -9px;
+    left: -16px;
+    width: 32px;
+    height: 18px;
+    opacity: 0.72;
+    filter: drop-shadow(0 0 5px rgba(190, 216, 226, 0.35));
+  }
+
+  .bird-cursor > i,
+  .bird-cursor .cursor-aura {
     display: none;
   }
 }

@@ -239,22 +239,79 @@ function BirdCursor() {
   const last = useRef({ x: -100, y: -100 });
 
   useEffect(() => {
-    if (!window.matchMedia("(pointer: fine)").matches) return;
+    const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    const initialPosition = isCoarsePointer
+      ? { x: window.innerWidth * 0.72, y: window.innerHeight * 0.28 }
+      : { x: -100, y: -100 };
+    target.current = initialPosition;
+    current.current = initialPosition;
+    last.current = initialPosition;
+
     let frame = 0;
+    let lastScrollY = window.scrollY;
+    let lastScrollTime = performance.now();
+    let lastTouchTime = -Infinity;
+    let scrollVelocity = 0;
+
     const move = (event: PointerEvent) => {
       target.current = { x: event.clientX, y: event.clientY };
+      if (event.pointerType === "touch") lastTouchTime = performance.now();
     };
-    const down = () => birdRef.current?.classList.add("cursor-click");
+    const down = (event: PointerEvent) => {
+      birdRef.current?.classList.add("cursor-click");
+      if (event.pointerType === "touch") {
+        target.current = { x: event.clientX, y: event.clientY };
+        lastTouchTime = performance.now();
+        birdRef.current?.classList.remove("cursor-hover");
+      }
+    };
     const up = () => birdRef.current?.classList.remove("cursor-click");
     const over = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
       const interactive = (event.target as HTMLElement).closest(
         "a,button,input,textarea,[role='button']",
       );
       birdRef.current?.classList.toggle("cursor-hover", Boolean(interactive));
     };
+    const touchStart = (event: TouchEvent) => {
+      const touch = event.changedTouches[0];
+      if (!touch) return;
+      target.current = { x: touch.clientX, y: touch.clientY };
+      lastTouchTime = performance.now();
+      birdRef.current?.classList.add("cursor-click");
+      birdRef.current?.classList.remove("cursor-hover");
+    };
+    const touchMove = (event: TouchEvent) => {
+      const touch = event.touches[0];
+      if (!touch) return;
+      target.current = { x: touch.clientX, y: touch.clientY };
+      lastTouchTime = performance.now();
+    };
+    const scroll = () => {
+      if (!isCoarsePointer) return;
+
+      const now = performance.now();
+      const scrollY = window.scrollY;
+      const deltaY = scrollY - lastScrollY;
+      const elapsed = Math.max(now - lastScrollTime, 16);
+      scrollVelocity = Math.max(-3, Math.min(3, deltaY / elapsed));
+      lastScrollY = scrollY;
+      lastScrollTime = now;
+
+      if (now - lastTouchTime < 900) return;
+
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = scrollableHeight > 0 ? scrollY / scrollableHeight : 0;
+      const arc = (Math.sin(progress * Math.PI * 4) + 1) / 2;
+      target.current = {
+        x: window.innerWidth * (0.22 + arc * 0.56),
+        y: window.innerHeight * (0.24 + progress * 0.52),
+      };
+    };
     const tick = () => {
       current.current.x += (target.current.x - current.current.x) * 0.16;
-      current.current.y += (target.current.y - current.current.y) * 0.16;
+      current.current.y +=
+        (target.current.y - scrollVelocity * 12 - current.current.y) * 0.16;
       const dx = current.current.x - last.current.x;
       const dy = current.current.y - last.current.y;
       const angle = Math.atan2(dy, Math.abs(dx)) * (180 / Math.PI);
@@ -263,12 +320,19 @@ function BirdCursor() {
         birdRef.current.style.setProperty("--speed", `${Math.min(Math.hypot(dx, dy), 18)}`);
       }
       last.current = { ...current.current };
+      scrollVelocity *= 0.9;
       frame = requestAnimationFrame(tick);
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerdown", down);
     window.addEventListener("pointerup", up);
     window.addEventListener("pointerover", over);
+    window.addEventListener("touchstart", touchStart, { passive: true });
+    window.addEventListener("touchmove", touchMove, { passive: true });
+    window.addEventListener("touchend", up);
+    window.addEventListener("scroll", scroll, { passive: true });
+    window.addEventListener("resize", scroll);
+    scroll();
     frame = requestAnimationFrame(tick);
     return () => {
       cancelAnimationFrame(frame);
@@ -276,6 +340,11 @@ function BirdCursor() {
       window.removeEventListener("pointerdown", down);
       window.removeEventListener("pointerup", up);
       window.removeEventListener("pointerover", over);
+      window.removeEventListener("touchstart", touchStart);
+      window.removeEventListener("touchmove", touchMove);
+      window.removeEventListener("touchend", up);
+      window.removeEventListener("scroll", scroll);
+      window.removeEventListener("resize", scroll);
     };
   }, []);
 
@@ -545,7 +614,7 @@ export default function App() {
             entry.target.classList.add("in-view");
           }
         }),
-      { rootMargin: "-35% 0px -50%", threshold: 0.05 },
+      { rootMargin: "-35% 0px -50%", threshold: 0.01 },
     );
     document.querySelectorAll("section[id]").forEach((section) => observer.observe(section));
     window.addEventListener("scroll", onScroll, { passive: true });
