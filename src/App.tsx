@@ -426,7 +426,7 @@ function MusicPlayer({
 
   return (
     <aside className={`music-player ${expanded ? "expanded" : ""}`}>
-      <audio ref={audioRef} src="/portfolio/Bye.mp3" loop preload="metadata" />
+      <audio ref={audioRef} src="/Guilding.mp3" loop preload="auto" />
       <button
         className="music-main"
         aria-label={musicOn ? "Pause ambient music" : "Play ambient music"}
@@ -445,7 +445,7 @@ function MusicPlayer({
         aria-expanded={expanded}
       >
         <span>Atmosphere</span>
-        <strong>BYE · AMBIENT EDIT</strong>
+        <strong>GUILDING · AMBIENT SCORE</strong>
       </button>
       <div className="music-extra">
         <button
@@ -651,23 +651,31 @@ export default function App() {
   };
 
   const setMusicOn = async (value: boolean) => {
-    setMusicOnState(value);
-    if (!audioRef.current) return;
-    if (value) {
-      try {
-        await audioRef.current.play();
-      } catch {
-        setMusicOnState(false);
-      }
-    } else {
-      audioRef.current.pause();
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (!value) {
+      audio.pause();
+      setMusicOnState(false);
+      return;
+    }
+
+    try {
+      await audio.play();
+      setMusicOnState(true);
+      setToast("");
+    } catch (error) {
+      setMusicOnState(false);
+      console.error("Unable to play Guilding.mp3.", error);
+      setToast("Music could not start. Press play to try again.");
+      window.setTimeout(() => setToast(""), 4000);
     }
   };
 
-  const enter = (withMusic: boolean) => {
+  const enter = () => {
     setEntered(true);
     sound(180, 0.45);
-    if (withMusic) setMusicOn(true);
+    void setMusicOn(true);
     window.setTimeout(() => setIntroVisible(false), 950);
   };
 
@@ -817,7 +825,7 @@ export default function App() {
       <PerformanceHud />
       {introVisible && (
         <div className={entered ? "intro-leaving" : ""}>
-          <Intro onEnter={() => enter(true)} onSkip={() => enter(false)} />
+          <Intro onEnter={enter} onSkip={enter} />
         </div>
       )}
 
