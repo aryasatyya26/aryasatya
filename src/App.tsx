@@ -393,7 +393,7 @@ function Intro({
           <i />
         </button>
         <button className="skip-button" onClick={onSkip}>
-          Skip intro
+          Welcome..
         </button>
       </div>
       <p className="intro-caption">Enter the unknown</p>
@@ -888,6 +888,7 @@ export default function App() {
             <span>106.8456° E</span>
           </div>
           <div className="hero-content reveal">
+            <p className="hero-greeting">Haii</p>
             <p className="eyebrow">Data analyst · Web developer</p>
             <h1>
               <span>Aryasatya</span>
