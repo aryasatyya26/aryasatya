@@ -212,13 +212,31 @@ function AtmosphericWorld({ entered }: { entered: boolean }) {
       <div className="forest" />
       <div className="fog fog-a" />
       <div className="fog fog-b" />
+      <div className="forest-glow" />
+      <div className="glow-rise">
+        {Array.from({ length: 8 }, (_, i) => (
+          <i
+            key={i}
+            style={{
+              left: `${7 + i * 12}%`,
+              height: `${22 + (i % 3) * 9}vh`,
+              animationDelay: `${-i * 2.1}s`,
+              animationDuration: `${14 + (i % 4) * 2}s`,
+            }}
+          />
+        ))}
+      </div>
       <div className="dust">
         {Array.from({ length: 18 }, (_, i) => (
           <i key={i} style={{ "--i": i } as React.CSSProperties} />
         ))}
       </div>
-      <div className="environment-bird bird-flight-1">
-        <Bird />
+      <div className="environment-birds">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div className="environment-bird" key={i}>
+            <Bird />
+          </div>
+        ))}
       </div>
       <div className="foreground" />
     </div>
@@ -370,7 +388,7 @@ function Intro({
       </h1>
       <p className="intro-title">Data analyst · Web developer · Creative thinker</p>
       <div className="intro-actions">
-        <button className="enter-button magnetic" onClick={onEnter}>
+        <button className="enter-button magnetic" data-custom-sfx onClick={onEnter}>
           <span>Click to enter</span>
           <i />
         </button>
@@ -569,25 +587,67 @@ export default function App() {
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
   const audioContext = useRef<AudioContext | null>(null);
 
-  const sound = (frequency = 520, duration = 0.08) => {
+  useEffect(() => {
+    document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach((icon) => {
+      icon.href = "/an-mark.svg";
+      icon.type = "image/svg+xml";
+    });
+  }, []);
+
+  const sound = (frequency = 520, duration = 0.16) => {
     if (!sfxOn) return;
     const Context = window.AudioContext || window.webkitAudioContext;
     if (!Context) return;
     const context = audioContext.current || new Context();
     audioContext.current = context;
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(frequency, context.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(
-      frequency * 0.72,
-      context.currentTime + duration,
-    );
-    gain.gain.setValueAtTime(0.035, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
-    oscillator.connect(gain).connect(context.destination);
-    oscillator.start();
-    oscillator.stop(context.currentTime + duration);
+
+    const play = () => {
+      const now = context.currentTime;
+      const filter = context.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(Math.max(frequency * 4, 1200), now);
+      filter.frequency.exponentialRampToValueAtTime(
+        Math.max(frequency * 1.8, 700),
+        now + duration * 1.5,
+      );
+      filter.Q.setValueAtTime(0.7, now);
+
+      const tones: { type: OscillatorType; ratio: number; level: number; decay: number }[] = [
+        { type: "sine", ratio: 1, level: 0.045, decay: duration },
+        { type: "triangle", ratio: 1.5, level: 0.015, decay: duration * 1.5 },
+        { type: "sine", ratio: 0.5, level: 0.016, decay: duration * 0.85 },
+      ];
+
+      tones.forEach(({ type, ratio, level, decay }) => {
+        const oscillator = context.createOscillator();
+        const envelope = context.createGain();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency * ratio, now);
+        oscillator.frequency.exponentialRampToValueAtTime(
+          frequency * ratio * 0.78,
+          now + decay,
+        );
+        envelope.gain.setValueAtTime(0.0001, now);
+        envelope.gain.exponentialRampToValueAtTime(level, now + 0.008);
+        envelope.gain.exponentialRampToValueAtTime(0.0001, now + decay);
+        oscillator.connect(envelope).connect(filter);
+        oscillator.start(now);
+        oscillator.stop(now + decay + 0.02);
+      });
+
+      filter.connect(context.destination);
+    };
+
+    if (context.state === "suspended") {
+      void context
+        .resume()
+        .then(play)
+        .catch((error: unknown) => {
+          console.error("Unable to resume audio for interactive sound.", error);
+        });
+    } else {
+      play();
+    }
   };
 
   const setMusicOn = async (value: boolean) => {
@@ -636,18 +696,40 @@ export default function App() {
   }, [introVisible, project]);
 
   useEffect(() => {
+    let lastFlockScrollY = window.scrollY;
+    let flockResetTimer = 0;
+
     const onScroll = () => {
       const total = document.documentElement.scrollHeight - window.innerHeight;
       const progress = total > 0 ? window.scrollY / total : 0;
+      const scrollDelta = window.scrollY - lastFlockScrollY;
+      lastFlockScrollY = window.scrollY;
       scrollProgressRef.current?.style.setProperty(
         "transform",
         `scaleX(${Math.min(1, Math.max(0, progress))})`,
       );
       document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
+      document.documentElement.style.setProperty(
+        "--flock-scroll-y",
+        `${Math.max(-24, Math.min(24, -scrollDelta * 0.16))}px`,
+      );
+      window.clearTimeout(flockResetTimer);
+      flockResetTimer = window.setTimeout(
+        () => document.documentElement.style.setProperty("--flock-scroll-y", "0px"),
+        180,
+      );
     };
     const onPointer = (event: PointerEvent) => {
       document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
       document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
+      document.documentElement.style.setProperty(
+        "--flock-pointer-x",
+        `${(event.clientX / window.innerWidth - 0.5) * 34}px`,
+      );
+      document.documentElement.style.setProperty(
+        "--flock-pointer-y",
+        `${(event.clientY / window.innerHeight - 0.5) * 18}px`,
+      );
       document.documentElement.style.setProperty(
         "--parallax-x",
         `${(event.clientX / window.innerWidth - 0.5) * 18}px`,
@@ -687,12 +769,15 @@ export default function App() {
       revealObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
+      window.clearTimeout(flockResetTimer);
     };
   }, []);
 
   useEffect(() => {
     const click = (event: Event) => {
-      if ((event.target as HTMLElement).closest("button,a")) sound(610, 0.06);
+      if (!(event.target instanceof Element)) return;
+      const control = event.target.closest("button,a");
+      if (control && !control.hasAttribute("data-custom-sfx")) sound(610, 0.17);
     };
     document.addEventListener("click", click);
     return () => document.removeEventListener("click", click);
@@ -741,8 +826,16 @@ export default function App() {
       </div>
 
       <header className="site-header">
-        <button className="monogram" onClick={() => scrollTo("home")} aria-label="Go to home">
-          AN<span>.</span>
+        <button
+          className="monogram"
+          onClick={() => scrollTo("home")}
+          aria-label="ARYASATYA NARYAMA — go to home"
+        >
+          <span className="monogram-symbol">AN</span>
+          <span className="brand-wordmark">
+            <span>ARYASATYA</span>
+            <span>NARYAMA</span>
+          </span>
         </button>
         <nav className={menuOpen ? "open" : ""} aria-label="Primary navigation">
           {navItems.map((item, index) => (
@@ -983,7 +1076,7 @@ export default function App() {
               </p>
               <a href="mailto:aryasatyya26@gmail.com">aryasatyya26@gmail.com</a>
               <div className="contact-actions">
-                <button className="primary-button" onClick={copyEmail}>
+                <button className="primary-button" data-custom-sfx onClick={copyEmail}>
                   Copy email <Icon name="copy" size={15} />
                 </button>
                 <a

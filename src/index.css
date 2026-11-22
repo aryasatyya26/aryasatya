@@ -14,6 +14,9 @@
   --mouse-y: 50vh;
   --parallax-x: 0px;
   --parallax-y: 0px;
+  --flock-pointer-x: 0px;
+  --flock-pointer-y: 0px;
+  --flock-scroll-y: 0px;
 }
 
 @layer base {
@@ -238,6 +241,52 @@
   animation: fogMove 35s ease-in-out infinite alternate-reverse;
 }
 
+.forest-glow {
+  position: absolute;
+  z-index: 1;
+  inset: 30% -18% -22%;
+  background:
+    radial-gradient(ellipse at 18% 72%, rgba(86, 169, 117, 0.22), transparent 42%),
+    radial-gradient(ellipse at 52% 82%, rgba(159, 190, 107, 0.18), transparent 45%),
+    radial-gradient(ellipse at 82% 68%, rgba(69, 150, 128, 0.2), transparent 38%);
+  filter: blur(30px);
+  mix-blend-mode: screen;
+  opacity: 0.58;
+  animation: forestGlow 16s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+.world-entered .forest-glow {
+  animation-duration: 12s;
+}
+
+.glow-rise {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.glow-rise i {
+  position: absolute;
+  bottom: -30vh;
+  width: 2px;
+  border-radius: 50%;
+  background: linear-gradient(
+    to top,
+    transparent,
+    rgba(128, 206, 145, 0.18),
+    rgba(190, 235, 169, 0.72),
+    transparent
+  );
+  box-shadow: 0 0 18px rgba(136, 219, 154, 0.42);
+  filter: blur(1px);
+  opacity: 0;
+  animation: glowRise 14s linear infinite;
+  will-change: transform, opacity;
+}
+
 .dust i {
   --x: calc((var(--i) * 61) % 100);
   position: absolute;
@@ -265,13 +314,87 @@
 
 .environment-bird {
   position: absolute;
-  z-index: 2;
-  top: 29%;
+  top: var(--bird-top, 24%);
   left: -8%;
-  width: 45px;
-  opacity: 0.58;
-  filter: drop-shadow(0 0 8px rgba(218, 228, 230, 0.25));
-  animation: worldBird 34s cubic-bezier(0.2, 0.55, 0.55, 0.85) infinite;
+  width: var(--bird-size, 28px);
+  opacity: 0;
+  filter: drop-shadow(0 0 10px var(--bird-glow, rgba(218, 228, 230, 0.36)));
+  animation: worldBird var(--bird-duration, 34s) cubic-bezier(0.2, 0.55, 0.55, 0.85)
+    var(--bird-delay, 0s) infinite;
+  will-change: transform, opacity;
+}
+
+.environment-birds {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.environment-birds .wing,
+.environment-birds .bird-body {
+  fill: var(--bird-color, #c9d2d1);
+}
+
+.environment-bird:nth-child(1) {
+  --bird-top: 20%;
+  --bird-size: 34px;
+  --bird-duration: 36s;
+  --bird-delay: -10s;
+  --bird-opacity: 0.72;
+  --bird-color: #d7e5d7;
+  --bird-glow: rgba(165, 217, 171, 0.55);
+}
+
+.environment-bird:nth-child(2) {
+  --bird-top: 35%;
+  --bird-size: 25px;
+  --bird-duration: 42s;
+  --bird-delay: -16s;
+  --bird-opacity: 0.62;
+  --bird-color: #d9e3cb;
+  --bird-glow: rgba(184, 216, 145, 0.5);
+}
+
+.environment-bird:nth-child(3) {
+  --bird-top: 27%;
+  --bird-size: 30px;
+  --bird-duration: 32s;
+  --bird-delay: -15s;
+  --bird-opacity: 0.68;
+  --bird-color: #c9dfd9;
+  --bird-glow: rgba(126, 201, 188, 0.5);
+}
+
+.environment-bird:nth-child(4) {
+  --bird-top: 46%;
+  --bird-size: 22px;
+  --bird-duration: 39s;
+  --bird-delay: -12s;
+  --bird-opacity: 0.58;
+  --bird-color: #e2d9bd;
+  --bird-glow: rgba(218, 189, 125, 0.45);
+}
+
+.environment-bird:nth-child(5) {
+  --bird-top: 16%;
+  --bird-size: 23px;
+  --bird-duration: 44s;
+  --bird-delay: -25s;
+  --bird-opacity: 0.6;
+  --bird-color: #d5e0d8;
+  --bird-glow: rgba(153, 199, 171, 0.48);
+}
+
+.environment-bird:nth-child(6) {
+  --bird-top: 40%;
+  --bird-size: 30px;
+  --bird-duration: 37s;
+  --bird-delay: -16s;
+  --bird-opacity: 0.65;
+  --bird-color: #d4dfca;
+  --bird-glow: rgba(171, 206, 140, 0.5);
 }
 
 .wing,
@@ -603,12 +726,40 @@
 }
 
 .monogram {
+  display: flex;
+  align-items: center;
+  gap: 9px;
   font-family: "Italiana", serif;
-  font-size: 17px;
-  letter-spacing: -0.06em;
+  text-align: left;
 }
 
-.monogram span {
+.monogram-symbol {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  border: 1px solid rgba(196, 154, 86, 0.48);
+  border-radius: 50%;
+  color: #e5d2ac;
+  font-size: 13px;
+  letter-spacing: -0.1em;
+  text-shadow: 0 0 14px rgba(196, 154, 86, 0.34);
+}
+
+.brand-wordmark {
+  display: grid;
+  gap: 3px;
+  color: rgba(236, 238, 235, 0.78);
+  font-family: "DM Sans", sans-serif;
+  font-size: 7px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.brand-wordmark span:last-child {
   color: var(--amber);
 }
 
@@ -1235,7 +1386,7 @@ blockquote {
 }
 
 .projects {
-  background: linear-gradient(180deg, transparent, rgba(3, 8, 11, 0.93) 8%, rgba(9, 15, 18, 0.96));
+  background: transparent;
 }
 
 .projects-heading {
@@ -1898,6 +2049,34 @@ blockquote {
   }
 }
 
+@keyframes forestGlow {
+  from {
+    opacity: 0.42;
+    transform: translate3d(0, 7%, 0) scale(0.94);
+  }
+  to {
+    opacity: 0.82;
+    transform: translate3d(-1%, -7%, 0) scale(1.08);
+  }
+}
+
+@keyframes glowRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scaleY(0.6);
+  }
+  18% {
+    opacity: 0.7;
+  }
+  72% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(22px, -130vh, 0) scaleY(1.2);
+  }
+}
+
 @keyframes dustRise {
   0% {
     opacity: 0;
@@ -1927,21 +2106,36 @@ blockquote {
 @keyframes worldBird {
   0% {
     opacity: 0;
-    transform: translate(-10vw, 8vh) scale(0.6);
+    transform: translate3d(
+        calc(-10vw + var(--flock-pointer-x, 0px)),
+        calc(8vh + var(--flock-pointer-y, 0px) + var(--flock-scroll-y, 0px)),
+        0
+      )
+      scale(0.6);
   }
   8% {
-    opacity: 0.55;
+    opacity: var(--bird-opacity, 0.45);
   }
   45% {
-    opacity: 0.2;
-    transform: translate(55vw, -10vh) scale(0.34);
+    opacity: 0.38;
+    transform: translate3d(
+        calc(55vw + var(--flock-pointer-x, 0px)),
+        calc(-10vh + var(--flock-pointer-y, 0px) + var(--flock-scroll-y, 0px)),
+        0
+      )
+      scale(0.34);
   }
   70% {
-    opacity: 0.62;
+    opacity: var(--bird-opacity, 0.45);
   }
   100% {
     opacity: 0;
-    transform: translate(120vw, 12vh) scale(0.85);
+    transform: translate3d(
+        calc(120vw + var(--flock-pointer-x, 0px)),
+        calc(12vh + var(--flock-pointer-y, 0px) + var(--flock-scroll-y, 0px)),
+        0
+      )
+      scale(0.85);
   }
 }
 
