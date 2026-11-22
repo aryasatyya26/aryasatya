@@ -679,6 +679,15 @@ export default function App() {
     window.setTimeout(() => setIntroVisible(false), 950);
   };
 
+  const returnToEntrance = () => {
+    lenisRef.current?.scrollTo(0, { immediate: true, force: true });
+    setProject(null);
+    setMenuOpen(false);
+    setActive("home");
+    setEntered(false);
+    setIntroVisible(true);
+  };
+
   useEffect(() => {
     const lenis = new Lenis({
       autoRaf: true,
@@ -836,8 +845,8 @@ export default function App() {
       <header className="site-header">
         <button
           className="monogram"
-          onClick={() => scrollTo("home")}
-          aria-label="ARYASATYA NARYAMA — go to home"
+          onClick={returnToEntrance}
+          aria-label="ARYASATYA NARYAMA — return to entrance"
         >
           <span className="monogram-symbol">AN</span>
           <span className="brand-wordmark">
