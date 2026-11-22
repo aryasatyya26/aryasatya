@@ -745,16 +745,18 @@
   border-radius: inherit;
   border: 1px solid rgba(196, 154, 86, 0.38);
   box-shadow: 0 0 12px rgba(196, 154, 86, 0.18);
-  opacity: 0;
+  opacity: 0.72;
   pointer-events: none;
-  transition: opacity 0.35s ease, transform 0.35s ease;
-  transform: scale(0.94);
+  transform: scale(1);
+  animation: brandGlowPulse 2.8s ease-in-out infinite;
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
 }
 
 .monogram:hover,
 .monogram:focus-visible {
   filter: drop-shadow(0 0 9px rgba(196, 154, 86, 0.38));
-  transform: translateY(-1px);
 }
 
 .monogram:hover::before,
@@ -762,12 +764,7 @@
 .monogram:active::before {
   border-color: rgba(224, 184, 112, 0.76);
   box-shadow: 0 0 18px rgba(196, 154, 86, 0.36);
-  opacity: 1;
-  animation: brandGlowPulse 1.8s ease-in-out infinite;
-}
-
-.monogram:active {
-  transform: scale(0.97);
+  animation-duration: 1.6s;
 }
 
 .monogram-symbol {
@@ -2206,11 +2203,9 @@ blockquote {
   0%,
   100% {
     opacity: 0.72;
-    transform: scale(0.94);
   }
   50% {
     opacity: 1;
-    transform: scale(1.04);
   }
 }
 
