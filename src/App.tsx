@@ -712,8 +712,12 @@ export default function App() {
               </div>
             </div>
           </div>
-          <div className="hero-portrait reveal">
-            <img src="/portfolio/Aryasatya.jpg" alt="Aryasatya Naryama outdoors" />
+          <div className="hero-portrait">
+            <img
+              src="/portfolio/Aryasatya.jpg"
+              alt="Aryasatya Naryama outdoors"
+              fetchPriority="high"
+            />
             <span>Between data & imagination</span>
           </div>
           <button className="scroll-cue" onClick={() => scrollTo("about")}>
@@ -729,8 +733,8 @@ export default function App() {
             <p>Beyond the surface</p>
           </div>
           <div className="about-grid">
-            <div className="about-portrait reveal">
-              <img src="/portfolio/THEGREAT.jpg" alt="Aryasatya Naryama portrait" loading="lazy" />
+            <div className="about-portrait">
+              <img src="/portfolio/THEGREAT.jpg" alt="Aryasatya Naryama portrait" />
               <span>Based in Indonesia · Working globally</span>
             </div>
             <div className="about-copy reveal">
@@ -810,13 +814,13 @@ export default function App() {
           </div>
           <div className="project-list">
             {projects.map((item, index) => (
-              <article className="project-card reveal" key={item.title}>
+              <article className="project-card" key={item.title}>
                 <button
                   className="project-visual"
                   onClick={() => setProject(item)}
                   aria-label={`Open ${item.title} project details`}
                 >
-                  <img src={item.image} alt={`${item.title} preview`} loading="lazy" />
+                  <img src={item.image} alt={`${item.title} preview`} loading="eager" />
                   <span className="project-number">0{index + 1}</span>
                   <span className="project-open">
                     View case <Icon name="arrow" />
