@@ -963,8 +963,8 @@ section {
   max-width: 100%;
   position: relative;
   z-index: 4;
-  top: clamp(-180px, -23vh, -120px);
-  left: 0;
+  top: clamp(-125px, -15vh, -90px);
+  left: clamp(130px, 18vw, 270px);
   margin-bottom: clamp(18px, 2.2vw, 30px);
   color: var(--amber);
   font-family: "Italiana", serif;
