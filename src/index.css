@@ -764,11 +764,11 @@ section {
   z-index: 1;
   top: 13%;
   right: 5%;
-  width: min(31vw, 470px);
+  width: min(34vw, 520px);
   aspect-ratio: 0.82;
   overflow: hidden;
   border: 1px solid rgba(224, 230, 229, 0.12);
-  clip-path: polygon(0 8%, 88% 0, 100% 90%, 12% 100%);
+  clip-path: polygon(0 5%, 95% 0, 100% 95%, 5% 100%);
   transform: translate(calc(var(--parallax-x) * 0.4), calc(var(--parallax-y) * 0.4));
   transition: transform 1s ease-out;
 }
@@ -2076,7 +2076,7 @@ blockquote {
   .hero-portrait {
     top: 12%;
     right: 3%;
-    width: min(38vw, 340px);
+    width: min(42vw, 390px);
   }
 
   .hero-bottom {
@@ -2169,7 +2169,7 @@ blockquote {
   .hero-portrait {
     top: 12%;
     right: 2%;
-    width: clamp(136px, 38vw, 240px);
+    width: clamp(160px, 44vw, 280px);
   }
 
   .hero h1 {
