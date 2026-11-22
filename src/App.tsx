@@ -4,21 +4,13 @@ type Project = {
   title: string;
   label: string;
   description: string;
-  image?: string;
+  image: string;
   technologies: string[];
   role: string;
   live?: string;
 };
 
 const projects: Project[] = [
-  {
-    title: "Lumen",
-    label: "Digital flagship",
-    description:
-      "A spatial commerce experience for a future-facing architectural lighting company.",
-    technologies: ["Next.js", "WebGL", "GSAP"],
-    role: "Creative development",
-  },
   {
     title: "Web Profile",
     label: "Brand experience",
@@ -496,14 +488,7 @@ function ProjectModal({
           <Icon name="close" />
         </button>
         <div className="modal-visual">
-          {project.image ? (
-            <img src={project.image} alt={`${project.title} project preview`} />
-          ) : (
-            <div className="lumen-art">
-              <i />
-              <span>L</span>
-            </div>
-          )}
+          <img src={project.image} alt={`${project.title} project preview`} />
         </div>
         <div className="modal-copy">
           <p className="eyebrow">{project.label}</p>
@@ -831,14 +816,7 @@ export default function App() {
                   onClick={() => setProject(item)}
                   aria-label={`Open ${item.title} project details`}
                 >
-                  {item.image ? (
-                    <img src={item.image} alt={`${item.title} preview`} loading="lazy" />
-                  ) : (
-                    <div className="lumen-art">
-                      <i />
-                      <span>L</span>
-                    </div>
-                  )}
+                  <img src={item.image} alt={`${item.title} preview`} loading="lazy" />
                   <span className="project-number">0{index + 1}</span>
                   <span className="project-open">
                     View case <Icon name="arrow" />
