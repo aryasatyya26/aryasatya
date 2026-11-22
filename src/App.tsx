@@ -445,7 +445,7 @@ function MusicPlayer({
         aria-expanded={expanded}
       >
         <span>Atmosphere</span>
-        <strong>GUILDING · AMBIENT SCORE</strong>
+        <strong>VIBES</strong>
       </button>
       <div className="music-extra">
         <button
