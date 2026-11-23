@@ -549,12 +549,12 @@
 }
 
 .shadow-arm-left {
-  transform-origin: 86px 82px;
+  transform-origin: 86px 72px;
   animation: shadowLeftPunch 0.42s cubic-bezier(0.2, 0.9, 0.25, 1) infinite;
 }
 
 .shadow-arm-right {
-  transform-origin: 84px 88px;
+  transform-origin: 84px 78px;
   animation: shadowRightPunch 0.42s cubic-bezier(0.2, 0.9, 0.25, 1) infinite;
 }
 
@@ -564,12 +564,12 @@
 }
 
 .shadow-leg-front {
-  transform-origin: 84px 145px;
+  transform-origin: 78px 142px;
   animation: shadowFrontFootwork 0.84s ease-in-out infinite;
 }
 
 .shadow-leg-back {
-  transform-origin: 105px 145px;
+  transform-origin: 99px 142px;
   animation: shadowBackFootwork 0.84s ease-in-out infinite;
 }
 
