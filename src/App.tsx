@@ -120,6 +120,7 @@ function Icon({
     | "pause"
     | "volume"
     | "mute"
+    | "sliders"
     | "close"
     | "copy"
     | "menu"
@@ -150,6 +151,14 @@ function Icon({
       <>
         <path d="M5 9v6h4l5 4V5L9 9H5Z" />
         <path d="m18 10 4 4m0-4-4 4" />
+      </>
+    ),
+    sliders: (
+      <>
+        <path d="M4 6h7m4 0h5M4 12h3m4 0h9M4 18h9m4 0h3" />
+        <circle cx="13" cy="6" r="2" />
+        <circle cx="9" cy="12" r="2" />
+        <circle cx="15" cy="18" r="2" />
       </>
     ),
     close: (
@@ -617,6 +626,7 @@ function MusicPlayer({
       <button
         className="music-main"
         aria-label={musicOn || musicPending ? "Pause ambient music" : "Play ambient music"}
+        aria-pressed={musicOn}
         onClick={() => setMusicOn(!(musicOn || musicPending))}
       >
         <span className={`waveform ${musicOn ? "playing" : ""}`}>
@@ -626,15 +636,25 @@ function MusicPlayer({
         </span>
         <Icon name={musicOn || musicPending ? "pause" : "play"} size={14} />
       </button>
-      <button
-        className="track-info"
-        onClick={() => setExpanded(!expanded)}
-        aria-expanded={expanded}
-      >
+      <div className="track-info">
         <span>Atmosphere</span>
         <strong>VIBES</strong>
+      </div>
+      <button
+        className={`music-settings-toggle ${expanded ? "active" : ""}`}
+        onClick={() => setExpanded(!expanded)}
+        aria-label={expanded ? "Hide sound settings" : "Show sound settings"}
+        aria-expanded={expanded}
+        aria-controls="music-settings"
+      >
+        <Icon name="sliders" size={15} />
       </button>
-      <div className="music-extra">
+      <div
+        id="music-settings"
+        className="music-extra"
+        aria-hidden={!expanded}
+        inert={!expanded}
+      >
         <button
           className="icon-button"
           onClick={() => setMuted(!muted)}
@@ -642,16 +662,18 @@ function MusicPlayer({
         >
           <Icon name={muted ? "mute" : "volume"} size={15} />
         </button>
-        <label>
+        <label className="music-volume-control">
           <span className="sr-only">Music volume</span>
           <input
             type="range"
             min="0"
             max="1"
-            step="0.05"
+            step="0.01"
             value={volume}
+            aria-valuetext={`${Math.round(volume * 100)}%`}
             onChange={(event) => setVolume(Number(event.target.value))}
           />
+          <span className="music-volume-value">{Math.round(volume * 100)}%</span>
         </label>
         <button
           className={`sfx-toggle ${sfxOn ? "active" : ""}`}

@@ -2196,18 +2196,44 @@ blockquote {
 .music-player {
   position: fixed;
   z-index: 80;
+  isolation: isolate;
   right: 22px;
   bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 8px;
   max-width: calc(100vw - 44px);
-  padding: 7px 12px 7px 7px;
-  border: 1px solid rgba(221, 231, 231, 0.15);
+  padding: 6px 8px 6px 6px;
+  border: 1px solid rgba(196, 154, 86, 0.34);
   border-radius: 999px;
   background: rgba(5, 10, 15, 0.76);
-  box-shadow: 0 10px 38px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 10px 38px rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(196, 154, 86, 0.1);
   backdrop-filter: blur(18px);
+}
+
+.music-player::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -3px;
+  border: 1px solid rgba(196, 154, 86, 0.48);
+  border-radius: inherit;
+  box-shadow: 0 0 14px rgba(196, 154, 86, 0.24);
+  opacity: 0.72;
+  pointer-events: none;
+  animation: brandGlowPulse 2.8s ease-in-out infinite;
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.music-player:hover::before,
+.music-player:focus-within::before,
+.music-player.expanded::before {
+  border-color: rgba(224, 184, 112, 0.76);
+  box-shadow: 0 0 18px rgba(196, 154, 86, 0.36);
 }
 
 .entry-loading ~ .music-player {
@@ -2217,7 +2243,7 @@ blockquote {
 .music-main {
   position: relative;
   display: grid;
-  width: 38px;
+  width: 34px;
   aspect-ratio: 1;
   place-items: center;
   overflow: hidden;
@@ -2256,7 +2282,7 @@ blockquote {
 }
 
 .track-info {
-  min-width: 116px;
+  min-width: 88px;
   text-align: left;
 }
 
@@ -2282,30 +2308,74 @@ blockquote {
 
 .music-extra {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
   max-width: 0;
   overflow: hidden;
   opacity: 0;
-  transition: 0.5s ease;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    max-width 0.35s ease,
+    opacity 0.25s ease,
+    visibility 0s linear 0.35s;
 }
 
 .music-player.expanded .music-extra {
-  max-width: 240px;
+  max-width: 250px;
   opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    max-width 0.35s ease,
+    opacity 0.25s ease,
+    visibility 0s;
 }
 
+.music-settings-toggle,
 .icon-button {
   display: grid;
-  width: 28px;
+  width: 30px;
   aspect-ratio: 1;
   place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
   color: rgba(240, 242, 239, 0.62);
+  transition:
+    color 0.25s ease,
+    border-color 0.25s ease,
+    background 0.25s ease;
+}
+
+.music-settings-toggle:hover,
+.music-settings-toggle:focus-visible,
+.music-settings-toggle.active,
+.icon-button:hover,
+.icon-button:focus-visible {
+  border-color: rgba(196, 154, 86, 0.42);
+  color: #f0d39f;
+  background: rgba(196, 154, 86, 0.1);
 }
 
 .music-extra input {
-  width: 72px;
+  width: 82px;
   accent-color: var(--amber);
+  cursor: pointer;
+}
+
+.music-volume-control {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.music-volume-value {
+  min-width: 28px;
+  color: rgba(240, 242, 239, 0.52);
+  font-size: 8px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
 
 .sfx-toggle {
@@ -3392,6 +3462,7 @@ blockquote {
   .music-player.expanded {
     right: 12px;
     left: 12px;
+    max-width: calc(100vw - 24px);
     justify-content: space-between;
   }
 
@@ -3400,7 +3471,7 @@ blockquote {
   }
 
   .music-extra input {
-    width: 58px;
+    width: clamp(72px, 20vw, 100px);
   }
 
   .modal-backdrop {
