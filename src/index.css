@@ -3160,9 +3160,9 @@ blockquote {
 
   .site-header nav {
     position: fixed;
-    top: 65px;
-    right: 0;
-    left: 0;
+    top: 69px;
+    right: 14px;
+    left: 14px;
     display: grid;
     gap: 0;
     padding: 18px;
@@ -3282,6 +3282,24 @@ blockquote {
 }
 
 @media (max-width: 680px) {
+  .site-header {
+    top: 10px;
+    width: calc(100% - 24px);
+    padding: 9px 12px;
+  }
+
+  .site-header nav {
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    max-height: calc(100svh - 82px);
+    overflow-y: auto;
+  }
+
+  .site-header nav button {
+    min-height: 52px;
+  }
+
   .intro-birds {
     --intro-flight-x: clamp(132px, 38vw, 250px);
     --intro-flight-y: clamp(54px, 9vh, 76px);

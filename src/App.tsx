@@ -840,6 +840,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!menuOpen) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    const closeOnOutsidePress = (event: PointerEvent) => {
+      if (!(event.target instanceof Element)) return;
+      if (!event.target.closest(".site-header")) setMenuOpen(false);
+    };
+
+    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("pointerdown", closeOnOutsidePress);
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("pointerdown", closeOnOutsidePress);
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
     if (!entryTransition) return;
 
     const timer = window.setTimeout(() => {
@@ -1131,6 +1150,9 @@ export default function App() {
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
+      if (window.location.hash !== `#${id}`) {
+        window.history.pushState(null, "", `#${id}`);
+      }
       if (lenisRef.current) {
         lenisRef.current.scrollTo(
           target,
@@ -1145,6 +1167,18 @@ export default function App() {
     }
     setMenuOpen(false);
   };
+
+  useEffect(() => {
+    const syncLocationHash = () => {
+      const id = window.location.hash.slice(1);
+      if (!navItems.includes(id)) return;
+      window.requestAnimationFrame(() => scrollTo(id));
+    };
+
+    syncLocationHash();
+    window.addEventListener("hashchange", syncLocationHash);
+    return () => window.removeEventListener("hashchange", syncLocationHash);
+  }, []);
 
   const copyEmail = async () => {
     await navigator.clipboard.writeText("aryasatyya26@gmail.com");
@@ -1263,9 +1297,9 @@ export default function App() {
           <button
             className="scroll-cue"
             onClick={() => scrollTo("about")}
-            aria-label="Scroll to the journey section"
+            aria-label="Scroll to the about section"
           >
-            <span>Scroll to journey</span>
+            <span>Scroll to about</span>
             <i />
           </button>
         </section>
