@@ -540,7 +540,8 @@
   overflow: hidden;
   text-align: center;
   background:
-    radial-gradient(circle at 50% 50%, rgba(28, 78, 124, 0.48), transparent 32%), rgba(23, 3, 43, 0.96);
+    radial-gradient(circle at 50% 50%, rgba(28, 78, 124, 0.48), transparent 32%),
+    rgba(23, 3, 43, 0.96);
   transition:
     opacity 0.9s ease,
     filter 0.9s ease,
@@ -2254,7 +2255,17 @@ blockquote {
   padding: 6px 8px 6px 6px;
   border: 1px solid rgba(196, 154, 86, 0.34);
   border-radius: 999px;
-  background: rgba(5, 10, 15, 0.76);
+  background:
+    radial-gradient(
+      120% 180% at 0% 0%,
+      color-mix(in srgb, var(--sky-gradient-top) 44%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--sky-gradient-mid) 88%, transparent),
+      color-mix(in srgb, var(--sky-gradient-top) 84%, transparent)
+    );
   box-shadow:
     0 10px 38px rgba(0, 0, 0, 0.3),
     0 0 18px rgba(196, 154, 86, 0.1);
