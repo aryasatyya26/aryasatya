@@ -3,18 +3,18 @@
 @import "tailwindcss";
 
 :root {
-  --ink: #05080c;
-  --midnight: #08131f;
+  --ink: #0c0705;
+  --midnight: #1f0f08;
   --blue: #122638;
   --silver: #b9c3ca;
   --white: #f0f1ed;
   --amber: #c49a56;
   --line: rgba(222, 231, 235, 0.16);
-  --sky-gradient-top: #020407;
-  --sky-gradient-mid: #08111a;
-  --sky-gradient-horizon: #101921;
-  --sky-gradient-bottom: #070b0e;
-  --sky-gradient-mid-stop: 48%;
+  --sky-gradient-top: #300b4e;
+  --sky-gradient-mid: #163b55;
+  --sky-gradient-horizon: #2d95b4;
+  --sky-gradient-bottom: #681434;
+  --sky-gradient-mid-stop: 60%;
   --sky-gradient-horizon-stop: 78%;
   --mouse-x: 50vw;
   --mouse-y: 50vh;
@@ -33,8 +33,8 @@
   --white: #f2f1eb;
   --amber: #d2ae72;
   --line: rgba(218, 228, 228, 0.16);
-  --sky-gradient-top: #030710;
-  --sky-gradient-mid: #0d1b29;
+  --sky-gradient-top: #030f10;
+  --sky-gradient-mid: #29160d;
   --sky-gradient-horizon: #183242;
   --sky-gradient-bottom: #080d12;
 }
@@ -109,19 +109,6 @@
   pointer-events: none;
 }
 
-.background-scene::after {
-  content: "";
-  position: absolute;
-  inset: 58% 0 0;
-  pointer-events: none;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(8, 19, 31, 0.12) 42%,
-    rgba(5, 8, 12, 0.62)
-  );
-}
-
 .app::after {
   content: "";
   position: fixed;
@@ -149,7 +136,11 @@
   inset: -10%;
   background:
     radial-gradient(circle at 75% 15%, rgba(141, 171, 184, 0.14), transparent 25%),
-    radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(85, 119, 139, 0.1), transparent 26%),
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      rgba(85, 119, 139, 0.1),
+      transparent 26%
+    ),
     linear-gradient(
       180deg,
       var(--sky-gradient-top) 0%,
@@ -277,7 +268,7 @@
   background:
     linear-gradient(140deg, transparent 48%, #05090b 49%) 0 0 / 50px 90px,
     linear-gradient(220deg, transparent 48%, #05090b 49%) 25px 8px / 55px 95px,
-    linear-gradient(#05090b, #030506);
+    linear-gradient(var(--sky-gradient-bottom) 0%, #05090b 58%, #030506 100%);
   mask-image: linear-gradient(to bottom, transparent, black 32%);
 }
 
@@ -549,9 +540,11 @@
   overflow: hidden;
   text-align: center;
   background:
-    radial-gradient(circle at 50% 50%, rgba(31, 55, 69, 0.48), transparent 32%),
-    rgba(2, 4, 7, 0.96);
-  transition: opacity 0.9s ease, filter 0.9s ease, transform 1.2s cubic-bezier(0.7, 0, 0.2, 1);
+    radial-gradient(circle at 50% 50%, rgba(31, 55, 69, 0.48), transparent 32%), rgba(2, 4, 7, 0.96);
+  transition:
+    opacity 0.9s ease,
+    filter 0.9s ease,
+    transform 1.2s cubic-bezier(0.7, 0, 0.2, 1);
 }
 
 .intro::before {
@@ -612,8 +605,7 @@
   left: 50%;
   width: 50px;
   opacity: 0;
-  filter:
-    drop-shadow(0 0 10px rgba(255, 232, 181, 1))
+  filter: drop-shadow(0 0 10px rgba(255, 232, 181, 1))
     drop-shadow(0 0 24px rgba(196, 154, 86, 0.92));
   pointer-events: none;
   will-change: transform, opacity;
@@ -641,8 +633,7 @@
   top: 50%;
   left: 50%;
   width: clamp(46px, 6vw, 68px);
-  filter:
-    drop-shadow(0 0 12px rgba(255, 232, 181, 1))
+  filter: drop-shadow(0 0 12px rgba(255, 232, 181, 1))
     drop-shadow(0 0 30px rgba(196, 154, 86, 0.96));
 }
 
@@ -887,9 +878,7 @@
   left: 50%;
   width: clamp(46px, 5vw, 68px);
   opacity: 1;
-  filter:
-    drop-shadow(0 0 10px rgba(255, 232, 181, 1))
-    drop-shadow(0 0 24px rgba(196, 154, 86, 0.9));
+  filter: drop-shadow(0 0 10px rgba(255, 232, 181, 1)) drop-shadow(0 0 24px rgba(196, 154, 86, 0.9));
   animation: introBirdFlight 13.5s ease-in-out infinite;
   will-change: transform;
 }
@@ -1053,7 +1042,9 @@
   border-radius: 999px;
   background: rgba(5, 10, 15, 0.72);
   color: rgba(236, 238, 235, 0.78);
-  font: 500 10px/1 "DM Sans", sans-serif;
+  font:
+    500 10px/1 "DM Sans",
+    sans-serif;
   letter-spacing: 0.08em;
   backdrop-filter: blur(14px);
   pointer-events: none;
@@ -1110,7 +1101,9 @@
   border-radius: 999px;
   font-family: "Italiana", serif;
   text-align: left;
-  transition: transform 0.35s ease, filter 0.35s ease;
+  transition:
+    transform 0.35s ease,
+    filter 0.35s ease;
 }
 
 .monogram::before {
@@ -1283,7 +1276,14 @@ section {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(2, 5, 7, 0.45), transparent 62%);
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--ink) 45%, transparent), transparent 62%),
+    linear-gradient(
+      180deg,
+      transparent 56%,
+      color-mix(in srgb, var(--midnight) 12%, transparent) 76%,
+      color-mix(in srgb, var(--ink) 46%, transparent) 100%
+    );
 }
 
 .hero-content {
@@ -1512,7 +1512,14 @@ section {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(3, 8, 12, 0.84) 15%, rgba(4, 9, 13, 0.72) 85%, transparent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--midnight) 2%, transparent) 0%,
+    color-mix(in srgb, var(--midnight) 12%, transparent) 16%,
+    color-mix(in srgb, var(--ink) 48%, transparent) 38%,
+    color-mix(in srgb, var(--ink) 46%, transparent) 82%,
+    color-mix(in srgb, var(--ink) 12%, transparent) 100%
+  );
 }
 
 .section-label {
@@ -1907,7 +1914,11 @@ blockquote {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.14), transparent 30%),
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      rgba(255, 255, 255, 0.14),
+      transparent 30%
+    ),
     linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.75));
   transition: opacity 0.4s;
 }
@@ -1917,7 +1928,9 @@ blockquote {
   height: 100%;
   object-fit: cover;
   filter: saturate(0.65) contrast(1.05);
-  transition: transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.7s;
+  transition:
+    transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
+    filter 0.7s;
 }
 
 .project-visual:hover img {
@@ -2078,8 +2091,18 @@ blockquote {
   padding-bottom: 30px;
   overflow: hidden;
   background:
-    radial-gradient(ellipse at 50% 88%, rgba(100, 137, 152, 0.2), transparent 36%),
-    linear-gradient(180deg, rgba(3, 8, 11, 0.3), rgba(5, 12, 17, 0.88));
+    radial-gradient(
+      ellipse at 50% 88%,
+      color-mix(in srgb, var(--sky-gradient-horizon) 20%, transparent),
+      transparent 36%
+    ),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--midnight) 2%, transparent) 0%,
+      color-mix(in srgb, var(--midnight) 12%, transparent) 18%,
+      color-mix(in srgb, var(--ink) 50%, transparent) 52%,
+      color-mix(in srgb, var(--ink) 86%, transparent) 100%
+    );
 }
 
 .contact::after {
@@ -3079,14 +3102,16 @@ blockquote {
   .world .forest {
     -webkit-mask-image: linear-gradient(
       to bottom,
-      transparent,
-      rgba(0, 0, 0, 0.28) 48%,
+      transparent 0%,
+      rgba(0, 0, 0, 0.12) 32%,
+      rgba(0, 0, 0, 0.62) 72%,
       #000 100%
     );
     mask-image: linear-gradient(
       to bottom,
-      transparent,
-      rgba(0, 0, 0, 0.28) 48%,
+      transparent 0%,
+      rgba(0, 0, 0, 0.12) 32%,
+      rgba(0, 0, 0, 0.62) 72%,
       #000 100%
     );
   }
