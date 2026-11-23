@@ -567,6 +567,36 @@
   fill: #ffe8b5;
 }
 
+.home-welcome-flight {
+  position: fixed;
+  z-index: 185;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.home-welcome-bird {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(46px, 6vw, 68px);
+  filter:
+    drop-shadow(0 0 12px rgba(255, 232, 181, 1))
+    drop-shadow(0 0 30px rgba(196, 154, 86, 0.96));
+  animation: homeWelcomeLeft 4.8s cubic-bezier(0.4, 0, 0.2, 1) both;
+  will-change: transform, opacity;
+}
+
+.home-welcome-bird .wing,
+.home-welcome-bird .bird-body {
+  fill: #ffe8b5;
+}
+
+.home-welcome-bird.bird-two {
+  width: clamp(42px, 5.2vw, 60px);
+  animation-name: homeWelcomeRight;
+}
+
 .entry-loading.is-welcoming .arrival-one {
   animation: entryBirdEnterLeft 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
@@ -586,6 +616,10 @@
   transition:
     opacity 0.75s ease,
     transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.entry-loading.is-arriving .entry-loading-arrival-bird {
+  display: none;
 }
 
 .entry-loading.is-arriving .arrival-one {
@@ -2647,6 +2681,66 @@ blockquote {
   100% {
     opacity: 0;
     transform: translate3d(calc(-50% + 66vw), calc(-50% - 58vh), 0) rotate(28deg) scale(0.48);
+  }
+}
+
+@keyframes homeWelcomeLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) rotate(-8deg) scale(0.5);
+  }
+  8% {
+    opacity: 1;
+  }
+  20% {
+    transform: translate3d(calc(-50% - 31vw), calc(-50% - 18vh), 0) rotate(-24deg) scale(1.05);
+  }
+  38% {
+    transform: translate3d(calc(-50% - 34vw), calc(-50% + 13vh), 0) rotate(-42deg) scale(1.12);
+  }
+  56% {
+    transform: translate3d(calc(-50% - 8vw), calc(-50% + 28vh), 0) rotate(-12deg) scale(0.98);
+  }
+  74% {
+    transform: translate3d(calc(-50% + 31vw), calc(-50% + 13vh), 0) rotate(18deg) scale(1.08);
+  }
+  88% {
+    opacity: 1;
+    transform: translate3d(calc(-50% + 28vw), calc(-50% - 20vh), 0) rotate(34deg) scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 68vw), calc(-50% - 62vh), 0) rotate(-32deg) scale(0.56);
+  }
+}
+
+@keyframes homeWelcomeRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(-50%, -50%, 0) rotate(8deg) scale(0.5);
+  }
+  8% {
+    opacity: 1;
+  }
+  20% {
+    transform: translate3d(calc(-50% + 31vw), calc(-50% - 18vh), 0) rotate(24deg) scale(1.05);
+  }
+  38% {
+    transform: translate3d(calc(-50% + 34vw), calc(-50% + 13vh), 0) rotate(42deg) scale(1.12);
+  }
+  56% {
+    transform: translate3d(calc(-50% + 8vw), calc(-50% + 28vh), 0) rotate(12deg) scale(0.98);
+  }
+  74% {
+    transform: translate3d(calc(-50% - 31vw), calc(-50% + 13vh), 0) rotate(-18deg) scale(1.08);
+  }
+  88% {
+    opacity: 1;
+    transform: translate3d(calc(-50% - 28vw), calc(-50% - 20vh), 0) rotate(-34deg) scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + 68vw), calc(-50% - 62vh), 0) rotate(32deg) scale(0.56);
   }
 }
 

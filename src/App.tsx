@@ -480,6 +480,15 @@ function EntryLoading({
   );
 }
 
+function HomeWelcomeFlight() {
+  return (
+    <div className="home-welcome-flight" aria-hidden="true">
+      <Bird className="home-welcome-bird bird-one" />
+      <Bird className="home-welcome-bird bird-two" />
+    </div>
+  );
+}
+
 function MusicPlayer({
   audioRef,
   musicOn,
@@ -659,6 +668,7 @@ export default function App() {
   const [entryProgress, setEntryProgress] = useState(0);
   const [entryWelcome, setEntryWelcome] = useState(false);
   const [entryTransition, setEntryTransition] = useState(false);
+  const [homeWelcome, setHomeWelcome] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -694,6 +704,7 @@ export default function App() {
       if (progress === 100) {
         completionTimer = window.setTimeout(() => {
           setEntryTransition(true);
+          setHomeWelcome(true);
           transitionTimer = window.setTimeout(() => {
             setEntryLoading(false);
             setEntryTransition(false);
@@ -719,6 +730,13 @@ export default function App() {
     const timer = window.setTimeout(() => setEntryWelcome(false), 1800);
     return () => window.clearTimeout(timer);
   }, [entryWelcome]);
+
+  useEffect(() => {
+    if (!homeWelcome) return;
+
+    const timer = window.setTimeout(() => setHomeWelcome(false), 4800);
+    return () => window.clearTimeout(timer);
+  }, [homeWelcome]);
 
   const sound = (frequency = 520, duration = 0.16) => {
     if (!sfxOn) return;
@@ -822,6 +840,7 @@ export default function App() {
     setEntryProgress(0);
     setEntryWelcome(false);
     setEntryTransition(false);
+    setHomeWelcome(false);
     setIntroVisible(true);
   };
 
@@ -988,6 +1007,7 @@ export default function App() {
           transitioning={entryTransition}
         />
       )}
+      {homeWelcome && <HomeWelcomeFlight />}
 
       <div className="scroll-progress" aria-hidden="true">
         <span ref={scrollProgressRef} />
