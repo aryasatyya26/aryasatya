@@ -688,7 +688,11 @@ export default function App() {
   };
 
   const returnToEntrance = () => {
-    lenisRef.current?.scrollTo(0, { immediate: true, force: true });
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true, force: true });
+    } else {
+      window.scrollTo(0, 0);
+    }
     setProject(null);
     setMenuOpen(false);
     setActive("home");
@@ -697,12 +701,13 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse), (max-width: 680px)").matches) return;
+
     const lenis = new Lenis({
       autoRaf: true,
       lerp: 0.1,
       smoothWheel: true,
-      syncTouch: true,
-      syncTouchLerp: 0.075,
+      syncTouch: false,
       stopInertiaOnNavigate: true,
     });
     lenisRef.current = lenis;
@@ -723,8 +728,10 @@ export default function App() {
   useEffect(() => {
     let lastFlockScrollY = window.scrollY;
     let flockResetTimer = 0;
+    let scrollFrame = 0;
 
-    const onScroll = () => {
+    const updateScroll = () => {
+      scrollFrame = 0;
       const total = document.documentElement.scrollHeight - window.innerHeight;
       const progress = total > 0 ? window.scrollY / total : 0;
       const scrollDelta = window.scrollY - lastFlockScrollY;
@@ -733,7 +740,6 @@ export default function App() {
         "transform",
         `scaleX(${Math.min(1, Math.max(0, progress))})`,
       );
-      document.documentElement.style.setProperty("--scroll-y", `${window.scrollY}px`);
       document.documentElement.style.setProperty(
         "--flock-scroll-y",
         `${Math.max(-24, Math.min(24, -scrollDelta * 0.16))}px`,
@@ -743,6 +749,10 @@ export default function App() {
         () => document.documentElement.style.setProperty("--flock-scroll-y", "0px"),
         180,
       );
+    };
+    const onScroll = () => {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(updateScroll);
     };
     const onPointer = (event: PointerEvent) => {
       document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
@@ -794,6 +804,7 @@ export default function App() {
       revealObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
+      cancelAnimationFrame(scrollFrame);
       window.clearTimeout(flockResetTimer);
     };
   }, []);

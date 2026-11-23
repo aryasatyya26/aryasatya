@@ -2383,6 +2383,10 @@ blockquote {
 }
 
 @media (pointer: coarse), (max-width: 680px) {
+  .app::after {
+    display: none;
+  }
+
   .bird-cursor {
     z-index: 40;
     top: -9px;
