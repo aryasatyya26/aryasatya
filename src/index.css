@@ -532,10 +532,17 @@
   display: block;
   fill: none;
   stroke: rgba(255, 255, 255, 0.25);
-  stroke-width: 1.5px;
+  stroke-width: 2.2px;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
   overflow: visible;
+}
+
+.shadow-fighter-body {
+  transform-origin: 91px 155px;
+  transform-box: view-box;
+  will-change: transform;
+  animation: shadowFootwork 1.1s ease-in-out infinite;
 }
 
 .shadow-arm {
@@ -545,12 +552,28 @@
 
 .shadow-arm-left {
   transform-origin: 64px 112px;
-  animation: shadowLeftPunch 1.8s ease-in-out infinite;
+  animation: shadowLeftPunch 0.72s ease-in-out infinite;
 }
 
 .shadow-arm-right {
   transform-origin: 62px 111px;
-  animation: shadowRightPunch 1.8s ease-in-out infinite;
+  animation: shadowRightPunch 0.72s ease-in-out infinite;
+}
+
+@keyframes shadowFootwork {
+  0%,
+  100% {
+    transform: translate3d(-5px, 2px, 0) rotate(-1deg);
+  }
+  25% {
+    transform: translate3d(8px, -4px, 0) rotate(2deg);
+  }
+  50% {
+    transform: translate3d(4px, 2px, 0) rotate(-2deg);
+  }
+  75% {
+    transform: translate3d(-8px, -3px, 0) rotate(1deg);
+  }
 }
 
 @keyframes shadowLeftPunch {
@@ -560,7 +583,7 @@
   }
   18%,
   38% {
-    transform: translate3d(38px, -4px, 0);
+    transform: translate3d(34px, -4px, 0);
   }
   58%,
   82% {
@@ -579,7 +602,7 @@
   }
   58%,
   78% {
-    transform: translate3d(34px, -2px, 0);
+    transform: translate3d(30px, -2px, 0);
   }
   82% {
     transform: translate3d(0, 0, 0);
