@@ -683,7 +683,7 @@
   position: absolute;
   z-index: 1;
   top: 61%;
-  left: calc(50% - 290px);
+  left: max(16px, calc(50% - 620px));
   width: clamp(175px, 17vw, 220px);
   height: auto;
   opacity: 0.72;
@@ -1439,8 +1439,8 @@ section {
 .hero-shadow-boxer {
   position: absolute;
   z-index: 0;
-  top: clamp(-72px, -5vw, -42px);
-  left: clamp(350px, 48vw, 760px);
+  top: clamp(0px, 1.5vw, 24px);
+  left: clamp(350px, 45vw, 700px);
   width: clamp(100px, 11vw, 150px);
   height: auto;
   opacity: 0.58;
@@ -1449,6 +1449,7 @@ section {
 
 @media (min-width: 981px) and (max-width: 1200px) {
   .hero-shadow-boxer {
+    top: clamp(-72px, -5vw, -42px);
     left: clamp(320px, 34vw, 410px);
   }
 }
