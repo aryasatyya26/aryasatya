@@ -551,12 +551,12 @@
 }
 
 .shadow-arm-left {
-  transform-origin: 64px 112px;
+  transform-origin: 68px 108px;
   animation: shadowLeftPunch 0.72s ease-in-out infinite;
 }
 
 .shadow-arm-right {
-  transform-origin: 62px 111px;
+  transform-origin: 74px 106px;
   animation: shadowRightPunch 0.72s ease-in-out infinite;
 }
 
@@ -583,7 +583,7 @@
   }
   18%,
   38% {
-    transform: translate3d(34px, -4px, 0);
+    transform: translate3d(18px, 0, 0);
   }
   58%,
   82% {
@@ -602,7 +602,7 @@
   }
   58%,
   78% {
-    transform: translate3d(30px, -2px, 0);
+    transform: translate3d(14px, 0, 0);
   }
   82% {
     transform: translate3d(0, 0, 0);
