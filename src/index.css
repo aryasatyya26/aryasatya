@@ -638,32 +638,32 @@
 @keyframes shadowFrontFootwork {
   0%,
   100% {
-    transform: translate3d(-4px, 2px, 0) rotate(-1deg);
+    transform: translate3d(-5px, 3px, 0) rotate(-4deg) skewX(-2deg);
   }
   25% {
-    transform: translate3d(7px, -3px, 0) rotate(2deg);
+    transform: translate3d(8px, -5px, 0) rotate(4deg) skewX(3deg);
   }
   50% {
-    transform: translate3d(2px, 3px, 0) rotate(-2deg);
+    transform: translate3d(3px, 2px, 0) rotate(-3deg) skewX(-3deg);
   }
   75% {
-    transform: translate3d(-8px, 0, 0) rotate(1deg);
+    transform: translate3d(-9px, 0, 0) rotate(3deg) skewX(2deg);
   }
 }
 
 @keyframes shadowBackFootwork {
   0%,
   100% {
-    transform: translate3d(5px, 0, 0) rotate(1deg);
+    transform: translate3d(6px, 1px, 0) rotate(4deg) skewX(2deg);
   }
   25% {
-    transform: translate3d(-6px, -2px, 0) rotate(-2deg);
+    transform: translate3d(-7px, -4px, 0) rotate(-4deg) skewX(-3deg);
   }
   50% {
-    transform: translate3d(-2px, 2px, 0) rotate(2deg);
+    transform: translate3d(-3px, 3px, 0) rotate(3deg) skewX(-2deg);
   }
   75% {
-    transform: translate3d(8px, -1px, 0) rotate(-1deg);
+    transform: translate3d(9px, -2px, 0) rotate(-3deg) skewX(3deg);
   }
 }
 
