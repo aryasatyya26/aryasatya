@@ -559,6 +559,14 @@
   width: 34px;
 }
 
+.entry-loading.is-welcoming .arrival-one {
+  animation: entryBirdEnterLeft 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.entry-loading.is-welcoming .arrival-two {
+  animation: entryBirdEnterRight 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 .entry-loading.is-arriving {
   pointer-events: none;
   animation: entryLoadingOut 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -789,9 +797,8 @@
 
 .intro-bird-two {
   width: clamp(30px, 3.2vw, 46px);
-  animation-duration: 17s;
-  animation-delay: -8.5s;
-  animation-direction: reverse;
+  animation-duration: 13.5s;
+  animation-delay: -0.8s;
 }
 
 .intro-kicker,
@@ -2542,6 +2549,46 @@ blockquote {
     opacity: 0;
     filter: blur(7px);
     transform: scale(1.045);
+  }
+}
+
+@keyframes entryBirdEnterLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 58vw), calc(-50% - 14vh), 0) rotate(-18deg) scale(0.5);
+  }
+  16% {
+    opacity: 1;
+  }
+  52% {
+    transform: translate3d(calc(-50% - 82px), calc(-50% - 72px), 0) rotate(-22deg) scale(1.05);
+  }
+  78% {
+    transform: translate3d(calc(-50% + 15px), calc(-50% - 94px), 0) rotate(12deg) scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + 48px), calc(-50% - 28px), 0) rotate(18deg) scale(0.55);
+  }
+}
+
+@keyframes entryBirdEnterRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + 58vw), calc(-50% - 14vh), 0) rotate(18deg) scale(0.5);
+  }
+  16% {
+    opacity: 1;
+  }
+  52% {
+    transform: translate3d(calc(-50% + 82px), calc(-50% - 72px), 0) rotate(22deg) scale(1.05);
+  }
+  78% {
+    transform: translate3d(calc(-50% - 15px), calc(-50% - 94px), 0) rotate(-12deg) scale(0.96);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 48px), calc(-50% - 28px), 0) rotate(-18deg) scale(0.55);
   }
 }
 

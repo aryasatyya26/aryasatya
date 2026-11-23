@@ -427,16 +427,18 @@ function Intro({
 
 function EntryLoading({
   progress,
+  welcoming,
   transitioning,
 }: {
   progress: number;
+  welcoming: boolean;
   transitioning: boolean;
 }) {
   const isComplete = progress === 100;
 
   return (
     <div
-      className={`entry-loading${isComplete ? " is-complete" : ""}${transitioning ? " is-arriving" : ""}`}
+      className={`entry-loading${isComplete ? " is-complete" : ""}${welcoming ? " is-welcoming" : ""}${transitioning ? " is-arriving" : ""}`}
     >
       <div className="entry-loading-content">
         <div className="entry-loading-emblem" aria-hidden="true">
@@ -655,6 +657,7 @@ export default function App() {
   const [introVisible, setIntroVisible] = useState(true);
   const [entryLoading, setEntryLoading] = useState(false);
   const [entryProgress, setEntryProgress] = useState(0);
+  const [entryWelcome, setEntryWelcome] = useState(false);
   const [entryTransition, setEntryTransition] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -709,6 +712,13 @@ export default function App() {
       window.clearTimeout(transitionTimer);
     };
   }, [entryLoading]);
+
+  useEffect(() => {
+    if (!entryWelcome) return;
+
+    const timer = window.setTimeout(() => setEntryWelcome(false), 1800);
+    return () => window.clearTimeout(timer);
+  }, [entryWelcome]);
 
   const sound = (frequency = 520, duration = 0.16) => {
     if (!sfxOn) return;
@@ -791,6 +801,7 @@ export default function App() {
   const enter = () => {
     if (entryLoading) return;
     setEntryProgress(0);
+    setEntryWelcome(true);
     setEntryLoading(true);
     setEntered(true);
     sound(180, 0.45);
@@ -809,6 +820,7 @@ export default function App() {
     setEntered(false);
     setEntryLoading(false);
     setEntryProgress(0);
+    setEntryWelcome(false);
     setEntryTransition(false);
     setIntroVisible(true);
   };
@@ -970,7 +982,11 @@ export default function App() {
         </div>
       )}
       {entryLoading && (
-        <EntryLoading progress={entryProgress} transitioning={entryTransition} />
+        <EntryLoading
+          progress={entryProgress}
+          welcoming={entryWelcome}
+          transitioning={entryTransition}
+        />
       )}
 
       <div className="scroll-progress" aria-hidden="true">
