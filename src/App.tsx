@@ -223,22 +223,21 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
       aria-hidden="true"
       focusable="false"
     >
-      <circle cx="110" cy="46" r="20" />
-      <path d="M91 62c-8 18-14 35-13 55l31 15 34-15c0-20-7-38-15-55" />
-      <path d="M78 117c-21 9-35 27-42 48" />
-      <path d="M142 117c22 9 36 27 43 48" />
+      <circle cx="88" cy="42" r="21" />
+      <path d="M83 64c-20 8-30 28-32 52l-4 48c3 24 14 38 35 43l31-12 16-52-17-49c-7-15-16-25-29-30Z" />
+      <path d="m48 115-18 37 10 14 29-26" />
+      <path d="m47 205-21 34-26 4 8 12h61l25-45" />
+      <path d="M119 207l25 31 28 7 8-12-22-19-7-33" />
       <g className="shadow-arm shadow-arm-left">
-        <path d="M78 117 49 135 30 122" />
-        <path d="m30 122-9-7m9 7-12 5" />
+        <path d="M64 112c13 2 25 11 32 25" />
+        <path d="m96 137 31-18" />
+        <circle cx="132" cy="116" r="15" />
       </g>
       <g className="shadow-arm shadow-arm-right">
-        <path d="M142 117l31 18 20-16" />
-        <path d="m193 119 10-7m-10 7 13 4" />
+        <path d="M62 111c11 8 17 18 20 30" />
+        <path d="M82 141l17 5" />
+        <circle cx="106" cy="148" r="14" />
       </g>
-      <path d="M78 117c-2 23-8 48-18 74l39 18 12-77" />
-      <path d="M143 117c2 23 8 48 18 74l-39 18-11-77" />
-      <path d="m99 209-14 43m36-43 15 43" />
-      <path d="M85 252h-23m59 0h24" />
     </svg>
   );
 }
