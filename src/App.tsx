@@ -563,7 +563,7 @@ function EntryLoading({
         </div>
         <p className="entry-loading-kicker">A digital journey by</p>
         <h2 className="entry-loading-title">
-          {isComplete ? "Journey ready" : "Preparing your journey"}
+          {isComplete ? "Journey ready" : "Welcome to my Journey"}
         </h2>
         <div
           className="entry-loading-progress"
