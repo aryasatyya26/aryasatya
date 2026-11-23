@@ -2863,7 +2863,9 @@ blockquote {
 
 @media (pointer: coarse), (max-width: 680px) {
   .app::after {
-    display: none;
+    opacity: 0.025;
+    mix-blend-mode: normal;
+    animation: none;
   }
 
   .home-welcome-bird {
