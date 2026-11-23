@@ -2874,23 +2874,20 @@ blockquote {
   }
 
   .world {
-    inset: -2px;
-    width: calc(100% + 4px);
-    height: calc(100vh + 4px);
+    inset: 0;
+    width: auto;
+    height: 100svh;
+    pointer-events: none;
     contain: strict;
-    transform: translate3d(0, 0, 0);
-    -webkit-transform: translate3d(0, 0, 0);
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
+    transform: none;
     --flock-pointer-x: 0px;
     --flock-pointer-y: 0px;
     --flock-scroll-y: 0px;
   }
 
-  @supports (height: 100lvh) {
-    .world {
-      height: calc(100lvh + 4px);
-    }
+  .horizon-clouds {
+    inset: 0;
+    height: 100svh;
   }
 
   .world .moon,
