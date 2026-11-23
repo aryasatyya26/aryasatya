@@ -214,6 +214,35 @@ function Bird({ className = "" }: { className?: string }) {
   );
 }
 
+function ShadowBoxer({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      className={`shadow-boxer ${className}`}
+      viewBox="0 0 220 260"
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="110" cy="46" r="20" />
+      <path d="M91 62c-8 18-14 35-13 55l31 15 34-15c0-20-7-38-15-55" />
+      <path d="M78 117c-21 9-35 27-42 48" />
+      <path d="M142 117c22 9 36 27 43 48" />
+      <g className="shadow-arm shadow-arm-left">
+        <path d="M78 117 49 135 30 122" />
+        <path d="m30 122-9-7m9 7-12 5" />
+      </g>
+      <g className="shadow-arm shadow-arm-right">
+        <path d="M142 117l31 18 20-16" />
+        <path d="m193 119 10-7m-10 7 13 4" />
+      </g>
+      <path d="M78 117c-2 23-8 48-18 74l39 18 12-77" />
+      <path d="M143 117c2 23 8 48 18 74l-39 18-11-77" />
+      <path d="m99 209-14 43m36-43 15 43" />
+      <path d="M85 252h-23m59 0h24" />
+    </svg>
+  );
+}
+
 function AtmosphericWorld({ entered }: { entered: boolean }) {
   const stars = Array.from({ length: 28 }, (_, i) => ({
     left: `${(i * 37) % 100}%`,
@@ -475,6 +504,7 @@ function Intro({
     <div className="intro" role="dialog" aria-label="Enter portfolio experience">
       <div className="intro-orbit orbit-one" />
       <div className="intro-orbit orbit-two" />
+      <ShadowBoxer className="intro-shadow-boxer" />
       <div className="intro-birds" aria-hidden="true">
         <div className="intro-bird intro-bird-one">
           <Bird />
@@ -1285,6 +1315,7 @@ export default function App() {
               </div>
             </div>
           </div>
+          <ShadowBoxer className="hero-shadow-boxer" />
           <div className="hero-portrait">
             <img
               src="/portfolio/Aryasatya.jpg"

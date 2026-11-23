@@ -528,6 +528,64 @@
   filter: drop-shadow(0 0 14px var(--amber));
 }
 
+.shadow-boxer {
+  display: block;
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.shadow-arm {
+  transform-box: fill-box;
+  will-change: transform;
+}
+
+.shadow-arm-left {
+  transform-origin: 78px 117px;
+  animation: shadowLeftPunch 1.8s ease-in-out infinite;
+}
+
+.shadow-arm-right {
+  transform-origin: 142px 117px;
+  animation: shadowRightPunch 1.8s ease-in-out infinite;
+}
+
+@keyframes shadowLeftPunch {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  18%,
+  38% {
+    transform: translate3d(28px, -10px, 0) rotate(-8deg);
+  }
+  58%,
+  82% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+@keyframes shadowRightPunch {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  18%,
+  38% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  58%,
+  78% {
+    transform: translate3d(-30px, -12px, 0) rotate(8deg);
+  }
+  82% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
 .intro {
   position: fixed;
   inset: 0;
@@ -554,6 +612,17 @@
   inset: 0;
   background: radial-gradient(circle at center, transparent 0 28%, rgba(1, 13, 29, 0.72) 100%);
   animation: introLight 4s ease-out both;
+}
+
+.intro-shadow-boxer {
+  position: absolute;
+  z-index: 1;
+  top: 54%;
+  left: 50%;
+  width: clamp(190px, 24vw, 300px);
+  height: auto;
+  opacity: 0.72;
+  transform: translate(-50%, -50%);
 }
 
 .intro-leaving .intro {
@@ -861,6 +930,11 @@
   border-style: dashed;
   animation-direction: reverse;
   animation-duration: 34s;
+}
+
+.intro-shadow-boxer {
+  top: 58%;
+  width: clamp(155px, 52vw, 210px);
 }
 
 .intro-birds {
@@ -1290,6 +1364,17 @@ section {
   position: relative;
   z-index: 3;
   width: min(82%, 1180px);
+}
+
+.hero-shadow-boxer {
+  position: absolute;
+  z-index: 1;
+  top: 12%;
+  right: 7%;
+  width: clamp(170px, 20vw, 270px);
+  height: auto;
+  opacity: 0.7;
+  transform: rotate(-2deg);
 }
 
 .hero-greeting {
@@ -3215,6 +3300,17 @@ blockquote {
     display: none;
   }
 
+  .intro-shadow-boxer {
+    top: 56%;
+    width: clamp(180px, 32vw, 260px);
+  }
+
+  .hero-shadow-boxer {
+    top: 15%;
+    right: 2%;
+    width: clamp(150px, 25vw, 220px);
+  }
+
   .hero-content {
     width: 100%;
   }
@@ -3348,6 +3444,12 @@ blockquote {
     top: 12%;
     right: 2%;
     width: clamp(160px, 44vw, 280px);
+  }
+
+  .hero-shadow-boxer {
+    top: 14%;
+    right: -2%;
+    width: clamp(145px, 46vw, 190px);
   }
 
   .hero {
