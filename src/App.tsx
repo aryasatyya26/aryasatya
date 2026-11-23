@@ -480,9 +480,9 @@ function EntryLoading({
   );
 }
 
-function HomeWelcomeFlight() {
+function HomeWelcomeFlight({ orbiting }: { orbiting: boolean }) {
   return (
-    <div className="home-welcome-flight" aria-hidden="true">
+    <div className={`home-welcome-flight${orbiting ? " is-orbiting" : ""}`} aria-hidden="true">
       <Bird className="home-welcome-bird bird-one" />
       <Bird className="home-welcome-bird bird-two" />
     </div>
@@ -669,6 +669,7 @@ export default function App() {
   const [entryWelcome, setEntryWelcome] = useState(false);
   const [entryTransition, setEntryTransition] = useState(false);
   const [homeWelcome, setHomeWelcome] = useState(false);
+  const [homeOrbiting, setHomeOrbiting] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -705,6 +706,7 @@ export default function App() {
         completionTimer = window.setTimeout(() => {
           setEntryTransition(true);
           setHomeWelcome(true);
+          setHomeOrbiting(false);
           transitionTimer = window.setTimeout(() => {
             setEntryLoading(false);
             setEntryTransition(false);
@@ -734,7 +736,7 @@ export default function App() {
   useEffect(() => {
     if (!homeWelcome) return;
 
-    const timer = window.setTimeout(() => setHomeWelcome(false), 4800);
+    const timer = window.setTimeout(() => setHomeOrbiting(true), 4800);
     return () => window.clearTimeout(timer);
   }, [homeWelcome]);
 
@@ -841,6 +843,7 @@ export default function App() {
     setEntryWelcome(false);
     setEntryTransition(false);
     setHomeWelcome(false);
+    setHomeOrbiting(false);
     setIntroVisible(true);
   };
 
@@ -1007,7 +1010,7 @@ export default function App() {
           transitioning={entryTransition}
         />
       )}
-      {homeWelcome && <HomeWelcomeFlight />}
+      {homeWelcome && <HomeWelcomeFlight orbiting={homeOrbiting} />}
 
       <div className="scroll-progress" aria-hidden="true">
         <span ref={scrollProgressRef} />
