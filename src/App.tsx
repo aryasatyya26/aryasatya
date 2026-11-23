@@ -1088,6 +1088,12 @@ export default function App() {
   return (
     <div className={`app ${entered ? "experience-entered" : ""}`}>
       <AtmosphericWorld entered={entered} />
+      <div className="mobile-clouds" aria-hidden="true">
+        <div className="cloud cloud-a" />
+        <div className="cloud cloud-b" />
+        <div className="fog fog-a" />
+        <div className="fog fog-b" />
+      </div>
       <div className="horizon-clouds" aria-hidden="true">
         <svg
           className="horizon-cloud horizon-cloud-a"

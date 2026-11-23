@@ -192,6 +192,10 @@
   pointer-events: none;
 }
 
+.mobile-clouds {
+  display: none;
+}
+
 .horizon-cloud {
   position: absolute;
   display: block;
@@ -2865,29 +2869,73 @@ blockquote {
     overscroll-behavior-y: none;
   }
 
-  body {
-    -webkit-overflow-scrolling: touch;
-  }
-
   .app::after {
     opacity: 0.012;
   }
 
   .world {
-    inset: 0;
-    width: auto;
-    height: 100svh;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: 100vw;
+    height: 100lvh;
     pointer-events: none;
-    contain: strict;
-    transform: none;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
     --flock-pointer-x: 0px;
     --flock-pointer-y: 0px;
     --flock-scroll-y: 0px;
   }
 
+  .mobile-clouds {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    z-index: -1;
+    display: block;
+    width: 100vw;
+    height: 100lvh;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+
   .horizon-clouds {
-    inset: 0;
-    height: 100svh;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: 100vw;
+    height: 100lvh;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+
+  .world .cloud,
+  .world .fog {
+    display: none;
+  }
+
+  .mobile-clouds .cloud {
+    filter: blur(24px);
+  }
+
+  .mobile-clouds .fog {
+    filter: blur(22px);
+  }
+
+  .mobile-clouds .cloud,
+  .mobile-clouds .fog,
+  .horizon-cloud {
+    animation: none;
+    transform: none;
+    transition: none;
   }
 
   .world .moon,
@@ -2903,14 +2951,6 @@ blockquote {
   .world .glow-rise,
   .world .dust {
     display: none;
-  }
-
-  .world .cloud {
-    filter: blur(24px);
-  }
-
-  .world .fog {
-    filter: blur(22px);
   }
 
   .world .forest-glow {
