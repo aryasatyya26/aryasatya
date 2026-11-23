@@ -79,6 +79,27 @@
 .app {
   position: relative;
   isolation: isolate;
+  z-index: 1;
+}
+
+.background-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.background-scene::after {
+  content: "";
+  position: absolute;
+  inset: 58% 0 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(8, 19, 31, 0.12) 42%,
+    rgba(5, 8, 12, 0.62)
+  );
 }
 
 .app::after {
@@ -2957,6 +2978,21 @@ blockquote {
     opacity: 0.36;
     filter: blur(22px);
     animation-duration: 24s;
+  }
+
+  .world .forest {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(0, 0, 0, 0.28) 48%,
+      #000 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(0, 0, 0, 0.28) 48%,
+      #000 100%
+    );
   }
 
   .world .environment-bird:nth-child(n + 4) {
