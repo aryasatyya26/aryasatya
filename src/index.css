@@ -187,7 +187,7 @@
 
 .horizon-clouds {
   position: fixed;
-  z-index: -1;
+  z-index: 0;
   inset: 0;
   pointer-events: none;
 }
@@ -199,7 +199,7 @@
   height: auto;
   overflow: visible;
   transform-origin: center;
-  animation: horizonCloudDrift 22s ease-in-out infinite alternate;
+  animation: horizonCloudDrift 19s ease-in-out infinite alternate;
   will-change: transform;
 }
 
@@ -213,7 +213,7 @@
   bottom: 24%;
   width: clamp(390px, 80vw, 820px);
   opacity: 0.82;
-  animation-duration: 27s;
+  animation-duration: 23s;
   animation-delay: -13s;
   animation-direction: alternate-reverse;
 }
