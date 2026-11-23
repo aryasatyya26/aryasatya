@@ -2934,10 +2934,6 @@ blockquote {
     filter: drop-shadow(0 0 8px rgba(255, 232, 181, 0.92));
   }
 
-  .bird-cursor {
-    display: none;
-  }
-
   .performance-hud {
     display: none;
   }

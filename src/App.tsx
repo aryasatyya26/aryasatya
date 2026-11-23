@@ -266,7 +266,6 @@ function BirdCursor() {
 
   useEffect(() => {
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
-    if (isCoarsePointer) return;
 
     const initialPosition = isCoarsePointer
       ? { x: window.innerWidth * 0.72, y: window.innerHeight * 0.28 }
