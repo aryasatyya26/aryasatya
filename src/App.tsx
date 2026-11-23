@@ -224,12 +224,12 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
     >
       <g className="shadow-fighter-body">
         <circle cx="91" cy="39" r="15" />
-        <path d="M88 55c-8 13-12 27-10 43l-7 43 14 47h22l9-48-3-42c-2-18-10-34-25-43Z" />
+        <path d="M88 55c-8 11-11 23-9 35l-5 33 11 25h25l10-25-4-33c-2-16-13-29-28-35Z" />
         <g className="shadow-leg shadow-leg-front">
-          <path d="M84 184 59 211v31H43v10h28l12-27 11-31Z" />
+          <path d="M84 145 58 178v64H42v10h31l10-31 13-43Z" />
         </g>
         <g className="shadow-leg shadow-leg-back">
-          <path d="M104 184 127 211v31h17v10h-29l-13-27-8-31Z" />
+          <path d="M105 145 128 178v64h17v10h-30l-13-31-8-43Z" />
         </g>
         <g className="shadow-arm shadow-arm-left">
           <path d="M78 92 118 82h58l3 16h-59l-39 12Z" />
