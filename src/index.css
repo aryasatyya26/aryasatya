@@ -3518,7 +3518,7 @@ blockquote {
   }
 
   .hero-shadow-boxer {
-    top: clamp(-50px, -14vw, -34px);
+    top: clamp(-88px, -22vw, -64px);
     left: clamp(44px, 12vw, 82px);
     width: clamp(100px, 28vw, 140px);
   }
