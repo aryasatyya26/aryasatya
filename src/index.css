@@ -2933,7 +2933,7 @@ blockquote {
   .mobile-clouds .cloud,
   .mobile-clouds .fog,
   .horizon-cloud {
-    animation: none;
+    animation-name: mobileCloudDrift;
     transform: none;
     transition: none;
   }
@@ -2973,6 +2973,16 @@ blockquote {
 
   .performance-hud {
     display: none;
+  }
+
+  @keyframes mobileCloudDrift {
+    from {
+      transform: translate3d(-5vw, 0, 0);
+    }
+
+    to {
+      transform: translate3d(5vw, 0, 0);
+    }
   }
 }
 
