@@ -2186,6 +2186,10 @@ blockquote {
   backdrop-filter: blur(18px);
 }
 
+.entry-loading ~ .music-player {
+  z-index: 190;
+}
+
 .music-main {
   position: relative;
   display: grid;

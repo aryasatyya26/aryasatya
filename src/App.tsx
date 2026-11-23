@@ -1,4 +1,4 @@
-import { FormEvent, MouseEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import Lenis from "lenis";
 
 type Project = {
@@ -441,15 +441,43 @@ function Intro({
 }
 
 function EntryLoading({
-  progress,
   welcoming,
   transitioning,
+  onComplete,
 }: {
-  progress: number;
   welcoming: boolean;
   transitioning: boolean;
+  onComplete: () => void;
 }) {
+  const [progress, setProgress] = useState(0);
   const isComplete = progress === 100;
+
+  useEffect(() => {
+    if (transitioning) return;
+
+    const loadingDuration = 6200;
+    let startedAt = 0;
+    let frame = 0;
+    let completionTimer = 0;
+
+    const updateProgress = (now: number) => {
+      if (!startedAt) startedAt = now;
+      const nextProgress = Math.min(100, Math.floor(((now - startedAt) / loadingDuration) * 100));
+      setProgress(nextProgress);
+
+      if (nextProgress === 100) {
+        completionTimer = window.setTimeout(onComplete, 900);
+      } else {
+        frame = requestAnimationFrame(updateProgress);
+      }
+    };
+
+    frame = requestAnimationFrame(updateProgress);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(completionTimer);
+    };
+  }, [onComplete, transitioning]);
 
   return (
     <div
@@ -682,7 +710,6 @@ export default function App() {
   const [entered, setEntered] = useState(false);
   const [introVisible, setIntroVisible] = useState(true);
   const [entryLoading, setEntryLoading] = useState(false);
-  const [entryProgress, setEntryProgress] = useState(0);
   const [entryWelcome, setEntryWelcome] = useState(false);
   const [entryTransition, setEntryTransition] = useState(false);
   const [homeWelcome, setHomeWelcome] = useState(false);
@@ -699,6 +726,12 @@ export default function App() {
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
   const audioContext = useRef<AudioContext | null>(null);
   const musicRequestRef = useRef(0);
+
+  const completeEntryLoading = useCallback(() => {
+    setEntryTransition(true);
+    setHomeWelcome(true);
+    setHomeOrbiting(false);
+  }, []);
 
   useEffect(() => {
     document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach((icon) => {
@@ -727,42 +760,15 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!entryLoading) return;
+    if (!entryTransition) return;
 
-    const loadingDuration = 6200;
-    let startedAt = 0;
-    let frame = 0;
-    let completionTimer = 0;
-    let transitionTimer = 0;
-
-    const updateProgress = (now: number) => {
-      if (!startedAt) startedAt = now;
-      const progress = Math.min(100, Math.floor(((now - startedAt) / loadingDuration) * 100));
-      setEntryProgress(progress);
-
-      if (progress === 100) {
-        completionTimer = window.setTimeout(() => {
-          setEntryTransition(true);
-          setHomeWelcome(true);
-          setHomeOrbiting(false);
-          transitionTimer = window.setTimeout(() => {
-            setEntryLoading(false);
-            setEntryTransition(false);
-            setIntroVisible(false);
-          }, 1800);
-        }, 900);
-      } else {
-        frame = requestAnimationFrame(updateProgress);
-      }
-    };
-
-    frame = requestAnimationFrame(updateProgress);
-    return () => {
-      cancelAnimationFrame(frame);
-      window.clearTimeout(completionTimer);
-      window.clearTimeout(transitionTimer);
-    };
-  }, [entryLoading]);
+    const timer = window.setTimeout(() => {
+      setEntryLoading(false);
+      setEntryTransition(false);
+      setIntroVisible(false);
+    }, 1800);
+    return () => window.clearTimeout(timer);
+  }, [entryTransition]);
 
   useEffect(() => {
     if (!entryWelcome) return;
@@ -865,7 +871,6 @@ export default function App() {
 
   const enter = () => {
     if (entryLoading) return;
-    setEntryProgress(0);
     setEntryWelcome(true);
     setEntryLoading(true);
     setEntered(true);
@@ -885,7 +890,6 @@ export default function App() {
     setActive("home");
     setEntered(false);
     setEntryLoading(false);
-    setEntryProgress(0);
     setEntryWelcome(false);
     setEntryTransition(false);
     setHomeWelcome(false);
@@ -1063,9 +1067,9 @@ export default function App() {
       )}
       {entryLoading && (
         <EntryLoading
-          progress={entryProgress}
           welcoming={entryWelcome}
           transitioning={entryTransition}
+          onComplete={completeEntryLoading}
         />
       )}
       {homeWelcome && <HomeWelcomeFlight orbiting={homeOrbiting} />}
