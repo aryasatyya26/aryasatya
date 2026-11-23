@@ -224,8 +224,6 @@ function AtmosphericWorld({ entered }: { entered: boolean }) {
       <div className="cloud cloud-a" />
       <div className="cloud cloud-b" />
       <div className="light-ray ray-a" />
-      <div className="mountain mountain-back" />
-      <div className="mountain mountain-mid" />
       <div className="forest" />
       <div className="fog fog-a" />
       <div className="fog fog-b" />
@@ -268,6 +266,8 @@ function BirdCursor() {
 
   useEffect(() => {
     const isCoarsePointer = window.matchMedia("(pointer: coarse)").matches;
+    if (isCoarsePointer) return;
+
     const initialPosition = isCoarsePointer
       ? { x: window.innerWidth * 0.72, y: window.innerHeight * 0.28 }
       : { x: -100, y: -100 };
@@ -675,6 +675,12 @@ function PerformanceHud() {
   const [fps, setFps] = useState<number | null>(null);
 
   useEffect(() => {
+    if (
+      window.matchMedia("(pointer: coarse), (max-width: 680px)").matches
+    ) {
+      return;
+    }
+
     let frame = 0;
     let frames = 0;
     let intervalStart = performance.now();
@@ -1416,6 +1422,44 @@ export default function App() {
             <p>Data · Design · Digital</p>
           </footer>
         </section>
+        <div className="horizon-clouds" aria-hidden="true">
+          <svg
+            className="horizon-cloud horizon-cloud-a"
+            viewBox="0 0 720 240"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient id="cloud-gradient-a" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#b9c9d0" stopOpacity=".25" />
+                <stop offset="42%" stopColor="#7893a0" stopOpacity=".19" />
+                <stop offset="76%" stopColor="#537a83" stopOpacity=".1" />
+                <stop offset="100%" stopColor="#537a83" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              fill="url(#cloud-gradient-a)"
+              d="M82 184c-34 0-58-22-58-51 0-29 24-53 55-53 4-36 35-64 74-64 40 0 69 29 73 67 15-27 43-44 76-44 45 0 79 34 81 78 18-36 53-59 93-59 53 0 96 43 96 96 38-5 72 20 72 48 0 24-22 38-53 38H87c-36 0-58-18-57-39 1-15 20-25 52-17Z"
+            />
+          </svg>
+          <svg
+            className="horizon-cloud horizon-cloud-b"
+            viewBox="0 0 720 240"
+            focusable="false"
+          >
+            <defs>
+              <linearGradient id="cloud-gradient-b" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stopColor="#d0c0a3" stopOpacity=".2" />
+                <stop offset="40%" stopColor="#8c9da0" stopOpacity=".16" />
+                <stop offset="78%" stopColor="#527b7d" stopOpacity=".09" />
+                <stop offset="100%" stopColor="#527b7d" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <path
+              fill="url(#cloud-gradient-b)"
+              d="M98 183c-39 0-66-25-66-57 0-29 24-52 57-55 10-39 44-66 83-66 38 0 68 25 76 61 19-24 47-38 78-38 43 0 76 28 83 67 18-28 47-44 82-44 48 0 87 36 90 83 35-9 68 12 68 41 0 29-25 43-58 43H99c-40 0-65-17-65-39 0-17 26-30 64-26Z"
+            />
+          </svg>
+        </div>
       </main>
 
       <MusicPlayer
