@@ -550,13 +550,13 @@
 
 .shadow-arm-left {
   transform-origin: 86px 72px;
-  animation: shadowLeftPunch 1.1s cubic-bezier(0.2, 0.9, 0.25, 1) infinite;
+  animation: shadowLeftPunch 0.78s cubic-bezier(0.2, 0.9, 0.25, 1) infinite;
 }
 
 .shadow-arm-right {
   transform-box: view-box;
   transform-origin: 84px 78px;
-  animation: shadowRightPunch 1.1s cubic-bezier(0.2, 0.9, 0.25, 1) infinite;
+  animation: shadowRightPunch 0.78s cubic-bezier(0.2, 0.9, 0.25, 1) infinite;
 }
 
 .shadow-leg {
