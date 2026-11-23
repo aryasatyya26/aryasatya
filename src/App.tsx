@@ -283,6 +283,7 @@ function BirdCursor() {
     const move = (event: PointerEvent) => {
       target.current = { x: event.clientX, y: event.clientY };
       if (event.pointerType === "touch") lastTouchTime = performance.now();
+      scheduleFrame();
     };
     const down = (event: PointerEvent) => {
       birdRef.current?.classList.add("cursor-click");
@@ -290,6 +291,7 @@ function BirdCursor() {
         target.current = { x: event.clientX, y: event.clientY };
         lastTouchTime = performance.now();
         birdRef.current?.classList.remove("cursor-hover");
+        scheduleFrame();
       }
     };
     const up = () => birdRef.current?.classList.remove("cursor-click");
@@ -307,12 +309,14 @@ function BirdCursor() {
       lastTouchTime = performance.now();
       birdRef.current?.classList.add("cursor-click");
       birdRef.current?.classList.remove("cursor-hover");
+      scheduleFrame();
     };
     const touchMove = (event: TouchEvent) => {
       const touch = event.touches[0];
       if (!touch) return;
       target.current = { x: touch.clientX, y: touch.clientY };
       lastTouchTime = performance.now();
+      scheduleFrame();
     };
     const scroll = () => {
       if (!isCoarsePointer) return;
@@ -334,8 +338,10 @@ function BirdCursor() {
         x: window.innerWidth * (0.22 + arc * 0.56),
         y: window.innerHeight * (0.24 + progress * 0.52),
       };
+      scheduleFrame();
     };
     const tick = () => {
+      frame = 0;
       current.current.x += (target.current.x - current.current.x) * 0.16;
       current.current.y +=
         (target.current.y - scrollVelocity * 12 - current.current.y) * 0.16;
@@ -348,7 +354,16 @@ function BirdCursor() {
       }
       last.current = { ...current.current };
       scrollVelocity *= 0.9;
-      frame = requestAnimationFrame(tick);
+      if (
+        Math.abs(target.current.x - current.current.x) > 0.1 ||
+        Math.abs(target.current.y - current.current.y) > 0.1 ||
+        Math.abs(scrollVelocity) > 0.01
+      ) {
+        scheduleFrame();
+      }
+    };
+    const scheduleFrame = () => {
+      if (!frame) frame = requestAnimationFrame(tick);
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerdown", down);
@@ -360,7 +375,7 @@ function BirdCursor() {
     window.addEventListener("scroll", scroll, { passive: true });
     window.addEventListener("resize", scroll);
     scroll();
-    frame = requestAnimationFrame(tick);
+    scheduleFrame();
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener("pointermove", move);
@@ -492,12 +507,14 @@ function HomeWelcomeFlight({ orbiting }: { orbiting: boolean }) {
 function MusicPlayer({
   audioRef,
   musicOn,
+  musicPending,
   setMusicOn,
   sfxOn,
   setSfxOn,
 }: {
   audioRef: React.RefObject<HTMLAudioElement | null>;
   musicOn: boolean;
+  musicPending: boolean;
   setMusicOn: (value: boolean) => void;
   sfxOn: boolean;
   setSfxOn: (value: boolean) => void;
@@ -514,18 +531,18 @@ function MusicPlayer({
 
   return (
     <aside className={`music-player ${expanded ? "expanded" : ""}`}>
-      <audio ref={audioRef} src="/Guilding.mp3" loop preload="auto" />
+      <audio ref={audioRef} src="/Guilding.mp3" loop preload="none" />
       <button
         className="music-main"
-        aria-label={musicOn ? "Pause ambient music" : "Play ambient music"}
-        onClick={() => setMusicOn(!musicOn)}
+        aria-label={musicOn || musicPending ? "Pause ambient music" : "Play ambient music"}
+        onClick={() => setMusicOn(!(musicOn || musicPending))}
       >
         <span className={`waveform ${musicOn ? "playing" : ""}`}>
           {Array.from({ length: 6 }, (_, i) => (
             <i key={i} />
           ))}
         </span>
-        <Icon name={musicOn ? "pause" : "play"} size={14} />
+        <Icon name={musicOn || musicPending ? "pause" : "play"} size={14} />
       </button>
       <button
         className="track-info"
@@ -674,18 +691,39 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
   const [musicOn, setMusicOnState] = useState(false);
+  const [musicPending, setMusicPending] = useState(false);
   const [sfxOn, setSfxOn] = useState(true);
   const [toast, setToast] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
   const audioContext = useRef<AudioContext | null>(null);
+  const musicRequestRef = useRef(0);
 
   useEffect(() => {
     document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach((icon) => {
       icon.href = "/an-mark.svg";
       icon.type = "image/svg+xml";
     });
+  }, []);
+
+  useEffect(() => {
+    const stopMusic = () => {
+      musicRequestRef.current += 1;
+      audioRef.current?.pause();
+      setMusicOnState(false);
+      setMusicPending(false);
+    };
+    const stopMusicWhenHidden = () => {
+      if (document.visibilityState === "hidden") stopMusic();
+    };
+
+    window.addEventListener("pagehide", stopMusic);
+    document.addEventListener("visibilitychange", stopMusicWhenHidden);
+    return () => {
+      window.removeEventListener("pagehide", stopMusic);
+      document.removeEventListener("visibilitychange", stopMusicWhenHidden);
+    };
   }, []);
 
   useEffect(() => {
@@ -799,19 +837,26 @@ export default function App() {
   const setMusicOn = async (value: boolean) => {
     const audio = audioRef.current;
     if (!audio) return;
+    const requestId = ++musicRequestRef.current;
 
     if (!value) {
       audio.pause();
       setMusicOnState(false);
+      setMusicPending(false);
       return;
     }
 
+    setMusicPending(true);
     try {
       await audio.play();
+      if (requestId !== musicRequestRef.current) return;
       setMusicOnState(true);
+      setMusicPending(false);
       setToast("");
     } catch (error) {
+      if (requestId !== musicRequestRef.current) return;
       setMusicOnState(false);
+      setMusicPending(false);
       console.error("Unable to play Guilding.mp3.", error);
       setToast("Music could not start. Press play to try again.");
       window.setTimeout(() => setToast(""), 4000);
@@ -829,6 +874,7 @@ export default function App() {
   };
 
   const returnToEntrance = () => {
+    void setMusicOn(false);
     if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true, force: true });
     } else {
@@ -1100,6 +1146,7 @@ export default function App() {
               src="/portfolio/Aryasatya.jpg"
               alt="Aryasatya Naryama outdoors"
               fetchPriority="high"
+              decoding="async"
             />
             <span>Between data & imagination</span>
           </div>
@@ -1121,7 +1168,12 @@ export default function App() {
           </div>
           <div className="about-grid">
             <div className="about-portrait">
-              <img src="/portfolio/THEGREAT.jpg" alt="Aryasatya Naryama portrait" />
+              <img
+                src="/portfolio/THEGREAT.jpg"
+                alt="Aryasatya Naryama portrait"
+                loading="lazy"
+                decoding="async"
+              />
               <span>Based in Indonesia · Working globally</span>
             </div>
             <div className="about-copy reveal">
@@ -1207,7 +1259,12 @@ export default function App() {
                   onClick={() => setProject(item)}
                   aria-label={`Open ${item.title} project details`}
                 >
-                  <img src={item.image} alt={`${item.title} preview`} loading="eager" />
+                  <img
+                    src={item.image}
+                    alt={`${item.title} preview`}
+                    loading="lazy"
+                    decoding="async"
+                  />
                   <span className="project-number">0{index + 1}</span>
                   <span className="project-open">
                     View case <Icon name="arrow" />
@@ -1335,6 +1392,7 @@ export default function App() {
       <MusicPlayer
         audioRef={audioRef}
         musicOn={musicOn}
+        musicPending={musicPending}
         setMusicOn={setMusicOn}
         sfxOn={sfxOn}
         setSfxOn={setSfxOn}
