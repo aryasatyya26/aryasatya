@@ -576,62 +576,62 @@
 @keyframes shadowFootwork {
   0%,
   100% {
-    transform: translate3d(-5px, 3px, 0) skewX(-1deg) rotate(-1deg);
+    transform: translate3d(-5px, 3px, 0) skewX(-3deg) scaleY(1) rotate(-2deg);
   }
   25% {
-    transform: translate3d(8px, -5px, 0) skewX(2deg) rotate(2deg);
+    transform: translate3d(8px, -5px, 0) skewX(5deg) scaleY(0.97) rotate(4deg);
   }
   50% {
-    transform: translate3d(4px, 3px, 0) skewX(-2deg) rotate(-2deg);
+    transform: translate3d(4px, 2px, 0) skewX(-5deg) scaleY(1.02) rotate(-4deg);
   }
   75% {
-    transform: translate3d(-8px, -2px, 0) skewX(1deg) rotate(1deg);
+    transform: translate3d(-8px, -2px, 0) skewX(4deg) scaleY(0.98) rotate(3deg);
   }
 }
 
 @keyframes shadowLeftPunch {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1) skewY(0deg);
   }
   8%,
   20% {
-    transform: translate3d(42px, -2px, 0) rotate(-3deg) scaleX(1.08);
+    transform: translate3d(42px, -2px, 0) rotate(-3deg) scaleX(1.08) skewY(-4deg);
   }
   25%,
   48% {
-    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1) skewY(0deg);
   }
   52%,
   63% {
-    transform: translate3d(28px, -18px, 0) rotate(-16deg) scaleX(0.92);
+    transform: translate3d(28px, -18px, 0) rotate(-16deg) scaleX(0.92) skewY(8deg);
   }
   68%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1);
+    transform: translate3d(0, 0, 0) rotate(0deg) scaleX(1) skewY(0deg);
   }
 }
 
 @keyframes shadowRightPunch {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg) skewY(0deg);
   }
   25%,
   45% {
-    transform: translate3d(24px, -6px, 0) rotate(-4deg);
+    transform: translate3d(24px, -6px, 0) rotate(-4deg) skewY(-5deg);
   }
   50%,
   68% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg) skewY(0deg);
   }
   72%,
   82% {
-    transform: translate3d(32px, 4px, 0) rotate(18deg) scaleX(0.96);
+    transform: translate3d(32px, 4px, 0) rotate(18deg) scaleX(0.96) skewY(7deg);
   }
   88%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
+    transform: translate3d(0, 0, 0) rotate(0deg) skewY(0deg);
   }
 }
 
