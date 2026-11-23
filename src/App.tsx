@@ -896,7 +896,13 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (window.matchMedia("(pointer: coarse), (max-width: 680px)").matches) return;
+    if (
+      window.matchMedia(
+        "(pointer: coarse), (max-width: 680px), (prefers-reduced-motion: reduce)",
+      ).matches
+    ) {
+      return;
+    }
 
     const lenis = new Lenis({
       autoRaf: true,
@@ -1029,10 +1035,19 @@ export default function App() {
   const scrollTo = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       if (lenisRef.current) {
-        lenisRef.current.scrollTo(target, { duration: 1.1 });
+        lenisRef.current.scrollTo(
+          target,
+          prefersReducedMotion ? { immediate: true } : { duration: 1.1 },
+        );
       } else {
-        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        target.scrollIntoView({
+          behavior: prefersReducedMotion ? "auto" : "smooth",
+          block: "start",
+        });
       }
     }
     setMenuOpen(false);
