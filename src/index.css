@@ -10,6 +10,12 @@
   --white: #f0f1ed;
   --amber: #c49a56;
   --line: rgba(222, 231, 235, 0.16);
+  --sky-gradient-top: #020407;
+  --sky-gradient-mid: #08111a;
+  --sky-gradient-horizon: #101921;
+  --sky-gradient-bottom: #070b0e;
+  --sky-gradient-mid-stop: 48%;
+  --sky-gradient-horizon-stop: 78%;
   --mouse-x: 50vw;
   --mouse-y: 50vh;
   --parallax-x: 0px;
@@ -17,6 +23,20 @@
   --flock-pointer-x: 0px;
   --flock-pointer-y: 0px;
   --flock-scroll-y: 0px;
+}
+
+:root[data-palette="nocturne-champagne"] {
+  --ink: #070a10;
+  --midnight: #0c1825;
+  --blue: #172f40;
+  --silver: #c4cfd2;
+  --white: #f2f1eb;
+  --amber: #d2ae72;
+  --line: rgba(218, 228, 228, 0.16);
+  --sky-gradient-top: #030710;
+  --sky-gradient-mid: #0d1b29;
+  --sky-gradient-horizon: #183242;
+  --sky-gradient-bottom: #080d12;
 }
 
 @layer base {
@@ -130,7 +150,13 @@
   background:
     radial-gradient(circle at 75% 15%, rgba(141, 171, 184, 0.14), transparent 25%),
     radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(85, 119, 139, 0.1), transparent 26%),
-    linear-gradient(180deg, #020407 0%, #08111a 48%, #101921 78%, #070b0e 100%);
+    linear-gradient(
+      180deg,
+      var(--sky-gradient-top) 0%,
+      var(--sky-gradient-mid) var(--sky-gradient-mid-stop),
+      var(--sky-gradient-horizon) var(--sky-gradient-horizon-stop),
+      var(--sky-gradient-bottom) 100%
+    );
   transition: background 1.4s ease;
 }
 
