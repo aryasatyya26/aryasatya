@@ -540,7 +540,7 @@
   overflow: hidden;
   text-align: center;
   background:
-    radial-gradient(circle at 50% 50%, rgba(31, 55, 69, 0.48), transparent 32%), rgba(2, 4, 7, 0.96);
+    radial-gradient(circle at 50% 50%, rgba(28, 78, 124, 0.48), transparent 32%), rgba(23, 3, 43, 0.96);
   transition:
     opacity 0.9s ease,
     filter 0.9s ease,
@@ -551,7 +551,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 0 28%, rgba(0, 0, 0, 0.72) 100%);
+  background: radial-gradient(circle at center, transparent 0 28%, rgba(1, 13, 29, 0.72) 100%);
   animation: introLight 4s ease-out both;
 }
 
@@ -574,9 +574,9 @@
   place-items: center;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 46%, rgba(35, 61, 72, 0.48), transparent 34%),
-    radial-gradient(circle at 50% 100%, rgba(77, 104, 79, 0.2), transparent 45%),
-    rgba(2, 4, 7, 0.98);
+    radial-gradient(circle at 50% 46%, rgba(45, 14, 94, 0.48), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(45, 125, 172, 0.2), transparent 45%),
+    rgba(15, 2, 34, 0.98);
   animation: entryLoadingIn 0.7s ease both;
 }
 
@@ -1276,14 +1276,13 @@ section {
   content: "";
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, color-mix(in srgb, var(--ink) 45%, transparent), transparent 62%),
-    linear-gradient(
-      180deg,
-      transparent 56%,
-      color-mix(in srgb, var(--midnight) 12%, transparent) 76%,
-      color-mix(in srgb, var(--ink) 46%, transparent) 100%
-    );
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ink) 45%, transparent),
+    transparent 62%
+  );
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
 }
 
 .hero-content {
@@ -1514,11 +1513,11 @@ section {
   pointer-events: none;
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--midnight) 2%, transparent) 0%,
+    transparent 0%,
     color-mix(in srgb, var(--midnight) 12%, transparent) 16%,
     color-mix(in srgb, var(--ink) 48%, transparent) 38%,
     color-mix(in srgb, var(--ink) 46%, transparent) 82%,
-    color-mix(in srgb, var(--ink) 12%, transparent) 100%
+    transparent 100%
   );
 }
 
@@ -3311,16 +3310,6 @@ blockquote {
     padding: 115px 20px 42px;
   }
 
-  .hero::before {
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--ink) 45%, transparent),
-      transparent 62%
-    );
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
-  }
-
   .hero-coordinates {
     top: 90px;
     left: 20px;
@@ -3395,17 +3384,6 @@ blockquote {
   .chapter {
     min-height: auto;
     padding: 110px 20px;
-  }
-
-  .chapter::before {
-    background: linear-gradient(
-      180deg,
-      transparent 0%,
-      color-mix(in srgb, var(--midnight) 12%, transparent) 16%,
-      color-mix(in srgb, var(--ink) 48%, transparent) 38%,
-      color-mix(in srgb, var(--ink) 46%, transparent) 82%,
-      transparent 100%
-    );
   }
 
   .section-label {
