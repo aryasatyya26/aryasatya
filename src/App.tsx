@@ -226,10 +226,10 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
         <circle cx="91" cy="39" r="15" />
         <path d="M88 55c-8 11-11 23-9 35l-5 33 11 25h25l10-25-4-33c-2-16-13-29-28-35Z" />
         <g className="shadow-leg shadow-leg-front">
-          <path d="M78 142c-9 10-15 22-16 36l-12 33 2 26-7 9h28l8-8-7-22 16-32 10-41Z" />
+          <path d="M78 142c-9 10-15 22-16 36l-12 33 3 26-2 6h22l8-6H53l16-21 12-39 10-41Z" />
         </g>
         <g className="shadow-leg shadow-leg-back">
-          <path d="M99 142c10 9 18 22 21 34l10 36v25l21-4-28 9-13-20-13-43-7-47Z" />
+          <path d="M99 142c10 9 18 22 21 34l10 36v25l-2 6h22l8-6h-28l-13-20-13-43-7-47Z" />
         </g>
         <g className="shadow-arm shadow-arm-left">
           <path d="M84 70 116 58h55l4 17h-59L84 88Z" />
