@@ -107,6 +107,7 @@ const journey = [
 ];
 
 const navItems = ["home", "about", "skills", "projects", "journey", "contact"];
+const HOME_WELCOME_DURATION = 2400;
 
 function Icon({
   name,
@@ -523,9 +524,9 @@ function EntryLoading({
   );
 }
 
-function HomeWelcomeFlight({ orbiting }: { orbiting: boolean }) {
+function HomeWelcomeFlight() {
   return (
-    <div className={`home-welcome-flight${orbiting ? " is-orbiting" : ""}`} aria-hidden="true">
+    <div className="home-welcome-flight" aria-hidden="true">
       <Bird className="home-welcome-bird bird-one" />
       <Bird className="home-welcome-bird bird-two" />
     </div>
@@ -713,7 +714,6 @@ export default function App() {
   const [entryWelcome, setEntryWelcome] = useState(false);
   const [entryTransition, setEntryTransition] = useState(false);
   const [homeWelcome, setHomeWelcome] = useState(false);
-  const [homeOrbiting, setHomeOrbiting] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -730,7 +730,6 @@ export default function App() {
   const completeEntryLoading = useCallback(() => {
     setEntryTransition(true);
     setHomeWelcome(true);
-    setHomeOrbiting(false);
   }, []);
 
   useEffect(() => {
@@ -780,7 +779,7 @@ export default function App() {
   useEffect(() => {
     if (!homeWelcome) return;
 
-    const timer = window.setTimeout(() => setHomeOrbiting(true), 4800);
+    const timer = window.setTimeout(() => setHomeWelcome(false), HOME_WELCOME_DURATION);
     return () => window.clearTimeout(timer);
   }, [homeWelcome]);
 
@@ -893,7 +892,6 @@ export default function App() {
     setEntryWelcome(false);
     setEntryTransition(false);
     setHomeWelcome(false);
-    setHomeOrbiting(false);
     setIntroVisible(true);
   };
 
@@ -1072,7 +1070,7 @@ export default function App() {
           onComplete={completeEntryLoading}
         />
       )}
-      {homeWelcome && <HomeWelcomeFlight orbiting={homeOrbiting} />}
+      {homeWelcome && <HomeWelcomeFlight />}
 
       <div className="scroll-progress" aria-hidden="true">
         <span ref={scrollProgressRef} />

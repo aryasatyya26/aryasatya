@@ -585,24 +585,14 @@
     drop-shadow(0 0 30px rgba(196, 154, 86, 0.96));
 }
 
-.home-welcome-flight:not(.is-orbiting) .bird-one {
-  animation: homeWelcomeLeft 4.8s linear both;
+.home-welcome-flight .bird-one {
+  animation: homeWelcomeLeft 2.4s linear both;
   will-change: transform, opacity;
 }
 
-.home-welcome-flight:not(.is-orbiting) .bird-two {
-  animation: homeWelcomeRight 4.8s linear both;
+.home-welcome-flight .bird-two {
+  animation: homeWelcomeRight 2.4s linear both;
   will-change: transform, opacity;
-}
-
-.home-welcome-flight.is-orbiting .bird-one {
-  animation: homeOrbitLeft 28s linear infinite;
-  will-change: transform;
-}
-
-.home-welcome-flight.is-orbiting .bird-two {
-  animation: homeOrbitRight 28s linear infinite;
-  will-change: transform;
 }
 
 .home-welcome-bird .wing,
@@ -2772,62 +2762,6 @@ blockquote {
   100% {
     opacity: 1;
     transform: translate3d(calc(-50% + 34vw), -50%, 0) rotate(-90deg) scale(1);
-  }
-}
-
-@keyframes homeOrbitLeft {
-  0%,
-  100% {
-    transform: translate3d(calc(-50% - 34vw), -50%, 0) rotate(270deg) scale(1);
-  }
-  12.5% {
-    transform: translate3d(calc(-50% - 26vw), calc(-50% - 17vh), 0) rotate(315deg) scale(1.08);
-  }
-  25% {
-    transform: translate3d(-50%, calc(-50% - 24vh), 0) rotate(360deg) scale(1.08);
-  }
-  37.5% {
-    transform: translate3d(calc(-50% + 26vw), calc(-50% - 17vh), 0) rotate(405deg) scale(1.08);
-  }
-  50% {
-    transform: translate3d(calc(-50% + 34vw), -50%, 0) rotate(450deg) scale(1);
-  }
-  62.5% {
-    transform: translate3d(calc(-50% + 26vw), calc(-50% + 17vh), 0) rotate(495deg) scale(1.08);
-  }
-  75% {
-    transform: translate3d(-50%, calc(-50% + 24vh), 0) rotate(540deg) scale(1.08);
-  }
-  87.5% {
-    transform: translate3d(calc(-50% - 26vw), calc(-50% + 17vh), 0) rotate(585deg) scale(1.08);
-  }
-}
-
-@keyframes homeOrbitRight {
-  0%,
-  100% {
-    transform: translate3d(calc(-50% + 34vw), -50%, 0) rotate(-90deg) scale(1);
-  }
-  12.5% {
-    transform: translate3d(calc(-50% + 26vw), calc(-50% - 17vh), 0) rotate(-135deg) scale(1.08);
-  }
-  25% {
-    transform: translate3d(-50%, calc(-50% - 24vh), 0) rotate(-180deg) scale(1.08);
-  }
-  37.5% {
-    transform: translate3d(calc(-50% - 26vw), calc(-50% - 17vh), 0) rotate(-225deg) scale(1.08);
-  }
-  50% {
-    transform: translate3d(calc(-50% - 34vw), -50%, 0) rotate(-270deg) scale(1);
-  }
-  62.5% {
-    transform: translate3d(calc(-50% - 26vw), calc(-50% + 17vh), 0) rotate(-315deg) scale(1.08);
-  }
-  75% {
-    transform: translate3d(-50%, calc(-50% + 24vh), 0) rotate(-360deg) scale(1.08);
-  }
-  87.5% {
-    transform: translate3d(calc(-50% + 26vw), calc(-50% + 17vh), 0) rotate(-405deg) scale(1.08);
   }
 }
 
