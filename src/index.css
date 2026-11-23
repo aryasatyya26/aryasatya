@@ -549,14 +549,22 @@
   z-index: 2;
   top: 50%;
   left: 50%;
-  width: 40px;
+  width: 50px;
   opacity: 0;
-  filter: drop-shadow(0 0 12px rgba(248, 220, 163, 0.95));
+  filter:
+    drop-shadow(0 0 10px rgba(255, 232, 181, 1))
+    drop-shadow(0 0 24px rgba(196, 154, 86, 0.92));
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .entry-loading-arrival-bird.arrival-two {
-  width: 34px;
+  width: 44px;
+}
+
+.entry-loading-arrival-bird .wing,
+.entry-loading-arrival-bird .bird-body {
+  fill: #ffe8b5;
 }
 
 .entry-loading.is-welcoming .arrival-one {
@@ -762,8 +770,6 @@
 }
 
 .intro-birds {
-  --intro-flight-x: clamp(150px, 27vw, 360px);
-  --intro-flight-y: clamp(72px, 12vh, 120px);
   position: absolute;
   z-index: 1;
   inset: 0;
@@ -775,12 +781,12 @@
   position: absolute;
   top: 40%;
   left: 50%;
-  width: clamp(36px, 4vw, 56px);
-  opacity: 0.98;
+  width: clamp(46px, 5vw, 68px);
+  opacity: 1;
   filter:
-    drop-shadow(0 0 7px rgba(248, 220, 163, 0.92))
-    drop-shadow(0 0 17px rgba(196, 154, 86, 0.68));
-  animation: introBirdFlight 13.5s ease-in-out infinite;
+    drop-shadow(0 0 10px rgba(255, 232, 181, 1))
+    drop-shadow(0 0 24px rgba(196, 154, 86, 0.9));
+  animation: introBirdWelcomeLeft 4.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   will-change: transform;
 }
 
@@ -792,13 +798,12 @@
 
 .intro-birds .wing,
 .intro-birds .bird-body {
-  fill: #f5dfb2;
+  fill: #ffe8b5;
 }
 
 .intro-bird-two {
-  width: clamp(30px, 3.2vw, 46px);
-  animation-duration: 13.5s;
-  animation-delay: -0.8s;
+  width: clamp(38px, 4.2vw, 56px);
+  animation-name: introBirdWelcomeRight;
 }
 
 .intro-kicker,
@@ -2488,19 +2493,49 @@ blockquote {
   }
 }
 
-@keyframes introBirdFlight {
-  0%,
+@keyframes introBirdWelcomeLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 60vw), -50%, 0) rotate(-16deg) scale(0.52);
+  }
+  14% {
+    opacity: 1;
+  }
+  38% {
+    transform: translate3d(calc(-50% - 76px), calc(-50% - 42px), 0) rotate(-10deg) scale(1.05);
+  }
+  64% {
+    transform: translate3d(calc(-50% + 10px), calc(-50% - 116px), 0) rotate(14deg) scale(1.08);
+  }
+  82% {
+    transform: translate3d(calc(-50% + 116px), calc(-50% - 8px), 0) rotate(24deg) scale(0.92);
+  }
   100% {
-    transform: translate3d(calc(-50% - var(--intro-flight-x)), -50%, 0) rotate(-10deg);
+    opacity: 0;
+    transform: translate3d(calc(-50% + 62vw), calc(-50% + 22vh), 0) rotate(30deg) scale(0.58);
   }
-  25% {
-    transform: translate3d(-50%, calc(-50% - var(--intro-flight-y)), 0) rotate(8deg);
+}
+
+@keyframes introBirdWelcomeRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + 60vw), -50%, 0) rotate(16deg) scale(0.52);
   }
-  50% {
-    transform: translate3d(calc(-50% + var(--intro-flight-x)), -50%, 0) rotate(12deg);
+  14% {
+    opacity: 1;
   }
-  75% {
-    transform: translate3d(-50%, calc(-50% + var(--intro-flight-y)), 0) rotate(-8deg);
+  38% {
+    transform: translate3d(calc(-50% + 76px), calc(-50% - 42px), 0) rotate(10deg) scale(1.05);
+  }
+  64% {
+    transform: translate3d(calc(-50% - 10px), calc(-50% - 116px), 0) rotate(-14deg) scale(1.08);
+  }
+  82% {
+    transform: translate3d(calc(-50% - 116px), calc(-50% - 8px), 0) rotate(-24deg) scale(0.92);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 62vw), calc(-50% + 22vh), 0) rotate(-30deg) scale(0.58);
   }
 }
 
@@ -2867,18 +2902,13 @@ blockquote {
 }
 
 @media (max-width: 680px) {
-  .intro-birds {
-    --intro-flight-x: clamp(132px, 38vw, 250px);
-    --intro-flight-y: clamp(54px, 9vh, 76px);
-  }
-
   .intro-bird {
     top: 36%;
-    width: clamp(30px, 8vw, 42px);
+    width: clamp(42px, 10vw, 54px);
   }
 
   .intro-bird-two {
-    width: clamp(27px, 7vw, 36px);
+    width: clamp(36px, 8.5vw, 46px);
   }
 
   .intro h1 {
