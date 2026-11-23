@@ -981,6 +981,7 @@ export default function App() {
       );
     };
     const onPointer = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
       pointerX = event.clientX;
       pointerY = event.clientY;
       if (!pointerFrame) pointerFrame = requestAnimationFrame(updatePointer);
@@ -1016,7 +1017,7 @@ export default function App() {
     );
     document.querySelectorAll("section[id]").forEach((section) => sectionObserver.observe(section));
     document.querySelectorAll<HTMLElement>(".reveal").forEach((element, index) => {
-      element.style.setProperty("--reveal-delay", `${(index % 4) * 40}ms`);
+      element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
       revealObserver.observe(element);
     });
     window.addEventListener("scroll", onScroll, { passive: true });
