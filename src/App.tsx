@@ -930,6 +930,9 @@ export default function App() {
     let lastFlockScrollY = window.scrollY;
     let flockResetTimer = 0;
     let scrollFrame = 0;
+    let pointerFrame = 0;
+    let pointerX = 0;
+    let pointerY = 0;
 
     const updateScroll = () => {
       scrollFrame = 0;
@@ -955,25 +958,32 @@ export default function App() {
       if (scrollFrame) return;
       scrollFrame = requestAnimationFrame(updateScroll);
     };
-    const onPointer = (event: PointerEvent) => {
-      document.documentElement.style.setProperty("--mouse-x", `${event.clientX}px`);
-      document.documentElement.style.setProperty("--mouse-y", `${event.clientY}px`);
+    const updatePointer = () => {
+      pointerFrame = 0;
+      const { style } = document.documentElement;
+      style.setProperty("--mouse-x", `${pointerX}px`);
+      style.setProperty("--mouse-y", `${pointerY}px`);
       document.documentElement.style.setProperty(
         "--flock-pointer-x",
-        `${(event.clientX / window.innerWidth - 0.5) * 34}px`,
+        `${(pointerX / window.innerWidth - 0.5) * 34}px`,
       );
       document.documentElement.style.setProperty(
         "--flock-pointer-y",
-        `${(event.clientY / window.innerHeight - 0.5) * 18}px`,
+        `${(pointerY / window.innerHeight - 0.5) * 18}px`,
       );
       document.documentElement.style.setProperty(
         "--parallax-x",
-        `${(event.clientX / window.innerWidth - 0.5) * 18}px`,
+        `${(pointerX / window.innerWidth - 0.5) * 18}px`,
       );
       document.documentElement.style.setProperty(
         "--parallax-y",
-        `${(event.clientY / window.innerHeight - 0.5) * 12}px`,
+        `${(pointerY / window.innerHeight - 0.5) * 12}px`,
       );
+    };
+    const onPointer = (event: PointerEvent) => {
+      pointerX = event.clientX;
+      pointerY = event.clientY;
+      if (!pointerFrame) pointerFrame = requestAnimationFrame(updatePointer);
     };
     const sectionObserver = new IntersectionObserver(
       (entries) => {
@@ -1006,7 +1016,7 @@ export default function App() {
     );
     document.querySelectorAll("section[id]").forEach((section) => sectionObserver.observe(section));
     document.querySelectorAll<HTMLElement>(".reveal").forEach((element, index) => {
-      element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
+      element.style.setProperty("--reveal-delay", `${(index % 4) * 40}ms`);
       revealObserver.observe(element);
     });
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -1018,6 +1028,7 @@ export default function App() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
       cancelAnimationFrame(scrollFrame);
+      cancelAnimationFrame(pointerFrame);
       window.clearTimeout(flockResetTimer);
     };
   }, []);
