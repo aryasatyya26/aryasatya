@@ -1295,7 +1295,10 @@ export default function App() {
             <span>106.8456° E</span>
           </div>
           <div className="hero-content reveal">
-            <p className="hero-greeting">Haii</p>
+            <div className="hero-greeting-stage">
+              <p className="hero-greeting">Haii</p>
+              <ShadowBoxer className="hero-shadow-boxer" />
+            </div>
             <p className="eyebrow">Data analyst · Web developer</p>
             <h1>
               <span>Aryasatya</span>
@@ -1316,7 +1319,6 @@ export default function App() {
               </div>
             </div>
           </div>
-          <ShadowBoxer className="hero-shadow-boxer" />
           <div className="hero-portrait">
             <img
               src="/portfolio/Aryasatya.jpg"
