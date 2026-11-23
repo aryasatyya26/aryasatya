@@ -425,11 +425,19 @@ function Intro({
   );
 }
 
-function EntryLoading({ progress }: { progress: number }) {
+function EntryLoading({
+  progress,
+  transitioning,
+}: {
+  progress: number;
+  transitioning: boolean;
+}) {
   const isComplete = progress === 100;
 
   return (
-    <div className={`entry-loading${isComplete ? " is-complete" : ""}`}>
+    <div
+      className={`entry-loading${isComplete ? " is-complete" : ""}${transitioning ? " is-arriving" : ""}`}
+    >
       <div className="entry-loading-content">
         <div className="entry-loading-emblem" aria-hidden="true">
           <div className="entry-loading-orbit orbit-one">
@@ -464,6 +472,8 @@ function EntryLoading({ progress }: { progress: number }) {
           {isComplete ? "Portfolio ready" : ""}
         </span>
       </div>
+      <Bird className="entry-loading-arrival-bird arrival-one" />
+      <Bird className="entry-loading-arrival-bird arrival-two" />
     </div>
   );
 }
@@ -645,6 +655,7 @@ export default function App() {
   const [introVisible, setIntroVisible] = useState(true);
   const [entryLoading, setEntryLoading] = useState(false);
   const [entryProgress, setEntryProgress] = useState(0);
+  const [entryTransition, setEntryTransition] = useState(false);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -670,6 +681,7 @@ export default function App() {
     let startedAt = 0;
     let frame = 0;
     let completionTimer = 0;
+    let transitionTimer = 0;
 
     const updateProgress = (now: number) => {
       if (!startedAt) startedAt = now;
@@ -678,8 +690,12 @@ export default function App() {
 
       if (progress === 100) {
         completionTimer = window.setTimeout(() => {
-          setEntryLoading(false);
-          setIntroVisible(false);
+          setEntryTransition(true);
+          transitionTimer = window.setTimeout(() => {
+            setEntryLoading(false);
+            setEntryTransition(false);
+            setIntroVisible(false);
+          }, 1800);
         }, 900);
       } else {
         frame = requestAnimationFrame(updateProgress);
@@ -690,6 +706,7 @@ export default function App() {
     return () => {
       cancelAnimationFrame(frame);
       window.clearTimeout(completionTimer);
+      window.clearTimeout(transitionTimer);
     };
   }, [entryLoading]);
 
@@ -792,6 +809,7 @@ export default function App() {
     setEntered(false);
     setEntryLoading(false);
     setEntryProgress(0);
+    setEntryTransition(false);
     setIntroVisible(true);
   };
 
@@ -947,11 +965,13 @@ export default function App() {
       <BirdCursor />
       <PerformanceHud />
       {introVisible && (
-        <div className={entered ? "intro-leaving" : ""}>
+        <div className={entryTransition ? "intro-leaving" : ""}>
           <Intro onEnter={enter} onSkip={enter} />
         </div>
       )}
-      {entryLoading && <EntryLoading progress={entryProgress} />}
+      {entryLoading && (
+        <EntryLoading progress={entryProgress} transitioning={entryTransition} />
+      )}
 
       <div className="scroll-progress" aria-hidden="true">
         <span ref={scrollProgressRef} />

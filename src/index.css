@@ -506,6 +506,10 @@
   filter: blur(10px);
   transform: scale(1.12);
   pointer-events: none;
+  transition:
+    opacity 1.8s ease,
+    filter 1.8s ease,
+    transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 .entry-loading {
@@ -538,6 +542,42 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+}
+
+.entry-loading-arrival-bird {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  opacity: 0;
+  filter: drop-shadow(0 0 12px rgba(248, 220, 163, 0.95));
+  pointer-events: none;
+}
+
+.entry-loading-arrival-bird.arrival-two {
+  width: 34px;
+}
+
+.entry-loading.is-arriving {
+  pointer-events: none;
+  animation: entryLoadingOut 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.entry-loading.is-arriving .entry-loading-content {
+  opacity: 0;
+  transform: translateY(-18px) scale(0.97);
+  transition:
+    opacity 0.75s ease,
+    transform 1s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.entry-loading.is-arriving .arrival-one {
+  animation: entryBirdWelcomeLeft 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.entry-loading.is-arriving .arrival-two {
+  animation: entryBirdWelcomeRight 1.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .entry-loading-emblem {
@@ -2492,12 +2532,65 @@ blockquote {
   }
 }
 
+@keyframes entryLoadingOut {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    filter: blur(7px);
+    transform: scale(1.045);
+  }
+}
+
 @keyframes entrySmileGlow {
   from {
     filter: drop-shadow(0 0 4px rgba(196, 154, 86, 0.45));
   }
   to {
     filter: drop-shadow(0 0 14px rgba(241, 216, 158, 0.95));
+  }
+}
+
+@keyframes entryBirdWelcomeLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 16px), calc(-50% + 8px), 0) rotate(-8deg) scale(0.45);
+  }
+  14% {
+    opacity: 1;
+  }
+  48% {
+    transform: translate3d(calc(-50% - 92px), calc(-50% - 82px), 0) rotate(-22deg) scale(1.05);
+  }
+  70% {
+    transform: translate3d(calc(-50% + 10px), calc(-50% - 112px), 0) rotate(12deg) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% - 66vw), calc(-50% - 58vh), 0) rotate(-28deg) scale(0.48);
+  }
+}
+
+@keyframes entryBirdWelcomeRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + 16px), calc(-50% - 8px), 0) rotate(8deg) scale(0.45);
+  }
+  14% {
+    opacity: 1;
+  }
+  48% {
+    transform: translate3d(calc(-50% + 92px), calc(-50% - 82px), 0) rotate(22deg) scale(1.05);
+  }
+  70% {
+    transform: translate3d(calc(-50% - 10px), calc(-50% - 112px), 0) rotate(-12deg) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(-50% + 66vw), calc(-50% - 58vh), 0) rotate(28deg) scale(0.48);
   }
 }
 
