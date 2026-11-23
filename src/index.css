@@ -552,12 +552,12 @@
 
 .shadow-arm-left {
   transform-origin: 82px 94px;
-  animation: shadowLeftPunch 0.72s ease-in-out infinite;
+  animation: shadowLeftPunch 1.6s ease-in-out infinite;
 }
 
 .shadow-arm-right {
   transform-origin: 78px 102px;
-  animation: shadowRightPunch 0.72s ease-in-out infinite;
+  animation: shadowRightPunch 1.6s ease-in-out infinite;
 }
 
 .shadow-leg {
@@ -596,12 +596,20 @@
   100% {
     transform: translate3d(0, 0, 0);
   }
-  18%,
-  38% {
-    transform: translate3d(18px, 0, 0);
+  8%,
+  20% {
+    transform: translate3d(42px, -2px, 0);
   }
-  58%,
-  82% {
+  25%,
+  48% {
+    transform: translate3d(0, 0, 0);
+  }
+  52%,
+  63% {
+    transform: translate3d(28px, -18px, 0) rotate(-16deg);
+  }
+  68%,
+  100% {
     transform: translate3d(0, 0, 0);
   }
 }
@@ -611,15 +619,20 @@
   100% {
     transform: translate3d(0, 0, 0);
   }
-  18%,
-  38% {
+  25%,
+  45% {
+    transform: translate3d(24px, -6px, 0);
+  }
+  50%,
+  68% {
     transform: translate3d(0, 0, 0);
   }
-  58%,
-  78% {
-    transform: translate3d(14px, 0, 0);
-  }
+  72%,
   82% {
+    transform: translate3d(32px, 4px, 0) rotate(18deg);
+  }
+  88%,
+  100% {
     transform: translate3d(0, 0, 0);
   }
 }
