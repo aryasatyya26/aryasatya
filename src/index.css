@@ -683,7 +683,7 @@
   position: absolute;
   z-index: 1;
   top: 61%;
-  left: max(16px, calc(50% - 620px));
+  left: calc(50% - min(33.5vw, 380px) - clamp(150px, 14.5vw, 188px) - 24px);
   width: clamp(175px, 17vw, 220px);
   height: auto;
   opacity: 0.72;
@@ -3379,8 +3379,8 @@ blockquote {
 
   .intro-shadow-boxer {
     top: 60%;
-    left: calc(50% - 220px);
-    width: clamp(145px, 23vw, 190px);
+    left: calc(50% - min(33.5vw, 380px) - clamp(103px, 12.8vw, 126px) - 16px);
+    width: clamp(120px, 15vw, 148px);
   }
 
   .hero-shadow-boxer {
