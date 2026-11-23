@@ -112,7 +112,16 @@ function Icon({
   name,
   size = 18,
 }: {
-  name: "arrow" | "play" | "pause" | "volume" | "mute" | "close" | "copy" | "menu";
+  name:
+    | "arrow"
+    | "play"
+    | "pause"
+    | "volume"
+    | "mute"
+    | "close"
+    | "copy"
+    | "menu"
+    | "smile";
   size?: number;
 }) {
   const paths: Record<string, React.ReactNode> = {
@@ -157,6 +166,13 @@ function Icon({
       <>
         <path d="M4 8h16" />
         <path d="M4 16h16" />
+      </>
+    ),
+    smile: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+        <path d="M9 9h.01M15 9h.01" />
       </>
     ),
   };
@@ -409,6 +425,49 @@ function Intro({
   );
 }
 
+function EntryLoading({ progress }: { progress: number }) {
+  const isComplete = progress === 100;
+
+  return (
+    <div className={`entry-loading${isComplete ? " is-complete" : ""}`}>
+      <div className="entry-loading-content">
+        <div className="entry-loading-emblem" aria-hidden="true">
+          <div className="entry-loading-orbit orbit-one">
+            <Bird className="entry-loading-bird" />
+          </div>
+          <div className="entry-loading-orbit orbit-two">
+            <Bird className="entry-loading-bird" />
+          </div>
+          <div className="entry-loading-orbit orbit-three">
+            <Bird className="entry-loading-bird" />
+          </div>
+          <div className="entry-loading-smile">
+            <Icon name="smile" size={38} />
+          </div>
+        </div>
+        <p className="entry-loading-kicker">A digital journey by</p>
+        <h2 className="entry-loading-title">
+          {isComplete ? "Journey ready" : "Preparing your journey"}
+        </h2>
+        <div
+          className="entry-loading-progress"
+          role="progressbar"
+          aria-label="Loading portfolio"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={progress}
+        >
+          <span style={{ width: `${progress}%` }} />
+        </div>
+        <p className="entry-loading-percent">{progress}%</p>
+        <span className="sr-only" aria-live="polite">
+          {isComplete ? "Portfolio ready" : ""}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function MusicPlayer({
   audioRef,
   musicOn,
@@ -584,6 +643,8 @@ function PerformanceHud() {
 export default function App() {
   const [entered, setEntered] = useState(false);
   const [introVisible, setIntroVisible] = useState(true);
+  const [entryLoading, setEntryLoading] = useState(false);
+  const [entryProgress, setEntryProgress] = useState(0);
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
@@ -601,6 +662,36 @@ export default function App() {
       icon.type = "image/svg+xml";
     });
   }, []);
+
+  useEffect(() => {
+    if (!entryLoading) return;
+
+    const loadingDuration = 6200;
+    let startedAt = 0;
+    let frame = 0;
+    let completionTimer = 0;
+
+    const updateProgress = (now: number) => {
+      if (!startedAt) startedAt = now;
+      const progress = Math.min(100, Math.floor(((now - startedAt) / loadingDuration) * 100));
+      setEntryProgress(progress);
+
+      if (progress === 100) {
+        completionTimer = window.setTimeout(() => {
+          setEntryLoading(false);
+          setIntroVisible(false);
+        }, 900);
+      } else {
+        frame = requestAnimationFrame(updateProgress);
+      }
+    };
+
+    frame = requestAnimationFrame(updateProgress);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearTimeout(completionTimer);
+    };
+  }, [entryLoading]);
 
   const sound = (frequency = 520, duration = 0.16) => {
     if (!sfxOn) return;
@@ -681,10 +772,12 @@ export default function App() {
   };
 
   const enter = () => {
+    if (entryLoading) return;
+    setEntryProgress(0);
+    setEntryLoading(true);
     setEntered(true);
     sound(180, 0.45);
     void setMusicOn(true);
-    window.setTimeout(() => setIntroVisible(false), 950);
   };
 
   const returnToEntrance = () => {
@@ -697,6 +790,8 @@ export default function App() {
     setMenuOpen(false);
     setActive("home");
     setEntered(false);
+    setEntryLoading(false);
+    setEntryProgress(0);
     setIntroVisible(true);
   };
 
@@ -856,6 +951,7 @@ export default function App() {
           <Intro onEnter={enter} onSkip={enter} />
         </div>
       )}
+      {entryLoading && <EntryLoading progress={entryProgress} />}
 
       <div className="scroll-progress" aria-hidden="true">
         <span ref={scrollProgressRef} />

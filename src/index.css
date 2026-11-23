@@ -508,6 +508,183 @@
   pointer-events: none;
 }
 
+.entry-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 180;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 46%, rgba(35, 61, 72, 0.48), transparent 34%),
+    radial-gradient(circle at 50% 100%, rgba(77, 104, 79, 0.2), transparent 45%),
+    rgba(2, 4, 7, 0.98);
+  animation: entryLoadingIn 0.7s ease both;
+}
+
+.entry-loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 0 34%, rgba(0, 0, 0, 0.56) 100%);
+}
+
+.entry-loading-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(84vw, 360px);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.entry-loading-emblem {
+  position: relative;
+  display: grid;
+  width: clamp(176px, 48vw, 220px);
+  aspect-ratio: 1;
+  place-items: center;
+  margin-bottom: 34px;
+}
+
+.entry-loading-emblem::before {
+  content: "";
+  position: absolute;
+  inset: 19%;
+  border: 1px solid rgba(220, 230, 230, 0.13);
+  border-radius: 50%;
+  box-shadow: inset 0 0 35px rgba(111, 150, 158, 0.08);
+}
+
+.entry-loading-orbit {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(220, 230, 230, 0.14);
+  border-radius: 50%;
+  animation: orbitSpin 7s linear infinite;
+}
+
+.entry-loading-orbit.orbit-two {
+  inset: 12px;
+  border-style: dashed;
+  border-color: rgba(196, 154, 86, 0.38);
+  animation-duration: 5.5s;
+  animation-direction: reverse;
+}
+
+.entry-loading-orbit.orbit-three {
+  inset: 25px;
+  border-color: rgba(220, 230, 230, 0.08);
+  animation-duration: 11s;
+}
+
+.entry-loading-bird {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  display: block;
+  width: 34px;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(248, 220, 163, 0.82));
+  transform: translateX(-50%);
+}
+
+.entry-loading-orbit.orbit-two .entry-loading-bird {
+  width: 28px;
+}
+
+.entry-loading-orbit.orbit-three .entry-loading-bird {
+  width: 22px;
+}
+
+.entry-loading-bird .wing,
+.entry-loading-bird .bird-body {
+  fill: #f5dfb2;
+}
+
+.entry-loading-smile {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 72px;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(196, 154, 86, 0.66);
+  border-radius: 50%;
+  color: #f2c873;
+  opacity: 0;
+  transform: scale(0.58) rotate(-16deg);
+  transition:
+    opacity 0.45s ease,
+    transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.45s ease;
+}
+
+.entry-loading-smile::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(196, 154, 86, 0.38), transparent 68%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.entry-loading.is-complete .entry-loading-smile {
+  opacity: 1;
+  transform: scale(1) rotate(0);
+  box-shadow:
+    0 0 22px rgba(196, 154, 86, 0.5),
+    inset 0 0 18px rgba(196, 154, 86, 0.12);
+  animation: entrySmileGlow 1.4s ease-in-out infinite alternate;
+}
+
+.entry-loading.is-complete .entry-loading-smile::before {
+  opacity: 1;
+}
+
+.entry-loading-kicker,
+.entry-loading-percent {
+  color: rgba(231, 235, 232, 0.48);
+  font-size: 9px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.entry-loading-title {
+  margin: 12px 0 24px;
+  color: var(--white);
+  font-family: "Italiana", serif;
+  font-size: clamp(1.8rem, 8vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+.entry-loading-progress {
+  width: 100%;
+  height: 2px;
+  overflow: hidden;
+  background: rgba(221, 231, 231, 0.12);
+}
+
+.entry-loading-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #718e91, var(--amber), #f1d89e);
+  box-shadow: 0 0 14px rgba(196, 154, 86, 0.68);
+  transition: width 0.12s linear;
+}
+
+.entry-loading-percent {
+  min-width: 4ch;
+  margin-top: 12px;
+  color: rgba(241, 216, 158, 0.82);
+  font-variant-numeric: tabular-nums;
+}
+
 .intro-orbit {
   position: absolute;
   width: min(67vw, 760px);
@@ -2303,6 +2480,24 @@ blockquote {
   }
   to {
     opacity: 1;
+  }
+}
+
+@keyframes entryLoadingIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes entrySmileGlow {
+  from {
+    filter: drop-shadow(0 0 4px rgba(196, 154, 86, 0.45));
+  }
+  to {
+    filter: drop-shadow(0 0 14px rgba(241, 216, 158, 0.95));
   }
 }
 
