@@ -876,7 +876,6 @@ export default function App() {
     let lastFlockScrollY = window.scrollY;
     let flockResetTimer = 0;
     let scrollFrame = 0;
-    const keepRevealedOnMobile = window.matchMedia("(pointer: coarse), (max-width: 680px)").matches;
 
     const updateScroll = () => {
       scrollFrame = 0;
@@ -923,14 +922,23 @@ export default function App() {
       );
     };
     const sectionObserver = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const sectionId = entry.target.id;
-            setActive((current) => (current === sectionId ? current : sectionId));
-            entry.target.classList.add("in-view");
-          }
-        }),
+      (entries) => {
+        const intersectingSections = entries.filter((entry) => entry.isIntersecting);
+        intersectingSections.forEach((entry) => entry.target.classList.add("in-view"));
+
+        const activeLine = window.innerHeight * 0.35;
+        const activeSection = Array.from(
+          document.querySelectorAll<HTMLElement>("section[id]"),
+        ).find((section) => {
+          const bounds = section.getBoundingClientRect();
+          return bounds.top <= activeLine && bounds.bottom > activeLine;
+        });
+
+        if (activeSection) {
+          const sectionId = activeSection.id;
+          setActive((current) => (current === sectionId ? current : sectionId));
+        }
+      },
       { rootMargin: "-35% 0px -50%", threshold: 0.01 },
     );
     const revealObserver = new IntersectionObserver(
@@ -938,8 +946,6 @@ export default function App() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("in-view");
-          } else if (!keepRevealedOnMobile) {
-            entry.target.classList.remove("in-view");
           }
         }),
       { rootMargin: "-10% 0px -15%", threshold: 0.01 },
