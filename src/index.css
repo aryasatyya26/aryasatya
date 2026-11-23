@@ -770,6 +770,8 @@
 }
 
 .intro-birds {
+  --intro-flight-x: clamp(150px, 27vw, 360px);
+  --intro-flight-y: clamp(72px, 12vh, 120px);
   position: absolute;
   z-index: 1;
   inset: 0;
@@ -786,7 +788,7 @@
   filter:
     drop-shadow(0 0 10px rgba(255, 232, 181, 1))
     drop-shadow(0 0 24px rgba(196, 154, 86, 0.9));
-  animation: introBirdWelcomeLeft 4.2s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: introBirdFlight 13.5s ease-in-out infinite;
   will-change: transform;
 }
 
@@ -803,7 +805,9 @@
 
 .intro-bird-two {
   width: clamp(38px, 4.2vw, 56px);
-  animation-name: introBirdWelcomeRight;
+  animation-duration: 13.5s;
+  animation-delay: -6.75s;
+  animation-direction: reverse;
 }
 
 .intro-kicker,
@@ -2493,49 +2497,19 @@ blockquote {
   }
 }
 
-@keyframes introBirdWelcomeLeft {
-  0% {
-    opacity: 0;
-    transform: translate3d(calc(-50% - 60vw), -50%, 0) rotate(-16deg) scale(0.52);
-  }
-  14% {
-    opacity: 1;
-  }
-  38% {
-    transform: translate3d(calc(-50% - 76px), calc(-50% - 42px), 0) rotate(-10deg) scale(1.05);
-  }
-  64% {
-    transform: translate3d(calc(-50% + 10px), calc(-50% - 116px), 0) rotate(14deg) scale(1.08);
-  }
-  82% {
-    transform: translate3d(calc(-50% + 116px), calc(-50% - 8px), 0) rotate(24deg) scale(0.92);
-  }
+@keyframes introBirdFlight {
+  0%,
   100% {
-    opacity: 0;
-    transform: translate3d(calc(-50% + 62vw), calc(-50% + 22vh), 0) rotate(30deg) scale(0.58);
+    transform: translate3d(calc(-50% - var(--intro-flight-x)), -50%, 0) rotate(-10deg);
   }
-}
-
-@keyframes introBirdWelcomeRight {
-  0% {
-    opacity: 0;
-    transform: translate3d(calc(-50% + 60vw), -50%, 0) rotate(16deg) scale(0.52);
+  25% {
+    transform: translate3d(-50%, calc(-50% - var(--intro-flight-y)), 0) rotate(8deg);
   }
-  14% {
-    opacity: 1;
+  50% {
+    transform: translate3d(calc(-50% + var(--intro-flight-x)), -50%, 0) rotate(12deg);
   }
-  38% {
-    transform: translate3d(calc(-50% + 76px), calc(-50% - 42px), 0) rotate(10deg) scale(1.05);
-  }
-  64% {
-    transform: translate3d(calc(-50% - 10px), calc(-50% - 116px), 0) rotate(-14deg) scale(1.08);
-  }
-  82% {
-    transform: translate3d(calc(-50% - 116px), calc(-50% - 8px), 0) rotate(-24deg) scale(0.92);
-  }
-  100% {
-    opacity: 0;
-    transform: translate3d(calc(-50% - 62vw), calc(-50% + 22vh), 0) rotate(-30deg) scale(0.58);
+  75% {
+    transform: translate3d(-50%, calc(-50% + var(--intro-flight-y)), 0) rotate(-8deg);
   }
 }
 
@@ -2902,6 +2876,11 @@ blockquote {
 }
 
 @media (max-width: 680px) {
+  .intro-birds {
+    --intro-flight-x: clamp(132px, 38vw, 250px);
+    --intro-flight-y: clamp(54px, 9vh, 76px);
+  }
+
   .intro-bird {
     top: 36%;
     width: clamp(42px, 10vw, 54px);
