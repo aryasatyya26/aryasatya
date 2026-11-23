@@ -238,8 +238,8 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
           <circle cx="176" cy="70" r="10" />
         </g>
         <g className="shadow-arm shadow-arm-right">
-          <path d="M84 78 110 70h42l3 13h-46l-24 10Z" />
-          <circle cx="159" cy="76" r="9" />
+          <path d="M84 78c12 2 22 13 29 26 4 7 11 10 18 7l12-17 13 8-16 24c-7 9-21 10-32 4-10-6-12-17-17-27L77 91Z" />
+          <circle cx="153" cy="96" r="10" />
         </g>
       </g>
     </svg>
