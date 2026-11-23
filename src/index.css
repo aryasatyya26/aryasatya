@@ -1440,11 +1440,17 @@ section {
   position: absolute;
   z-index: 0;
   top: clamp(-72px, -5vw, -42px);
-  left: clamp(180px, 25vw, 380px);
+  left: clamp(350px, 48vw, 760px);
   width: clamp(100px, 11vw, 150px);
   height: auto;
   opacity: 0.58;
   transform: rotate(-2deg);
+}
+
+@media (min-width: 981px) and (max-width: 1200px) {
+  .hero-shadow-boxer {
+    left: clamp(320px, 34vw, 410px);
+  }
 }
 
 .hero-greeting {
