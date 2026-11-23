@@ -376,24 +376,20 @@ function BirdCursor() {
     last.current = initialPosition;
 
     let frame = 0;
+    let lastFrameTime = performance.now();
     let lastScrollY = window.scrollY;
     let lastScrollTime = performance.now();
     let lastTouchTime = -Infinity;
     let scrollVelocity = 0;
 
     const move = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
       target.current = { x: event.clientX, y: event.clientY };
-      if (event.pointerType === "touch") lastTouchTime = performance.now();
       scheduleFrame();
     };
     const down = (event: PointerEvent) => {
+      if (event.pointerType === "touch") return;
       birdRef.current?.classList.add("cursor-click");
-      if (event.pointerType === "touch") {
-        target.current = { x: event.clientX, y: event.clientY };
-        lastTouchTime = performance.now();
-        birdRef.current?.classList.remove("cursor-hover");
-        scheduleFrame();
-      }
     };
     const up = () => birdRef.current?.classList.remove("cursor-click");
     const over = (event: PointerEvent) => {
@@ -441,11 +437,14 @@ function BirdCursor() {
       };
       scheduleFrame();
     };
-    const tick = () => {
+    const tick = (now: number) => {
       frame = 0;
-      current.current.x += (target.current.x - current.current.x) * 0.16;
+      const elapsed = Math.min(Math.max(now - lastFrameTime, 0), 50);
+      const smoothing = 1 - Math.pow(0.84, elapsed / (1000 / 60));
+      lastFrameTime = now;
+      current.current.x += (target.current.x - current.current.x) * smoothing;
       current.current.y +=
-        (target.current.y - scrollVelocity * 12 - current.current.y) * 0.16;
+        (target.current.y - scrollVelocity * 12 - current.current.y) * smoothing;
       const dx = current.current.x - last.current.x;
       const dy = current.current.y - last.current.y;
       const angle = Math.atan2(dy, Math.abs(dx)) * (180 / Math.PI);
@@ -454,7 +453,7 @@ function BirdCursor() {
         birdRef.current.style.setProperty("--speed", `${Math.min(Math.hypot(dx, dy), 18)}`);
       }
       last.current = { ...current.current };
-      scrollVelocity *= 0.9;
+      scrollVelocity *= Math.pow(0.9, elapsed / (1000 / 60));
       if (
         Math.abs(target.current.x - current.current.x) > 0.1 ||
         Math.abs(target.current.y - current.current.y) > 0.1 ||
@@ -1334,7 +1333,7 @@ export default function App() {
               fetchPriority="high"
               decoding="async"
             />
-            <span>Between data & imagination</span>
+            <span></span>
           </div>
           <button
             className="scroll-cue"
