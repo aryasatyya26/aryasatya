@@ -2843,11 +2843,23 @@ blockquote {
 }
 
 @media (pointer: coarse), (max-width: 680px) {
+  .world *,
+  .world *::before,
+  .world *::after {
+    animation: none !important;
+  }
+
   .moon,
   .mountain,
   .foreground {
     transform: none;
     transition: none;
+  }
+
+  .world .forest-glow,
+  .world .glow-rise i,
+  .world .environment-bird {
+    will-change: auto;
   }
 
   .home-welcome-bird {
