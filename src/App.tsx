@@ -876,6 +876,7 @@ export default function App() {
     let lastFlockScrollY = window.scrollY;
     let flockResetTimer = 0;
     let scrollFrame = 0;
+    const keepRevealedOnMobile = window.matchMedia("(pointer: coarse), (max-width: 680px)").matches;
 
     const updateScroll = () => {
       scrollFrame = 0;
@@ -925,7 +926,8 @@ export default function App() {
       (entries) =>
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActive(entry.target.id);
+            const sectionId = entry.target.id;
+            setActive((current) => (current === sectionId ? current : sectionId));
             entry.target.classList.add("in-view");
           }
         }),
@@ -934,7 +936,11 @@ export default function App() {
     const revealObserver = new IntersectionObserver(
       (entries) =>
         entries.forEach((entry) => {
-          entry.target.classList.toggle("in-view", entry.isIntersecting);
+          if (entry.isIntersecting) {
+            entry.target.classList.add("in-view");
+          } else if (!keepRevealedOnMobile) {
+            entry.target.classList.remove("in-view");
+          }
         }),
       { rootMargin: "-10% 0px -15%", threshold: 0.01 },
     );
