@@ -1383,6 +1383,7 @@
 
 .site-header nav button {
   position: relative;
+  isolation: isolate;
   padding: 4px 0;
   color: rgba(234, 238, 236, 0.48);
   font-size: 9px;
@@ -1399,13 +1400,23 @@
 .site-header nav button::after {
   content: "";
   position: absolute;
-  right: 0;
-  bottom: -4px;
-  left: 0;
-  height: 1px;
-  background: var(--amber);
-  transform: scaleX(0);
-  transition: transform 0.35s;
+  inset: -7px -10px;
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 219, 126, 0.56) 0%,
+    rgba(245, 128, 57, 0.38) 34%,
+    rgba(195, 59, 44, 0.28) 62%,
+    transparent 84%
+  );
+  filter: blur(7px);
+  opacity: 0;
+  transform: scale(0.78);
+  transition:
+    opacity 0.16s ease,
+    transform 0.2s ease;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .site-header nav button:hover,
@@ -1413,8 +1424,22 @@
   color: var(--white);
 }
 
+.site-header nav button:hover::after {
+  opacity: 0.42;
+  transform: scale(0.94);
+}
+
+.site-header nav button.active {
+  color: #fff0c4;
+  text-shadow:
+    0 0 7px rgba(255, 222, 141, 0.84),
+    0 0 17px rgba(213, 67, 45, 0.58);
+}
+
 .site-header nav button.active::after {
-  transform: scaleX(1);
+  opacity: 1;
+  transform: scale(1);
+  animation: navFireGlow 1.8s ease-in-out infinite;
 }
 
 .availability {
@@ -2992,6 +3017,20 @@ blockquote {
   }
 }
 
+@keyframes navFireGlow {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scale(0.92);
+    filter: blur(6px);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.06);
+    filter: blur(9px);
+  }
+}
+
 @keyframes introLight {
   from {
     opacity: 0;
@@ -3692,7 +3731,6 @@ blockquote {
 
   .site-header nav button::after {
     display: block;
-    bottom: 1px;
   }
 
   .menu-button {

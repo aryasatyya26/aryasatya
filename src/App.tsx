@@ -849,6 +849,8 @@ export default function App() {
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
   const musicRequestRef = useRef(0);
+  const navigationTargetRef = useRef<string | null>(null);
+  const navigationScrollTimeoutRef = useRef<number | null>(null);
 
   const completeEntryLoading = useCallback(() => {
     setEntryTransition(true);
@@ -1092,6 +1094,15 @@ export default function App() {
         intersectingSections.forEach((entry) => entry.target.classList.add("in-view"));
 
         const activeLine = window.innerHeight * 0.35;
+        const pendingTarget = navigationTargetRef.current
+          ? document.getElementById(navigationTargetRef.current)
+          : null;
+        if (pendingTarget) {
+          const bounds = pendingTarget.getBoundingClientRect();
+          if (bounds.top > activeLine || bounds.bottom <= activeLine) return;
+          navigationTargetRef.current = null;
+        }
+
         const activeSection = Array.from(
           document.querySelectorAll<HTMLElement>("section[id]"),
         ).find((section) => {
@@ -1131,15 +1142,38 @@ export default function App() {
       cancelAnimationFrame(scrollFrame);
       cancelAnimationFrame(pointerFrame);
       window.clearTimeout(flockResetTimer);
+      if (navigationScrollTimeoutRef.current !== null) {
+        window.clearTimeout(navigationScrollTimeoutRef.current);
+      }
     };
   }, []);
 
   const scrollTo = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
+      setActive(id);
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
+      if (navigationScrollTimeoutRef.current !== null) {
+        window.clearTimeout(navigationScrollTimeoutRef.current);
+        navigationScrollTimeoutRef.current = null;
+      }
+
+      const activeLine = window.innerHeight * 0.35;
+      const bounds = target.getBoundingClientRect();
+      const targetIsActive = bounds.top <= activeLine && bounds.bottom > activeLine;
+      navigationTargetRef.current = targetIsActive ? null : id;
+      if (!targetIsActive) {
+        navigationScrollTimeoutRef.current = window.setTimeout(
+          () => {
+            navigationTargetRef.current = null;
+            navigationScrollTimeoutRef.current = null;
+          },
+          prefersReducedMotion ? 250 : 1800,
+        );
+      }
+
       if (window.location.hash !== `#${id}`) {
         window.history.pushState(null, "", `#${id}`);
       }
