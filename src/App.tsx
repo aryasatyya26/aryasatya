@@ -233,12 +233,12 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
             <path d="M99 138c10 9 18 22 21 38l10 36v25l-2 6h22l8-6h-28l-13-20-13-43-7-47Z" />
           </g>
           <g className="shadow-arm shadow-arm-left">
-            <path d="M78 68 116 58h55l4 17h-59L78 88Z" />
-            <circle cx="178" cy="68" r="11" />
+            <path d="M78 68 113 58h52l4 17h-54L78 84Z" />
+            <circle cx="175" cy="67" r="11" />
           </g>
           <g className="shadow-arm shadow-arm-right">
-            <path d="M78 76c12 2 22 13 29 26 4 7 11 10 18 7l12-17 13 8-16 24c-7 9-21 10-32 4-10-6-12-17-17-27L77 91Z" />
-            <circle cx="153" cy="96" r="11" />
+            <path d="M78 76 109 72l42 9-3 17-42-8-28 3Z" />
+            <circle cx="161" cy="90" r="11" />
           </g>
         </g>
         <g className="shadow-arm shadow-arm-left shadow-arm-left-effects">
@@ -249,6 +249,16 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
             <circle cx="197" cy="77" r="2.4" />
             <circle cx="210" cy="57" r="1.3" />
             <circle cx="207" cy="83" r="1.5" />
+          </g>
+        </g>
+        <g className="shadow-arm shadow-arm-right shadow-arm-right-effects">
+          <g className="shadow-jab-sparks shadow-jab-sparks-right">
+            <circle cx="178" cy="79" r="2" />
+            <circle cx="188" cy="83" r="2.8" />
+            <circle cx="194" cy="91" r="1.7" />
+            <circle cx="184" cy="98" r="2.4" />
+            <circle cx="198" cy="77" r="1.3" />
+            <circle cx="197" cy="103" r="1.5" />
           </g>
         </g>
       </g>
@@ -664,7 +674,7 @@ function MusicPlayer({
 
   return (
     <aside className={`music-player ${expanded ? "expanded" : ""}`}>
-      <audio ref={audioRef} src="/Dont.mp3?v=3" loop preload="auto" />
+      <audio ref={audioRef} src="/Dont.mp3?v=3" loop preload="none" />
       <button
         className="music-main"
         aria-label={musicOn || musicPending ? "Pause ambient music" : "Play ambient music"}
@@ -803,6 +813,9 @@ function PerformanceHud() {
     let intervalStart = performance.now();
 
     const measure = (now: number) => {
+      frame = 0;
+      if (document.visibilityState === "hidden") return;
+
       frames += 1;
       const elapsed = now - intervalStart;
       if (elapsed >= 500) {
@@ -812,9 +825,23 @@ function PerformanceHud() {
       }
       frame = requestAnimationFrame(measure);
     };
+    const syncVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        window.cancelAnimationFrame(frame);
+        frame = 0;
+      } else if (!frame) {
+        frames = 0;
+        intervalStart = performance.now();
+        frame = requestAnimationFrame(measure);
+      }
+    };
 
-    frame = requestAnimationFrame(measure);
-    return () => cancelAnimationFrame(frame);
+    document.addEventListener("visibilitychange", syncVisibility);
+    syncVisibility();
+    return () => {
+      document.removeEventListener("visibilitychange", syncVisibility);
+      window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
@@ -871,9 +898,20 @@ export default function App() {
       setMusicOnState(false);
       setMusicPending(false);
     };
+    const syncVisibility = () => {
+      const isHidden = document.visibilityState === "hidden";
+      document.documentElement.classList.toggle("page-hidden", isHidden);
+      if (isHidden) stopMusic();
+    };
 
+    document.addEventListener("visibilitychange", syncVisibility);
     window.addEventListener("pagehide", stopMusic);
-    return () => window.removeEventListener("pagehide", stopMusic);
+    syncVisibility();
+    return () => {
+      document.removeEventListener("visibilitychange", syncVisibility);
+      window.removeEventListener("pagehide", stopMusic);
+      document.documentElement.classList.remove("page-hidden");
+    };
   }, []);
 
   useEffect(() => {
@@ -1220,7 +1258,9 @@ export default function App() {
 
   return (
     <div
-      className={`app ${entered ? "experience-entered" : ""}`}
+      className={`app ${entered ? "experience-entered" : ""}${
+        introVisible ? " intro-visible" : ""
+      }${entryLoading ? " entry-loading-active" : ""}`}
       onClickCapture={handleInteractiveSfx}
     >
       <AtmosphericBackground entered={entered} />
