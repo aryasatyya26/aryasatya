@@ -945,6 +945,13 @@ export default function App() {
     [sfxOn],
   );
 
+  const handleInteractiveSfx = (event: MouseEvent<HTMLDivElement>) => {
+    if (!(event.target instanceof Element)) return;
+    const control = event.target.closest("button,a");
+    if (!control) return;
+    playSfx(control.getAttribute("data-sfx") === "bomb" ? "bomb" : "ping");
+  };
+
   const setMusicOn = async (value: boolean) => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -1138,17 +1145,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    const click = (event: Event) => {
-      if (!(event.target instanceof Element)) return;
-      const control = event.target.closest("button,a");
-      if (!control) return;
-      playSfx(control.getAttribute("data-sfx") === "bomb" ? "bomb" : "ping");
-    };
-    document.addEventListener("click", click);
-    return () => document.removeEventListener("click", click);
-  }, [playSfx]);
-
   const scrollTo = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
@@ -1200,7 +1196,10 @@ export default function App() {
   };
 
   return (
-    <div className={`app ${entered ? "experience-entered" : ""}`}>
+    <div
+      className={`app ${entered ? "experience-entered" : ""}`}
+      onClickCapture={handleInteractiveSfx}
+    >
       <AtmosphericBackground entered={entered} />
       <BirdCursor />
       <PerformanceHud />
