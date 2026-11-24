@@ -528,18 +528,6 @@
   filter: drop-shadow(0 0 14px var(--amber));
 }
 
-.shadow-boxer {
-  display: block;
-  fill: #fff;
-  stroke: none;
-  pointer-events: none;
-  overflow: visible;
-}
-
-.shadow-fighter-silhouette {
-  opacity: 0.25;
-}
-
 .intro {
   position: fixed;
   inset: 0;
@@ -566,17 +554,6 @@
   inset: 0;
   background: radial-gradient(circle at center, transparent 0 28%, rgba(1, 13, 29, 0.72) 100%);
   animation: introLight 4s ease-out both;
-}
-
-.intro-shadow-boxer {
-  position: absolute;
-  z-index: 1;
-  top: 61%;
-  left: calc(50% - min(33.5vw, 380px) - clamp(150px, 14.5vw, 188px) - 24px);
-  width: clamp(175px, 17vw, 220px);
-  height: auto;
-  opacity: 0.72;
-  transform: translateY(-50%);
 }
 
 .intro-leaving .intro {
@@ -1541,24 +1518,6 @@ section {
 
 .hero-greeting-stage {
   position: relative;
-}
-
-.hero-shadow-boxer {
-  position: absolute;
-  z-index: 0;
-  top: clamp(0px, 1.5vw, 24px);
-  left: clamp(350px, 45vw, 700px);
-  width: clamp(100px, 11vw, 150px);
-  height: auto;
-  opacity: 0.58;
-  transform: rotate(-2deg);
-}
-
-@media (min-width: 981px) and (max-width: 1200px) {
-  .hero-shadow-boxer {
-    top: clamp(-72px, -5vw, -42px);
-    left: clamp(320px, 34vw, 410px);
-  }
 }
 
 .hero-greeting {
@@ -3621,18 +3580,6 @@ html.page-scrolled .music-player {
     display: none;
   }
 
-  .intro-shadow-boxer {
-    top: 60%;
-    left: calc(50% - min(33.5vw, 380px) - clamp(103px, 12.8vw, 126px) - 16px);
-    width: clamp(120px, 15vw, 148px);
-  }
-
-  .hero-shadow-boxer {
-    top: clamp(-60px, -8vw, -34px);
-    left: clamp(66px, 16vw, 160px);
-    width: clamp(100px, 21vw, 155px);
-  }
-
   .hero-content {
     width: 100%;
   }
@@ -3986,12 +3933,6 @@ html.page-scrolled .music-player {
     width: clamp(36px, 8.5vw, 46px);
   }
 
-  .intro-shadow-boxer {
-    top: 59%;
-    left: clamp(30px, 8vw, 42px);
-    width: clamp(96px, 29vw, 128px);
-  }
-
   .intro h1 {
     font-size: clamp(3rem, 17vw, 5.5rem);
     line-height: 0.78;
@@ -4026,12 +3967,6 @@ html.page-scrolled .music-player {
     top: 12%;
     right: 2%;
     width: clamp(160px, 44vw, 280px);
-  }
-
-  .hero-shadow-boxer {
-    top: clamp(-88px, -22vw, -64px);
-    left: clamp(44px, 12vw, 82px);
-    width: clamp(100px, 28vw, 140px);
   }
 
   .hero {

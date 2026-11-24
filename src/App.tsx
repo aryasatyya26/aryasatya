@@ -224,38 +224,6 @@ function BrandFlames({ className = "" }: { className?: string }) {
   );
 }
 
-function ShadowBoxer({ className = "" }: { className?: string }) {
-  return (
-    <svg
-      className={`shadow-boxer ${className}`}
-      viewBox="0 0 220 260"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <g className="shadow-fighter-body">
-        <g className="shadow-fighter-silhouette">
-          <circle cx="91" cy="39" r="15" />
-          <path d="M88 51 80 59Q74 63 74 73l4 26q1 9 5 16l-10 26q18 19 38 0l-9-26q4-7 5-16l6-26q-1-11-12-16Z" />
-          <g className="shadow-leg shadow-leg-front">
-            <path d="M78 138c-9 10-15 22-16 40l-12 33 3 26-2 6h22l8-6H53l16-21 12-39 10-41Z" />
-          </g>
-          <g className="shadow-leg shadow-leg-back">
-            <path d="M99 138c10 9 18 22 21 38l10 36v25l-2 6h22l8-6h-28l-13-20-13-43-7-47Z" />
-          </g>
-          <g className="shadow-arm shadow-arm-left">
-            <path d="M78 68 113 58h52l4 17h-54L78 84Z" />
-            <circle cx="175" cy="67" r="11" />
-          </g>
-          <g className="shadow-arm shadow-arm-right">
-            <path d="M78 76 109 72l42 9-3 17-42-8-28 3Z" />
-            <circle cx="161" cy="90" r="11" />
-          </g>
-        </g>
-      </g>
-    </svg>
-  );
-}
-
 function AtmosphericWorld({ entered }: { entered: boolean }) {
   const stars = Array.from({ length: 28 }, (_, i) => ({
     left: `${(i * 37) % 100}%`,
@@ -516,7 +484,6 @@ function Intro({
     <div className="intro" role="dialog" aria-label="Enter portfolio experience">
       <div className="intro-orbit orbit-one" />
       <div className="intro-orbit orbit-two" />
-      <ShadowBoxer className="intro-shadow-boxer" />
       <div className="intro-birds" aria-hidden="true">
         <div className="intro-bird intro-bird-one">
           <Bird />
@@ -1326,7 +1293,6 @@ export default function App() {
           <div className="hero-content reveal">
             <div className="hero-greeting-stage">
               <p className="hero-greeting">Haii</p>
-              <ShadowBoxer className="hero-shadow-boxer" />
             </div>
             <p className="eyebrow">Data analyst · Web developer</p>
             <h1>
