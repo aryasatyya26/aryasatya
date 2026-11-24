@@ -664,7 +664,7 @@ function MusicPlayer({
 
   return (
     <aside className={`music-player ${expanded ? "expanded" : ""}`}>
-      <audio ref={audioRef} src="/Guilding.mp3" loop preload="none" />
+      <audio ref={audioRef} src="/Dont.mp3" loop preload="none" />
       <button
         className="music-main"
         aria-label={musicOn || musicPending ? "Pause ambient music" : "Play ambient music"}
@@ -1004,7 +1004,7 @@ export default function App() {
       if (requestId !== musicRequestRef.current) return;
       setMusicOnState(false);
       setMusicPending(false);
-      console.error("Unable to play Guilding.mp3.", error);
+      console.error("Unable to play Dont.mp3.", error);
       setToast("Music could not start. Press play to try again.");
       window.setTimeout(() => setToast(""), 4000);
     }
@@ -1016,7 +1016,6 @@ export default function App() {
     setEntryLoading(true);
     setEntered(true);
     sound(180, 0.45);
-    void setMusicOn(true);
   };
 
   const returnToEntrance = () => {
