@@ -532,7 +532,7 @@ function Intro({
       </h1>
       <p className="intro-title">Data analyst · Web developer · Creative thinker</p>
       <div className="intro-actions">
-        <button className="enter-button magnetic" data-custom-sfx onClick={onEnter}>
+        <button className="enter-button magnetic" data-sfx="bomb" onClick={onEnter}>
           <span>Click to enter</span>
           <i />
         </button>
@@ -845,9 +845,12 @@ export default function App() {
   const [sfxOn, setSfxOn] = useState(true);
   const [toast, setToast] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
+  const sfxAudioRefs = useRef<{ bomb: HTMLAudioElement | null; ping: HTMLAudioElement | null }>({
+    bomb: null,
+    ping: null,
+  });
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
-  const audioContext = useRef<AudioContext | null>(null);
   const musicRequestRef = useRef(0);
 
   const completeEntryLoading = useCallback(() => {
@@ -925,61 +928,22 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [homeWelcome]);
 
-  const sound = (frequency = 520, duration = 0.16) => {
-    if (!sfxOn) return;
-    const Context = window.AudioContext || window.webkitAudioContext;
-    if (!Context) return;
-    const context = audioContext.current || new Context();
-    audioContext.current = context;
+  const playSfx = useCallback(
+    (name: "bomb" | "ping") => {
+      if (!sfxOn) return;
+      const audio = sfxAudioRefs.current[name];
+      if (!audio) {
+        console.error(`Unable to play ${name}.mp3: audio element is unavailable.`);
+        return;
+      }
 
-    const play = () => {
-      const now = context.currentTime;
-      const filter = context.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(Math.max(frequency * 4, 1200), now);
-      filter.frequency.exponentialRampToValueAtTime(
-        Math.max(frequency * 1.8, 700),
-        now + duration * 1.5,
-      );
-      filter.Q.setValueAtTime(0.7, now);
-
-      const tones: { type: OscillatorType; ratio: number; level: number; decay: number }[] = [
-        { type: "sine", ratio: 1, level: 0.045, decay: duration },
-        { type: "triangle", ratio: 1.5, level: 0.015, decay: duration * 1.5 },
-        { type: "sine", ratio: 0.5, level: 0.016, decay: duration * 0.85 },
-      ];
-
-      tones.forEach(({ type, ratio, level, decay }) => {
-        const oscillator = context.createOscillator();
-        const envelope = context.createGain();
-        oscillator.type = type;
-        oscillator.frequency.setValueAtTime(frequency * ratio, now);
-        oscillator.frequency.exponentialRampToValueAtTime(
-          frequency * ratio * 0.78,
-          now + decay,
-        );
-        envelope.gain.setValueAtTime(0.0001, now);
-        envelope.gain.exponentialRampToValueAtTime(level, now + 0.008);
-        envelope.gain.exponentialRampToValueAtTime(0.0001, now + decay);
-        oscillator.connect(envelope).connect(filter);
-        oscillator.start(now);
-        oscillator.stop(now + decay + 0.02);
+      audio.currentTime = 0;
+      void audio.play().catch((error: unknown) => {
+        console.error(`Unable to play ${name}.mp3.`, error);
       });
-
-      filter.connect(context.destination);
-    };
-
-    if (context.state === "suspended") {
-      void context
-        .resume()
-        .then(play)
-        .catch((error: unknown) => {
-          console.error("Unable to resume audio for interactive sound.", error);
-        });
-    } else {
-      play();
-    }
-  };
+    },
+    [sfxOn],
+  );
 
   const setMusicOn = async (value: boolean) => {
     const audio = audioRef.current;
@@ -1015,7 +979,6 @@ export default function App() {
     setEntryWelcome(true);
     setEntryLoading(true);
     setEntered(true);
-    sound(180, 0.45);
   };
 
   const returnToEntrance = () => {
@@ -1179,11 +1142,12 @@ export default function App() {
     const click = (event: Event) => {
       if (!(event.target instanceof Element)) return;
       const control = event.target.closest("button,a");
-      if (control && !control.hasAttribute("data-custom-sfx")) sound(610, 0.17);
+      if (!control) return;
+      playSfx(control.getAttribute("data-sfx") === "bomb" ? "bomb" : "ping");
     };
     document.addEventListener("click", click);
     return () => document.removeEventListener("click", click);
-  });
+  }, [playSfx]);
 
   const scrollTo = (id: string) => {
     const target = document.getElementById(id);
@@ -1224,7 +1188,6 @@ export default function App() {
   const copyEmail = async () => {
     await navigator.clipboard.writeText("aryasatyya26@gmail.com");
     setToast("Email copied to clipboard");
-    sound(880, 0.14);
     window.setTimeout(() => setToast(""), 2600);
   };
 
@@ -1262,6 +1225,7 @@ export default function App() {
       <header className="site-header">
         <button
           className="monogram"
+          data-sfx="bomb"
           onClick={returnToEntrance}
           aria-label="ARYASATYA NARYAMA — return to entrance"
         >
@@ -1529,7 +1493,7 @@ export default function App() {
               </p>
               <a href="mailto:aryasatyya26@gmail.com">aryasatyya26@gmail.com</a>
               <div className="contact-actions">
-                <button className="primary-button" data-custom-sfx onClick={copyEmail}>
+                <button className="primary-button" onClick={copyEmail}>
                   Copy email <Icon name="copy" size={15} />
                 </button>
                 <a
@@ -1589,12 +1553,22 @@ export default function App() {
       <div className={`toast ${toast ? "visible" : ""}`} role="status">
         {toast}
       </div>
+      <audio
+        ref={(audio) => {
+          sfxAudioRefs.current.bomb = audio;
+        }}
+        src="/Bomb.mp3"
+        preload="auto"
+        aria-hidden="true"
+      />
+      <audio
+        ref={(audio) => {
+          sfxAudioRefs.current.ping = audio;
+        }}
+        src="/Ping.mp3"
+        preload="auto"
+        aria-hidden="true"
+      />
     </div>
   );
-}
-
-declare global {
-  interface Window {
-    webkitAudioContext?: typeof AudioContext;
-  }
 }
