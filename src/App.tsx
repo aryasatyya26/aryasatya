@@ -1,4 +1,4 @@
-import { FormEvent, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, MouseEvent, memo, useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Lenis from "lenis";
 
@@ -278,7 +278,7 @@ function AtmosphericWorld({ entered }: { entered: boolean }) {
   );
 }
 
-function AtmosphericBackground({ entered }: { entered: boolean }) {
+function AtmosphericBackgroundView({ entered }: { entered: boolean }) {
   return createPortal(
     <div className="background-scene" aria-hidden="true">
       <AtmosphericWorld entered={entered} />
@@ -331,7 +331,9 @@ function AtmosphericBackground({ entered }: { entered: boolean }) {
   );
 }
 
-function BirdCursor() {
+const AtmosphericBackground = memo(AtmosphericBackgroundView);
+
+const BirdCursor = memo(function BirdCursor() {
   const birdRef = useRef<HTMLDivElement>(null);
   const target = useRef({ x: -100, y: -100 });
   const current = useRef({ x: -100, y: -100 });
@@ -471,7 +473,7 @@ function BirdCursor() {
       <i />
     </div>
   );
-}
+});
 
 function Intro({
   onEnter,

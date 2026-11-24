@@ -242,7 +242,6 @@
   overflow: visible;
   transform-origin: center;
   animation: horizonCloudDrift 19s ease-in-out infinite alternate;
-  will-change: transform;
 }
 
 .horizon-cloud-a {
@@ -305,7 +304,6 @@
   mix-blend-mode: screen;
   opacity: 0.58;
   animation: forestGlow 16s ease-in-out infinite alternate;
-  will-change: transform, opacity;
 }
 
 .world-entered .forest-glow {
@@ -336,7 +334,6 @@
   filter: blur(1px);
   opacity: 0;
   animation: glowRise 14s linear infinite;
-  will-change: transform, opacity;
 }
 
 .dust i {
@@ -373,7 +370,6 @@
   filter: drop-shadow(0 0 10px var(--bird-glow, rgba(218, 228, 230, 0.36)));
   animation: worldBird var(--bird-duration, 34s) cubic-bezier(0.2, 0.55, 0.55, 0.85)
     var(--bird-delay, 0s) infinite;
-  will-change: transform, opacity;
 }
 
 .environment-birds {
