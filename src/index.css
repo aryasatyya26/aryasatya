@@ -1175,7 +1175,7 @@
   inset: -6px -14px;
   overflow: hidden;
   border-radius: inherit;
-  opacity: 0.78;
+  opacity: 0.86;
   mix-blend-mode: screen;
   pointer-events: none;
 }
@@ -1184,15 +1184,17 @@
   content: "";
   position: absolute;
   right: -5%;
-  bottom: -34%;
+  bottom: -32%;
   left: -5%;
-  height: 72%;
+  height: 82%;
   border-radius: 50%;
   background:
-    radial-gradient(ellipse at center bottom, rgba(255, 202, 81, 0.24), transparent 34%),
-    radial-gradient(ellipse at center bottom, rgba(227, 34, 20, 0.82), transparent 74%);
+    radial-gradient(ellipse at 16% 100%, rgba(255, 112, 34, 0.42), transparent 62%),
+    radial-gradient(ellipse at 48% 100%, rgba(255, 208, 91, 0.32), transparent 58%),
+    radial-gradient(ellipse at 82% 100%, rgba(255, 93, 30, 0.4), transparent 64%),
+    linear-gradient(to top, rgba(207, 27, 21, 0.58), transparent 82%);
   transform-origin: center bottom;
-  animation: brandFireBase 1.25s ease-in-out infinite alternate;
+  animation: brandFireBase 1.05s ease-in-out infinite alternate;
 }
 
 .brand-fire i {
@@ -1201,87 +1203,86 @@
   left: var(--flame-x);
   width: var(--flame-width);
   height: var(--flame-height);
-  border-radius: 50% 50% 14% 14%;
+  border-radius: 50% 50% 42% 42% / 42% 42% 30% 30%;
   background: linear-gradient(
     to top,
-    rgba(255, 231, 153, 0.98) 0%,
-    rgba(255, 132, 32, 0.98) 9%,
-    rgba(241, 47, 25, 0.96) 27%,
-    rgba(189, 18, 19, 0.78) 62%,
-    rgba(111, 11, 15, 0) 100%
+    rgba(255, 228, 145, 0.88) 0%,
+    rgba(255, 151, 48, 0.82) 28%,
+    rgba(238, 50, 25, 0.58) 64%,
+    rgba(172, 22, 21, 0.18) 88%,
+    transparent 100%
   );
-  clip-path: polygon(0 100%, 12% 66%, 25% 80%, 34% 39%, 47% 65%, 59% 0, 72% 58%, 84% 29%, 100% 100%);
   transform-origin: center bottom;
   animation: brandFlameRise var(--flame-duration) ease-in-out var(--flame-delay) infinite;
 }
 
 .brand-fire i:nth-child(1) {
   --flame-x: 1%;
-  --flame-width: 6%;
-  --flame-height: 74%;
-  --flame-duration: 0.88s;
+  --flame-width: 30%;
+  --flame-height: 76%;
+  --flame-duration: 0.92s;
   --flame-delay: -0.34s;
 }
 
 .brand-fire i:nth-child(2) {
   --flame-x: 9%;
-  --flame-width: 5%;
-  --flame-height: 90%;
-  --flame-duration: 1.12s;
+  --flame-width: 28%;
+  --flame-height: 84%;
+  --flame-duration: 1.04s;
   --flame-delay: -0.58s;
 }
 
 .brand-fire i:nth-child(3) {
   --flame-x: 18%;
-  --flame-width: 7%;
-  --flame-height: 68%;
-  --flame-duration: 0.96s;
+  --flame-width: 30%;
+  --flame-height: 70%;
+  --flame-duration: 0.88s;
   --flame-delay: -0.12s;
 }
 
 .brand-fire i:nth-child(4) {
   --flame-x: 28%;
-  --flame-width: 5%;
-  --flame-height: 84%;
-  --flame-duration: 1.2s;
+  --flame-width: 29%;
+  --flame-height: 82%;
+  --flame-duration: 1.08s;
   --flame-delay: -0.73s;
 }
 
 .brand-fire i:nth-child(5) {
   --flame-x: 38%;
-  --flame-width: 6%;
-  --flame-height: 70%;
-  --flame-duration: 0.9s;
+  --flame-width: 31%;
+  --flame-height: 72%;
+  --flame-duration: 0.94s;
   --flame-delay: -0.28s;
 }
 
 .brand-fire i:nth-child(6) {
   --flame-x: 48%;
-  --flame-width: 7%;
-  --flame-height: 92%;
-  --flame-duration: 1.16s;
+  --flame-width: 32%;
+  --flame-height: 86%;
+  --flame-duration: 1.1s;
   --flame-delay: -0.62s;
 }
 
 .brand-fire i:nth-child(7) {
   --flame-x: 59%;
-  --flame-width: 5%;
+  --flame-width: 28%;
   --flame-height: 76%;
-  --flame-duration: 1s;
+  --flame-duration: 0.9s;
   --flame-delay: -0.18s;
 }
 
 .brand-fire i:nth-child(8) {
   --flame-x: 68%;
-  --flame-width: 6%;
-  --flame-height: 88%;
-  --flame-duration: 1.24s;
+  --flame-width: 30%;
+  --flame-height: 84%;
+  --flame-duration: 1.06s;
   --flame-delay: -0.82s;
 }
 
 .brand-fire i:nth-child(9) {
   --flame-x: 78%;
-  --flame-width: 7%;
+  --flame-width: 29%;
   --flame-height: 72%;
   --flame-duration: 0.92s;
   --flame-delay: -0.42s;
@@ -1289,17 +1290,17 @@
 
 .brand-fire i:nth-child(10) {
   --flame-x: 88%;
-  --flame-width: 5%;
-  --flame-height: 86%;
-  --flame-duration: 1.08s;
+  --flame-width: 31%;
+  --flame-height: 82%;
+  --flame-duration: 1.02s;
   --flame-delay: -0.67s;
 }
 
 .brand-fire i:nth-child(11) {
-  --flame-x: 96%;
-  --flame-width: 4%;
-  --flame-height: 66%;
-  --flame-duration: 1.18s;
+  --flame-x: 90%;
+  --flame-width: 28%;
+  --flame-height: 70%;
+  --flame-duration: 1.08s;
   --flame-delay: -0.22s;
 }
 
@@ -1315,7 +1316,7 @@
 }
 
 .enter-button .brand-fire i {
-  width: 7px;
+  width: 30%;
 }
 
 .app.intro-visible .monogram .brand-fire::before,
@@ -3240,27 +3241,27 @@ blockquote {
 
 @keyframes brandFireBase {
   from {
-    opacity: 0.38;
-    transform: scaleX(0.9);
+    opacity: 0.42;
+    transform: scaleX(0.94) scaleY(0.96);
   }
   to {
-    opacity: 0.72;
-    transform: scaleX(1.04);
+    opacity: 0.76;
+    transform: scaleX(1.04) scaleY(1.02);
   }
 }
 
 @keyframes brandFlameRise {
   0% {
-    opacity: 0.48;
-    transform: translate3d(0, 2px, 0) scaleY(0.66) skewX(-5deg);
+    opacity: 0.58;
+    transform: translate3d(1px, 2px, 0) scale(0.96, 0.88) skewX(-2deg);
   }
-  48% {
-    opacity: 0.95;
-    transform: translate3d(1px, -1px, 0) scaleY(1.04) skewX(4deg);
+  45% {
+    opacity: 0.82;
+    transform: translate3d(-1px, -1px, 0) scale(1.03, 1.02) skewX(2deg);
   }
   100% {
-    opacity: 0.62;
-    transform: translate3d(-1px, -3px, 0) scaleY(0.8) skewX(-2deg);
+    opacity: 0.64;
+    transform: translate3d(2px, -3px, 0) scale(0.98, 0.94) skewX(-1deg);
   }
 }
 
