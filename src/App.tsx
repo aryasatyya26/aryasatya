@@ -872,16 +872,9 @@ export default function App() {
       setMusicOnState(false);
       setMusicPending(false);
     };
-    const stopMusicWhenHidden = () => {
-      if (document.visibilityState === "hidden") stopMusic();
-    };
 
     window.addEventListener("pagehide", stopMusic);
-    document.addEventListener("visibilitychange", stopMusicWhenHidden);
-    return () => {
-      window.removeEventListener("pagehide", stopMusic);
-      document.removeEventListener("visibilitychange", stopMusicWhenHidden);
-    };
+    return () => window.removeEventListener("pagehide", stopMusic);
   }, []);
 
   useEffect(() => {
