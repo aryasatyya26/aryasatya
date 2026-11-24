@@ -3750,12 +3750,12 @@ html.page-scrolled .music-player {
 
   .monogram .brand-fire i {
     width: 22%;
-    background: linear-gradient(
-      to top,
-      rgba(255, 228, 145, 0.82) 0%,
-      rgba(255, 151, 48, 0.74) 28%,
-      rgba(238, 50, 25, 0.52) 64%,
-      rgba(172, 22, 21, 0.16) 88%,
+    background: radial-gradient(
+      ellipse 78% 112% at 50% 100%,
+      rgba(255, 235, 164, 0.9) 0%,
+      rgba(255, 174, 66, 0.82) 28%,
+      rgba(235, 76, 33, 0.68) 55%,
+      rgba(183, 31, 24, 0.36) 78%,
       transparent 100%
     );
   }
@@ -3882,6 +3882,28 @@ html.page-scrolled .music-player {
       radial-gradient(circle at 94% 48%, rgba(255, 231, 179, 0.62) 0 1px, transparent 3px);
     animation: mobileGoldSparkle 2.8s ease-in-out infinite 0.4s;
     pointer-events: none;
+  }
+
+  html:not(.page-scrolled) .monogram,
+  html:not(.page-scrolled) .site-header nav {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  html:not(.page-scrolled) .monogram::before,
+  html:not(.page-scrolled) .site-header nav::before {
+    border-color: transparent;
+    box-shadow: none;
+    opacity: 0;
+    animation: none;
+  }
+
+  html:not(.page-scrolled) .monogram::after,
+  html:not(.page-scrolled) .site-header nav::after {
+    background: none;
+    opacity: 0;
+    animation: none;
   }
 
   .site-header nav button {
