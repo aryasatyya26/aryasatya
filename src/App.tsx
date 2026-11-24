@@ -653,7 +653,7 @@ function MusicPlayer({
   setSfxOn: (value: boolean) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [volume, setVolume] = useState(0.36);
+  const [volume, setVolume] = useState(0.65);
   const [muted, setMuted] = useState(false);
 
   useEffect(() => {
@@ -664,7 +664,7 @@ function MusicPlayer({
 
   return (
     <aside className={`music-player ${expanded ? "expanded" : ""}`}>
-      <audio ref={audioRef} src="/Dont.mp3" loop preload="none" />
+      <audio ref={audioRef} src="/Dont.mp3?v=2" loop preload="auto" />
       <button
         className="music-main"
         aria-label={musicOn || musicPending ? "Pause ambient music" : "Play ambient music"}
@@ -940,9 +940,11 @@ export default function App() {
       audio.currentTime = 0;
       void audio.play().catch((error: unknown) => {
         console.error(`Unable to play ${name}.mp3.`, error);
+        setToast(`${name}.mp3 could not play. Check browser audio settings.`);
+        window.setTimeout(() => setToast(""), 4000);
       });
     },
-    [sfxOn],
+    [sfxOn, setToast],
   );
 
   const handleInteractiveSfx = (event: MouseEvent<HTMLDivElement>) => {
@@ -1556,7 +1558,7 @@ export default function App() {
         ref={(audio) => {
           sfxAudioRefs.current.bomb = audio;
         }}
-        src="/Bomb.mp3"
+        src="/Bomb.mp3?v=2"
         preload="auto"
         aria-hidden="true"
       />
@@ -1564,7 +1566,7 @@ export default function App() {
         ref={(audio) => {
           sfxAudioRefs.current.ping = audio;
         }}
-        src="/Ping.mp3"
+        src="/Ping.mp3?v=1"
         preload="auto"
         aria-hidden="true"
       />
