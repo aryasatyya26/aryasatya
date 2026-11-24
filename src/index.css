@@ -2481,6 +2481,10 @@ blockquote {
   backdrop-filter: blur(18px);
 }
 
+.app:not(.experience-entered) .music-player {
+  z-index: 160;
+}
+
 .music-player::before {
   content: "";
   position: absolute;
