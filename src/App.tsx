@@ -532,7 +532,7 @@ function Intro({
       </h1>
       <p className="intro-title">Data analyst · Web developer · Creative thinker</p>
       <div className="intro-actions">
-        <button className="enter-button magnetic" data-sfx="bomb" onClick={onEnter}>
+        <button className="enter-button magnetic" onClick={onEnter}>
           <span>Click to enter</span>
           <i />
         </button>
@@ -845,10 +845,7 @@ export default function App() {
   const [sfxOn, setSfxOn] = useState(true);
   const [toast, setToast] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
-  const sfxAudioRefs = useRef<{ bomb: HTMLAudioElement | null; ping: HTMLAudioElement | null }>({
-    bomb: null,
-    ping: null,
-  });
+  const sfxAudioRef = useRef<HTMLAudioElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
   const musicRequestRef = useRef(0);
@@ -921,30 +918,27 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [homeWelcome]);
 
-  const playSfx = useCallback(
-    (name: "bomb" | "ping") => {
-      if (!sfxOn) return;
-      const audio = sfxAudioRefs.current[name];
-      if (!audio) {
-        console.error(`Unable to play ${name}.mp3: audio element is unavailable.`);
-        return;
-      }
+  const playSfx = useCallback(() => {
+    if (!sfxOn) return;
+    const audio = sfxAudioRef.current;
+    if (!audio) {
+      console.error("Unable to play Bomb.mp3: audio element is unavailable.");
+      return;
+    }
 
-      audio.currentTime = 0;
-      void audio.play().catch((error: unknown) => {
-        console.error(`Unable to play ${name}.mp3.`, error);
-        setToast(`${name}.mp3 could not play. Check browser audio settings.`);
-        window.setTimeout(() => setToast(""), 4000);
-      });
-    },
-    [sfxOn, setToast],
-  );
+    audio.currentTime = 0;
+    void audio.play().catch((error: unknown) => {
+      console.error("Unable to play Bomb.mp3.", error);
+      setToast("Bomb.mp3 could not play. Check browser audio settings.");
+      window.setTimeout(() => setToast(""), 4000);
+    });
+  }, [sfxOn]);
 
   const handleInteractiveSfx = (event: MouseEvent<HTMLDivElement>) => {
     if (!(event.target instanceof Element)) return;
     const control = event.target.closest("button,a");
     if (!control) return;
-    playSfx(control.getAttribute("data-sfx") === "bomb" ? "bomb" : "ping");
+    playSfx();
   };
 
   const setMusicOn = async (value: boolean) => {
@@ -1219,7 +1213,6 @@ export default function App() {
       <header className="site-header">
         <button
           className="monogram"
-          data-sfx="bomb"
           onClick={returnToEntrance}
           aria-label="ARYASATYA NARYAMA — return to entrance"
         >
@@ -1548,18 +1541,8 @@ export default function App() {
         {toast}
       </div>
       <audio
-        ref={(audio) => {
-          sfxAudioRefs.current.bomb = audio;
-        }}
+        ref={sfxAudioRef}
         src="/Bomb.mp3?v=3"
-        preload="auto"
-        aria-hidden="true"
-      />
-      <audio
-        ref={(audio) => {
-          sfxAudioRefs.current.ping = audio;
-        }}
-        src="/Ping.mp3?v=2"
         preload="auto"
         aria-hidden="true"
       />

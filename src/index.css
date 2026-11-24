@@ -3539,18 +3539,65 @@ blockquote {
     top: 10px;
     width: calc(100% - 24px);
     padding: 9px 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+    border-radius: 18px;
   }
 
   .site-header nav {
-    top: 64px;
-    right: 12px;
-    left: 12px;
-    max-height: calc(100svh - 82px);
-    overflow-y: auto;
+    position: static;
+    grid-column: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: clamp(6px, 2.4vw, 12px);
+    width: 100%;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 7px 0 6px;
+    border: 0;
+    border-top: 1px solid rgba(221, 231, 231, 0.12);
+    border-radius: 0;
+    background: transparent;
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+    scrollbar-width: none;
+  }
+
+  .site-header nav::-webkit-scrollbar {
+    display: none;
   }
 
   .site-header nav button {
-    min-height: 52px;
+    display: inline-flex;
+    flex: 0 0 auto;
+    justify-content: center;
+    min-height: 28px;
+    padding: 5px 0;
+    border-bottom: 0;
+    font-family: "DM Sans", sans-serif;
+    font-size: clamp(7px, 2.1vw, 8px);
+    letter-spacing: 0.12em;
+    text-align: center;
+  }
+
+  .site-header nav button i {
+    display: none;
+  }
+
+  .site-header nav button::after {
+    display: block;
+    bottom: 0;
+  }
+
+  .menu-button {
+    display: none;
+  }
+
+  section {
+    scroll-margin-top: 100px;
   }
 
   .intro-birds {
