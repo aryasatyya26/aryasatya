@@ -3907,7 +3907,28 @@ blockquote {
 
   .monogram .brand-fire {
     inset: 2px 4px 1px;
-    opacity: 0.9;
+    opacity: 0.82;
+  }
+
+  .monogram .brand-fire::before {
+    background:
+      radial-gradient(ellipse at 16% 100%, rgba(255, 112, 34, 0.3), transparent 62%),
+      radial-gradient(ellipse at 48% 100%, rgba(255, 208, 91, 0.22), transparent 58%),
+      radial-gradient(ellipse at 82% 100%, rgba(255, 93, 30, 0.28), transparent 64%),
+      linear-gradient(to top, rgba(207, 27, 21, 0.4), transparent 82%);
+  }
+
+  .monogram .brand-fire i {
+    width: 22%;
+    border-radius: 50% 50% 38% 38% / 28% 28% 22% 22%;
+    background: linear-gradient(
+      to top,
+      rgba(255, 228, 145, 0.78) 0%,
+      rgba(255, 151, 48, 0.7) 28%,
+      rgba(238, 50, 25, 0.48) 64%,
+      rgba(172, 22, 21, 0.12) 88%,
+      transparent 100%
+    );
   }
 
   .site-header nav {
