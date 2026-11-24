@@ -664,7 +664,7 @@ function MusicPlayer({
 
   return (
     <aside className={`music-player ${expanded ? "expanded" : ""}`}>
-      <audio ref={audioRef} src="/Dont.mp3?v=2" loop preload="auto" />
+      <audio ref={audioRef} src="/Dont.mp3?v=3" loop preload="auto" />
       <button
         className="music-main"
         aria-label={musicOn || musicPending ? "Pause ambient music" : "Play ambient music"}
@@ -1551,7 +1551,7 @@ export default function App() {
         ref={(audio) => {
           sfxAudioRefs.current.bomb = audio;
         }}
-        src="/Bomb.mp3?v=2"
+        src="/Bomb.mp3?v=3"
         preload="auto"
         aria-hidden="true"
       />
@@ -1559,7 +1559,7 @@ export default function App() {
         ref={(audio) => {
           sfxAudioRefs.current.ping = audio;
         }}
-        src="/Ping.mp3?v=1"
+        src="/Ping.mp3?v=2"
         preload="auto"
         aria-hidden="true"
       />
