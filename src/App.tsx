@@ -251,26 +251,6 @@ function ShadowBoxer({ className = "" }: { className?: string }) {
             <circle cx="161" cy="90" r="11" />
           </g>
         </g>
-        <g className="shadow-arm shadow-arm-left shadow-arm-left-effects">
-          <g className="shadow-jab-sparks">
-            <circle cx="192" cy="58" r="2" />
-            <circle cx="201" cy="62" r="2.8" />
-            <circle cx="207" cy="70" r="1.7" />
-            <circle cx="197" cy="77" r="2.4" />
-            <circle cx="210" cy="57" r="1.3" />
-            <circle cx="207" cy="83" r="1.5" />
-          </g>
-        </g>
-        <g className="shadow-arm shadow-arm-right shadow-arm-right-effects">
-          <g className="shadow-jab-sparks shadow-jab-sparks-right">
-            <circle cx="178" cy="79" r="2" />
-            <circle cx="188" cy="83" r="2.8" />
-            <circle cx="194" cy="91" r="1.7" />
-            <circle cx="184" cy="98" r="2.4" />
-            <circle cx="198" cy="77" r="1.3" />
-            <circle cx="197" cy="103" r="1.5" />
-          </g>
-        </g>
       </g>
     </svg>
   );

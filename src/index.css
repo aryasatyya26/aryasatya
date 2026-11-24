@@ -536,174 +536,8 @@
   overflow: visible;
 }
 
-.app.intro-visible .hero-shadow-boxer .shadow-fighter-body,
-.app.intro-visible .hero-shadow-boxer .shadow-arm,
-.app.intro-visible .hero-shadow-boxer .shadow-leg,
-.app.entry-loading-active .shadow-boxer .shadow-fighter-body,
-.app.entry-loading-active .shadow-boxer .shadow-arm,
-.app.entry-loading-active .shadow-boxer .shadow-leg {
-  animation-play-state: paused;
-}
-
-.shadow-fighter-body {
-  transform-origin: 91px 138px;
-  transform-box: view-box;
-  animation: shadowFootwork 1.6s ease-in-out infinite;
-}
-
 .shadow-fighter-silhouette {
   opacity: 0.25;
-}
-
-.shadow-arm {
-  transform-box: view-box;
-}
-
-.shadow-arm-left {
-  transform-origin: 86px 72px;
-  animation: shadowLeftPunch 1.6s cubic-bezier(0.25, 0.7, 0.25, 1) infinite;
-}
-
-.shadow-arm-left-effects {
-  transform-box: view-box;
-  transform-origin: 86px 72px;
-  animation: shadowLeftPunch 1.6s cubic-bezier(0.25, 0.7, 0.25, 1) infinite;
-}
-
-.shadow-arm-right-effects {
-  transform-origin: 84px 78px;
-  animation: shadowRightPunch 1.6s cubic-bezier(0.25, 0.7, 0.25, 1) infinite;
-}
-
-.shadow-jab-sparks {
-  fill: #f1d89e;
-  stroke: none;
-  transform-box: fill-box;
-  transform-origin: center;
-  opacity: 0;
-  filter: drop-shadow(0 0 4px rgba(255, 215, 140, 0.88));
-  animation: shadowJabSpark 1.6s cubic-bezier(0.22, 0.61, 0.36, 1) infinite;
-  pointer-events: none;
-}
-
-.shadow-jab-sparks-right {
-  animation-delay: 0.8s;
-}
-
-.shadow-arm-right {
-  transform-box: view-box;
-  transform-origin: 84px 78px;
-  animation: shadowRightPunch 1.6s cubic-bezier(0.25, 0.7, 0.25, 1) infinite;
-}
-
-.shadow-leg {
-  transform-box: view-box;
-}
-
-.shadow-leg-front {
-  transform-origin: 78px 142px;
-  animation: shadowFrontFootwork 1.6s ease-in-out infinite;
-}
-
-.shadow-leg-back {
-  transform-origin: 99px 142px;
-  animation: shadowBackFootwork 1.6s ease-in-out -0.8s infinite;
-}
-
-@keyframes shadowFootwork {
-  0%,
-  100% {
-    transform: translate3d(-5px, 3px, 0) skewX(-3deg) scaleY(1) rotate(-2deg);
-  }
-  25% {
-    transform: translate3d(8px, -5px, 0) skewX(5deg) scaleY(0.97) rotate(4deg);
-  }
-  50% {
-    transform: translate3d(4px, 2px, 0) skewX(-5deg) scaleY(1.02) rotate(-4deg);
-  }
-  75% {
-    transform: translate3d(-8px, -2px, 0) skewX(4deg) scaleY(0.98) rotate(3deg);
-  }
-}
-
-@keyframes shadowLeftPunch {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scaleX(1);
-  }
-  8%,
-  19% {
-    transform: translate3d(18px, -2px, 0) scaleX(1.04);
-  }
-  27% {
-    transform: translate3d(0, 0, 0) scaleX(1);
-  }
-}
-
-@keyframes shadowJabSpark {
-  0%,
-  30%,
-  100% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  8% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-  14% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-  22% {
-    opacity: 0;
-    transform: scale(1.3);
-  }
-}
-
-@keyframes shadowRightPunch {
-  0%,
-  51%,
-  77%,
-  100% {
-    transform: translate3d(0, 0, 0) scaleX(1);
-  }
-  58%,
-  68% {
-    transform: translate3d(17px, 2px, 0) scaleX(1.04);
-  }
-}
-
-@keyframes shadowFrontFootwork {
-  0%,
-  100% {
-    transform: translate3d(-2px, 2px, 0) rotate(-4deg) skewX(-2deg);
-  }
-  25% {
-    transform: translate3d(3px, -2px, 0) rotate(4deg) skewX(3deg);
-  }
-  50% {
-    transform: translate3d(1px, 1px, 0) rotate(-3deg) skewX(-3deg);
-  }
-  75% {
-    transform: translate3d(-3px, 0, 0) rotate(3deg) skewX(2deg);
-  }
-}
-
-@keyframes shadowBackFootwork {
-  0%,
-  100% {
-    transform: translate3d(2px, 1px, 0) rotate(4deg) skewX(2deg);
-  }
-  25% {
-    transform: translate3d(-3px, -2px, 0) rotate(-4deg) skewX(-3deg);
-  }
-  50% {
-    transform: translate3d(-1px, 2px, 0) rotate(3deg) skewX(-2deg);
-  }
-  75% {
-    transform: translate3d(3px, -1px, 0) rotate(-3deg) skewX(3deg);
-  }
 }
 
 .intro {
@@ -3674,10 +3508,6 @@ blockquote {
     animation: mobileGoldAura 2.8s ease-in-out infinite;
   }
 
-  .shadow-jab-sparks {
-    filter: none;
-  }
-
   .home-welcome-bird {
     filter: drop-shadow(0 0 8px rgba(255, 232, 181, 0.92));
   }
@@ -3907,27 +3737,76 @@ blockquote {
 
   .monogram .brand-fire {
     inset: 2px 4px 1px;
-    opacity: 0.82;
+    opacity: 0.88;
   }
 
   .monogram .brand-fire::before {
     background:
-      radial-gradient(ellipse at 16% 100%, rgba(255, 112, 34, 0.3), transparent 62%),
-      radial-gradient(ellipse at 48% 100%, rgba(255, 208, 91, 0.22), transparent 58%),
-      radial-gradient(ellipse at 82% 100%, rgba(255, 93, 30, 0.28), transparent 64%),
-      linear-gradient(to top, rgba(207, 27, 21, 0.4), transparent 82%);
+      radial-gradient(ellipse at 16% 100%, rgba(255, 112, 34, 0.34), transparent 62%),
+      radial-gradient(ellipse at 48% 100%, rgba(255, 208, 91, 0.26), transparent 58%),
+      radial-gradient(ellipse at 82% 100%, rgba(255, 93, 30, 0.32), transparent 64%),
+      linear-gradient(to top, rgba(207, 27, 21, 0.46), transparent 82%);
   }
 
   .monogram .brand-fire i {
     width: 22%;
-    border-radius: 50% 50% 38% 38% / 28% 28% 22% 22%;
+    clip-path: polygon(
+      0 100%,
+      13% 80%,
+      27% 68%,
+      23% 57%,
+      43% 48%,
+      51% 29%,
+      59% 12%,
+      66% 2%,
+      72% 13%,
+      75% 29%,
+      69% 46%,
+      88% 35%,
+      100% 100%
+    );
     background: linear-gradient(
       to top,
-      rgba(255, 228, 145, 0.78) 0%,
-      rgba(255, 151, 48, 0.7) 28%,
-      rgba(238, 50, 25, 0.48) 64%,
-      rgba(172, 22, 21, 0.12) 88%,
+      rgba(255, 228, 145, 0.82) 0%,
+      rgba(255, 151, 48, 0.74) 28%,
+      rgba(238, 50, 25, 0.52) 64%,
+      rgba(172, 22, 21, 0.16) 88%,
       transparent 100%
+    );
+  }
+
+  .monogram .brand-fire i:nth-child(3n + 1) {
+    clip-path: polygon(
+      0 100%,
+      12% 78%,
+      30% 67%,
+      25% 53%,
+      46% 46%,
+      53% 24%,
+      62% 7%,
+      69% 0,
+      76% 18%,
+      72% 39%,
+      92% 31%,
+      100% 100%
+    );
+  }
+
+  .monogram .brand-fire i:nth-child(3n + 2) {
+    clip-path: polygon(
+      0 100%,
+      16% 76%,
+      31% 70%,
+      27% 58%,
+      45% 51%,
+      53% 34%,
+      59% 15%,
+      66% 4%,
+      73% 14%,
+      77% 32%,
+      69% 48%,
+      90% 37%,
+      100% 100%
     );
   }
 
