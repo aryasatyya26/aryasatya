@@ -1158,15 +1158,173 @@
   transition: 0.45s ease;
 }
 
-.enter-button span {
+.enter-button .enter-label {
   display: inline-block;
   position: relative;
-  z-index: 1;
+  z-index: 2;
   color: #ffe7a7;
   text-shadow:
     0 0 5px rgba(255, 218, 112, 0.72),
     0 0 14px rgba(255, 145, 49, 0.42);
   animation: entranceFireText 2s ease-in-out infinite;
+}
+
+.brand-fire {
+  position: absolute;
+  z-index: 0;
+  inset: -6px -14px;
+  overflow: hidden;
+  border-radius: inherit;
+  opacity: 0.78;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.brand-fire::before {
+  content: "";
+  position: absolute;
+  right: -5%;
+  bottom: -34%;
+  left: -5%;
+  height: 72%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center bottom, rgba(255, 202, 81, 0.24), transparent 34%),
+    radial-gradient(ellipse at center bottom, rgba(227, 34, 20, 0.82), transparent 74%);
+  transform-origin: center bottom;
+  animation: brandFireBase 1.25s ease-in-out infinite alternate;
+}
+
+.brand-fire i {
+  position: absolute;
+  bottom: -3px;
+  left: var(--flame-x);
+  width: var(--flame-width);
+  height: var(--flame-height);
+  border-radius: 50% 50% 14% 14%;
+  background: linear-gradient(
+    to top,
+    rgba(255, 231, 153, 0.98) 0%,
+    rgba(255, 132, 32, 0.98) 9%,
+    rgba(241, 47, 25, 0.96) 27%,
+    rgba(189, 18, 19, 0.78) 62%,
+    rgba(111, 11, 15, 0) 100%
+  );
+  clip-path: polygon(0 100%, 12% 66%, 25% 80%, 34% 39%, 47% 65%, 59% 0, 72% 58%, 84% 29%, 100% 100%);
+  transform-origin: center bottom;
+  animation: brandFlameRise var(--flame-duration) ease-in-out var(--flame-delay) infinite;
+}
+
+.brand-fire i:nth-child(1) {
+  --flame-x: 1%;
+  --flame-width: 6%;
+  --flame-height: 74%;
+  --flame-duration: 0.88s;
+  --flame-delay: -0.34s;
+}
+
+.brand-fire i:nth-child(2) {
+  --flame-x: 9%;
+  --flame-width: 5%;
+  --flame-height: 90%;
+  --flame-duration: 1.12s;
+  --flame-delay: -0.58s;
+}
+
+.brand-fire i:nth-child(3) {
+  --flame-x: 18%;
+  --flame-width: 7%;
+  --flame-height: 68%;
+  --flame-duration: 0.96s;
+  --flame-delay: -0.12s;
+}
+
+.brand-fire i:nth-child(4) {
+  --flame-x: 28%;
+  --flame-width: 5%;
+  --flame-height: 84%;
+  --flame-duration: 1.2s;
+  --flame-delay: -0.73s;
+}
+
+.brand-fire i:nth-child(5) {
+  --flame-x: 38%;
+  --flame-width: 6%;
+  --flame-height: 70%;
+  --flame-duration: 0.9s;
+  --flame-delay: -0.28s;
+}
+
+.brand-fire i:nth-child(6) {
+  --flame-x: 48%;
+  --flame-width: 7%;
+  --flame-height: 92%;
+  --flame-duration: 1.16s;
+  --flame-delay: -0.62s;
+}
+
+.brand-fire i:nth-child(7) {
+  --flame-x: 59%;
+  --flame-width: 5%;
+  --flame-height: 76%;
+  --flame-duration: 1s;
+  --flame-delay: -0.18s;
+}
+
+.brand-fire i:nth-child(8) {
+  --flame-x: 68%;
+  --flame-width: 6%;
+  --flame-height: 88%;
+  --flame-duration: 1.24s;
+  --flame-delay: -0.82s;
+}
+
+.brand-fire i:nth-child(9) {
+  --flame-x: 78%;
+  --flame-width: 7%;
+  --flame-height: 72%;
+  --flame-duration: 0.92s;
+  --flame-delay: -0.42s;
+}
+
+.brand-fire i:nth-child(10) {
+  --flame-x: 88%;
+  --flame-width: 5%;
+  --flame-height: 86%;
+  --flame-duration: 1.08s;
+  --flame-delay: -0.67s;
+}
+
+.brand-fire i:nth-child(11) {
+  --flame-x: 96%;
+  --flame-width: 4%;
+  --flame-height: 66%;
+  --flame-duration: 1.18s;
+  --flame-delay: -0.22s;
+}
+
+.monogram-symbol,
+.brand-wordmark {
+  position: relative;
+  z-index: 2;
+}
+
+.entrance-fire {
+  inset: 20px;
+  opacity: 0.95;
+}
+
+.enter-button .brand-fire i {
+  width: 7px;
+}
+
+.app.intro-visible .monogram .brand-fire::before,
+.app.intro-visible .monogram .brand-fire i,
+.app.entry-loading-active .monogram .brand-fire::before,
+.app.entry-loading-active .monogram .brand-fire i,
+.app.entry-loading-active .enter-button .brand-fire::before,
+.app.entry-loading-active .enter-button .brand-fire i {
+  animation-play-state: paused;
 }
 
 .enter-button::after {
@@ -1188,7 +1346,7 @@
 }
 
 .enter-button::before,
-.enter-button i {
+.enter-button > i {
   content: "";
   position: absolute;
   inset: 9px;
@@ -1197,7 +1355,7 @@
   animation: orbitSpin 12s linear infinite;
 }
 
-.enter-button i {
+.enter-button > i {
   inset: -8px;
   border-style: solid;
   border-color: transparent var(--amber);
@@ -1211,7 +1369,7 @@
   transform: scale(1.05);
 }
 
-.enter-button:hover i {
+.enter-button:hover > i {
   opacity: 0.7;
 }
 
@@ -3080,6 +3238,32 @@ blockquote {
   }
 }
 
+@keyframes brandFireBase {
+  from {
+    opacity: 0.38;
+    transform: scaleX(0.9);
+  }
+  to {
+    opacity: 0.72;
+    transform: scaleX(1.04);
+  }
+}
+
+@keyframes brandFlameRise {
+  0% {
+    opacity: 0.48;
+    transform: translate3d(0, 2px, 0) scaleY(0.66) skewX(-5deg);
+  }
+  48% {
+    opacity: 0.95;
+    transform: translate3d(1px, -1px, 0) scaleY(1.04) skewX(4deg);
+  }
+  100% {
+    opacity: 0.62;
+    transform: translate3d(-1px, -3px, 0) scaleY(0.8) skewX(-2deg);
+  }
+}
+
 @keyframes introLight {
   from {
     opacity: 0;
@@ -3715,9 +3899,14 @@ blockquote {
     pointer-events: none;
   }
 
-  .monogram > span {
+  .monogram > span:not(.brand-fire) {
     position: relative;
     z-index: 2;
+  }
+
+  .monogram .brand-fire {
+    inset: 2px 4px 1px;
+    opacity: 0.9;
   }
 
   .site-header nav {

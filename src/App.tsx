@@ -214,6 +214,16 @@ function Bird({ className = "" }: { className?: string }) {
   );
 }
 
+function BrandFlames({ className = "" }: { className?: string }) {
+  return (
+    <span className={`brand-fire ${className}`} aria-hidden="true">
+      {Array.from({ length: 11 }, (_, index) => (
+        <i key={index} />
+      ))}
+    </span>
+  );
+}
+
 function ShadowBoxer({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -543,7 +553,8 @@ function Intro({
       <p className="intro-title">Data analyst · Web developer · Creative thinker</p>
       <div className="intro-actions">
         <button className="enter-button magnetic" onClick={onEnter}>
-          <span>Click to enter</span>
+          <BrandFlames className="entrance-fire" />
+          <span className="enter-label">Click to enter</span>
           <i />
         </button>
         <button className="skip-button" onClick={onSkip}>
@@ -1290,6 +1301,7 @@ export default function App() {
           onClick={returnToEntrance}
           aria-label="ARYASATYA NARYAMA — return to entrance"
         >
+          <BrandFlames />
           <span className="monogram-symbol">AN</span>
           <span className="brand-wordmark">
             <span>ARYASATYA</span>
