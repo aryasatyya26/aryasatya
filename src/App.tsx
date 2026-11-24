@@ -1067,6 +1067,7 @@ export default function App() {
 
     const updateScroll = () => {
       scrollFrame = 0;
+      document.documentElement.classList.toggle("page-scrolled", window.scrollY > 24);
       const total = document.documentElement.scrollHeight - window.innerHeight;
       const progress = total > 0 ? window.scrollY / total : 0;
       const scrollDelta = window.scrollY - lastFlockScrollY;
@@ -1171,6 +1172,7 @@ export default function App() {
       cancelAnimationFrame(scrollFrame);
       cancelAnimationFrame(pointerFrame);
       window.clearTimeout(flockResetTimer);
+      document.documentElement.classList.remove("page-scrolled");
       if (navigationScrollTimeoutRef.current !== null) {
         window.clearTimeout(navigationScrollTimeoutRef.current);
       }

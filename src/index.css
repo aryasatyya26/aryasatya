@@ -1297,12 +1297,22 @@
   align-items: center;
   width: min(94%, 1460px);
   padding: 12px 18px;
-  border: 1px solid rgba(221, 230, 231, 0.09);
+  border: 1px solid rgba(221, 230, 231, 0.07);
   border-radius: 999px;
-  background: rgba(6, 11, 16, 0.52);
-  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.2);
+  background: rgba(6, 11, 16, 0.26);
+  box-shadow: 0 8px 34px rgba(0, 0, 0, 0.14);
   backdrop-filter: blur(16px);
   transform: translateX(-50%);
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+html.page-scrolled .site-header {
+  border-color: rgba(221, 230, 231, 0.1);
+  background: rgba(6, 11, 16, 0.36);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18);
 }
 
 .monogram {
@@ -1325,8 +1335,8 @@
   z-index: -1;
   inset: -7px -10px;
   border-radius: inherit;
-  border: 2px solid rgba(196, 154, 86, 0.42);
-  box-shadow: 0 0 14px rgba(196, 154, 86, 0.22);
+  border: 2px solid rgba(196, 154, 86, 0.3);
+  box-shadow: 0 0 12px rgba(196, 154, 86, 0.14);
   opacity: 0.72;
   pointer-events: none;
   transform: scale(1);
@@ -1344,8 +1354,8 @@
 .monogram:hover::before,
 .monogram:focus-visible::before,
 .monogram:active::before {
-  border-color: rgba(224, 184, 112, 0.76);
-  box-shadow: 0 0 18px rgba(196, 154, 86, 0.36);
+  border-color: rgba(224, 184, 112, 0.56);
+  box-shadow: 0 0 16px rgba(196, 154, 86, 0.24);
   animation-duration: 1.6s;
 }
 
@@ -2512,23 +2522,45 @@ blockquote {
   gap: 6px;
   max-width: calc(100vw - 44px);
   padding: 4px 6px 4px 4px;
-  border: 1px solid rgba(196, 154, 86, 0.34);
+  border: 1px solid rgba(196, 154, 86, 0.22);
   border-radius: 999px;
   background:
     radial-gradient(
       120% 180% at 0% 0%,
-      color-mix(in srgb, var(--sky-gradient-top) 44%, transparent),
+      color-mix(in srgb, var(--sky-gradient-top) 34%, transparent),
       transparent 68%
     ),
     linear-gradient(
       125deg,
-      color-mix(in srgb, var(--sky-gradient-mid) 88%, transparent),
-      color-mix(in srgb, var(--sky-gradient-top) 84%, transparent)
+      color-mix(in srgb, var(--sky-gradient-mid) 62%, transparent),
+      color-mix(in srgb, var(--sky-gradient-top) 58%, transparent)
     );
   box-shadow:
-    0 10px 38px rgba(0, 0, 0, 0.3),
-    0 0 18px rgba(196, 154, 86, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    0 0 14px rgba(196, 154, 86, 0.06);
   backdrop-filter: blur(12px);
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+html.page-scrolled .music-player {
+  border-color: rgba(196, 154, 86, 0.28);
+  background:
+    radial-gradient(
+      120% 180% at 0% 0%,
+      color-mix(in srgb, var(--sky-gradient-top) 40%, transparent),
+      transparent 68%
+    ),
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--sky-gradient-mid) 68%, transparent),
+      color-mix(in srgb, var(--sky-gradient-top) 64%, transparent)
+    );
+  box-shadow:
+    0 9px 34px rgba(0, 0, 0, 0.22),
+    0 0 16px rgba(196, 154, 86, 0.08);
 }
 
 .app:not(.experience-entered) .music-player {
@@ -2540,10 +2572,10 @@ blockquote {
   position: absolute;
   z-index: -1;
   inset: -3px;
-  border: 1px solid rgba(196, 154, 86, 0.48);
+  border: 1px solid rgba(196, 154, 86, 0.3);
   border-radius: inherit;
-  box-shadow: 0 0 14px rgba(196, 154, 86, 0.24);
-  opacity: 0.72;
+  box-shadow: 0 0 12px rgba(196, 154, 86, 0.12);
+  opacity: 0.58;
   pointer-events: none;
   animation: brandGlowPulse 2.8s ease-in-out infinite;
   transition:
@@ -2554,8 +2586,8 @@ blockquote {
 .music-player:hover::before,
 .music-player:focus-within::before,
 .music-player.expanded::before {
-  border-color: rgba(224, 184, 112, 0.76);
-  box-shadow: 0 0 18px rgba(196, 154, 86, 0.36);
+  border-color: rgba(224, 184, 112, 0.56);
+  box-shadow: 0 0 16px rgba(196, 154, 86, 0.24);
 }
 
 .entry-loading ~ .music-player {
@@ -3003,21 +3035,21 @@ blockquote {
 @keyframes brandGlowPulse {
   0%,
   100% {
-    opacity: 0.72;
+    opacity: 0.42;
   }
   50% {
-    opacity: 1;
+    opacity: 0.66;
   }
 }
 
 @keyframes mobileGoldAura {
   0%,
   100% {
-    opacity: 0.68;
+    opacity: 0.42;
     transform: scale(0.99);
   }
   50% {
-    opacity: 1;
+    opacity: 0.68;
     transform: scale(1.01);
   }
 }
@@ -3025,15 +3057,15 @@ blockquote {
 @keyframes mobileGoldSparkle {
   0%,
   100% {
-    opacity: 0.14;
+    opacity: 0.08;
     transform: scale(0.98);
   }
   48% {
-    opacity: 0.9;
+    opacity: 0.48;
     transform: scale(1);
   }
   64% {
-    opacity: 0.38;
+    opacity: 0.2;
   }
 }
 
@@ -3683,37 +3715,62 @@ blockquote {
     backdrop-filter: none;
   }
 
+  html.page-scrolled .site-header {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+  }
+
   .monogram {
     align-self: center;
     justify-content: center;
     width: 100%;
     padding: 3px 9px;
-    border: 1px solid rgba(221, 231, 231, 0.18);
+    gap: 10px;
+    border: 1px solid rgba(221, 231, 231, 0.14);
     border-radius: 999px;
-    background: rgba(6, 11, 16, 0.78);
+    background: rgba(6, 11, 16, 0.2);
     box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.24),
-      inset 0 0 14px rgba(196, 154, 86, 0.07);
+      0 6px 20px rgba(0, 0, 0, 0.14),
+      inset 0 0 12px rgba(196, 154, 86, 0.04);
+    transition:
+      background-color 0.35s ease,
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  html.page-scrolled .monogram {
+    border-color: rgba(221, 231, 231, 0.19);
+    background: rgba(6, 11, 16, 0.3);
+    box-shadow:
+      0 7px 22px rgba(0, 0, 0, 0.18),
+      inset 0 0 12px rgba(196, 154, 86, 0.05);
   }
 
   .monogram-symbol {
-    width: 28px;
-    height: 28px;
-    flex-basis: 28px;
-    font-size: 11px;
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+    font-size: 12px;
   }
 
   .brand-wordmark {
-    gap: 2px;
-    font-size: 6px;
+    gap: 3px;
+    font-size: 7px;
+    letter-spacing: 0.24em;
   }
 
   .monogram::before {
     z-index: 0;
     inset: -2px;
-    border: 1px solid rgba(224, 184, 112, 0.68);
-    box-shadow: 0 0 12px rgba(196, 154, 86, 0.26);
+    border: 1px solid rgba(224, 184, 112, 0.32);
+    box-shadow: 0 0 10px rgba(196, 154, 86, 0.12);
     animation: mobileGoldAura 2.8s ease-in-out infinite;
+  }
+
+  html.page-scrolled .monogram::before {
+    border-color: rgba(224, 184, 112, 0.4);
+    box-shadow: 0 0 12px rgba(196, 154, 86, 0.16);
   }
 
   .monogram::after {
@@ -3723,9 +3780,9 @@ blockquote {
     inset: 0;
     border-radius: inherit;
     background:
-      radial-gradient(circle at 9% 28%, rgba(255, 231, 179, 0.95) 0 1px, transparent 3px),
-      radial-gradient(circle at 93% 72%, rgba(255, 231, 179, 0.85) 0 1px, transparent 3px),
-      radial-gradient(circle at 58% 8%, rgba(255, 231, 179, 0.72) 0 1px, transparent 3px);
+      radial-gradient(circle at 9% 28%, rgba(255, 231, 179, 0.68) 0 1px, transparent 3px),
+      radial-gradient(circle at 93% 72%, rgba(255, 231, 179, 0.58) 0 1px, transparent 3px),
+      radial-gradient(circle at 58% 8%, rgba(255, 231, 179, 0.48) 0 1px, transparent 3px);
     animation: mobileGoldSparkle 2.8s ease-in-out infinite;
     pointer-events: none;
   }
@@ -3828,16 +3885,28 @@ blockquote {
     max-height: none;
     overflow: visible;
     padding: 2px clamp(12px, 3vw, 20px);
-    border: 1px solid rgba(221, 231, 231, 0.2);
+    border: 1px solid rgba(221, 231, 231, 0.15);
     border-radius: 999px;
-    background: rgba(6, 11, 16, 0.78);
+    background: rgba(6, 11, 16, 0.2);
     box-shadow:
-      0 8px 24px rgba(0, 0, 0, 0.24),
-      inset 0 0 16px rgba(196, 154, 86, 0.06);
+      0 6px 20px rgba(0, 0, 0, 0.14),
+      inset 0 0 12px rgba(196, 154, 86, 0.035);
     opacity: 1;
     transform: none;
     pointer-events: auto;
     isolation: isolate;
+    transition:
+      background-color 0.35s ease,
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
+  }
+
+  html.page-scrolled .site-header nav {
+    border-color: rgba(221, 231, 231, 0.2);
+    background: rgba(6, 11, 16, 0.3);
+    box-shadow:
+      0 7px 22px rgba(0, 0, 0, 0.18),
+      inset 0 0 12px rgba(196, 154, 86, 0.045);
   }
 
   .site-header nav::before {
@@ -3845,11 +3914,16 @@ blockquote {
     position: absolute;
     z-index: 0;
     inset: -2px;
-    border: 1px solid rgba(224, 184, 112, 0.62);
+    border: 1px solid rgba(224, 184, 112, 0.32);
     border-radius: inherit;
-    box-shadow: 0 0 12px rgba(196, 154, 86, 0.24);
+    box-shadow: 0 0 10px rgba(196, 154, 86, 0.12);
     animation: mobileGoldAura 2.8s ease-in-out infinite;
     pointer-events: none;
+  }
+
+  html.page-scrolled .site-header nav::before {
+    border-color: rgba(224, 184, 112, 0.4);
+    box-shadow: 0 0 12px rgba(196, 154, 86, 0.16);
   }
 
   .site-header nav::after {
@@ -3859,10 +3933,10 @@ blockquote {
     inset: 0;
     border-radius: inherit;
     background:
-      radial-gradient(circle at 8% 52%, rgba(255, 231, 179, 0.95) 0 1px, transparent 3px),
-      radial-gradient(circle at 36% 12%, rgba(255, 231, 179, 0.72) 0 1px, transparent 3px),
-      radial-gradient(circle at 74% 88%, rgba(255, 231, 179, 0.78) 0 1px, transparent 3px),
-      radial-gradient(circle at 94% 48%, rgba(255, 231, 179, 0.9) 0 1px, transparent 3px);
+      radial-gradient(circle at 8% 52%, rgba(255, 231, 179, 0.65) 0 1px, transparent 3px),
+      radial-gradient(circle at 36% 12%, rgba(255, 231, 179, 0.46) 0 1px, transparent 3px),
+      radial-gradient(circle at 74% 88%, rgba(255, 231, 179, 0.5) 0 1px, transparent 3px),
+      radial-gradient(circle at 94% 48%, rgba(255, 231, 179, 0.62) 0 1px, transparent 3px);
     animation: mobileGoldSparkle 2.8s ease-in-out infinite 0.4s;
     pointer-events: none;
   }
