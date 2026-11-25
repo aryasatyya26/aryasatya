@@ -2703,7 +2703,8 @@ blockquote {
 }
 
 html.game-playing .app .music-player {
-  z-index: 220;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 html.page-scrolled .music-player {
