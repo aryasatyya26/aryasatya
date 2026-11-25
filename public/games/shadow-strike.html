@@ -645,9 +645,7 @@
         border: 1px solid rgba(56, 189, 248, 0.22);
         border-radius: 18px;
         overflow: hidden;
-        background:
-          radial-gradient(circle at 50% 42%, rgba(56, 189, 248, 0.12), transparent 42%),
-          linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(5, 7, 11, 0.96));
+        background: linear-gradient(180deg, #070b18, #18253b 55%, #46505d 82%, #090d15);
       }
 
       #characterSelectCanvas {
@@ -1718,6 +1716,8 @@
       const ctx = canvas.getContext("2d");
       const arenaBackgroundCanvas = document.createElement("canvas");
       const arenaBackgroundCtx = arenaBackgroundCanvas.getContext("2d");
+      const characterPreviewBackgroundCanvas = document.createElement("canvas");
+      let characterPreviewBackgroundDpr = 0;
       let arenaBackgroundDirty = true;
 
       const p1HpFill = document.getElementById("p1-hp-fill");
@@ -3156,6 +3156,129 @@
         ctx.drawImage(arenaBackgroundCanvas, 0, 0, width, height);
       }
 
+      function drawCharacterPreviewBackground(bg, previewWidth, previewHeight) {
+        const groundY = previewHeight * 0.8;
+        const sky = bg.createLinearGradient(0, 0, 0, groundY);
+        sky.addColorStop(0, "#070b18");
+        sky.addColorStop(0.58, "#18253b");
+        sky.addColorStop(1, "#51566a");
+        bg.fillStyle = sky;
+        bg.fillRect(0, 0, previewWidth, previewHeight);
+
+        for (let i = 0; i < 20; i++) {
+          const x = (((i * 73 + 19) % 97) / 97) * previewWidth;
+          const y = (((i * 31 + 7) % 59) / 100) * groundY;
+          bg.globalAlpha = 0.25 + ((i * 17) % 6) * 0.08;
+          bg.fillStyle = i % 4 === 0 ? "#f8dca0" : "#c8d8f2";
+          bg.fillRect(x, y, 1.5, 1.5);
+        }
+        bg.globalAlpha = 1;
+
+        const moonX = previewWidth * 0.82;
+        const moonY = previewHeight * 0.23;
+        const moonRadius = Math.min(15, previewWidth * 0.03);
+        const moonGlow = bg.createRadialGradient(
+          moonX,
+          moonY,
+          moonRadius * 0.35,
+          moonX,
+          moonY,
+          moonRadius * 3.2,
+        );
+        moonGlow.addColorStop(0, "rgba(209, 224, 255, 0.24)");
+        moonGlow.addColorStop(0.38, "rgba(157, 184, 232, 0.1)");
+        moonGlow.addColorStop(1, "rgba(157, 184, 232, 0)");
+        bg.fillStyle = moonGlow;
+        bg.fillRect(
+          moonX - moonRadius * 3.2,
+          moonY - moonRadius * 3.2,
+          moonRadius * 6.4,
+          moonRadius * 6.4,
+        );
+        bg.save();
+        bg.shadowColor = "rgba(220, 232, 255, 0.65)";
+        bg.shadowBlur = 12;
+        bg.fillStyle = "#e6edfa";
+        bg.beginPath();
+        bg.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+        bg.fill();
+        bg.restore();
+
+        const buildings = [
+          [-0.04, 0.16, 0.42, "#111a2a"],
+          [0.09, 0.13, 0.63, "#0e1929"],
+          [0.2, 0.17, 0.45, "#131e30"],
+          [0.35, 0.14, 0.68, "#0d1728"],
+          [0.47, 0.18, 0.5, "#111b2c"],
+          [0.63, 0.13, 0.62, "#0c1727"],
+          [0.75, 0.17, 0.46, "#121d2e"],
+          [0.9, 0.14, 0.58, "#0d1727"],
+        ];
+        buildings.forEach(([bx, bw, buildingHeight, color], index) => {
+          const x = previewWidth * bx;
+          const buildingWidth = previewWidth * bw;
+          const buildingHeightPx = groundY * buildingHeight;
+          const y = groundY - buildingHeightPx;
+          bg.fillStyle = color;
+          bg.fillRect(x, y, buildingWidth, buildingHeightPx);
+          bg.fillStyle = "rgba(119, 152, 194, 0.12)";
+          bg.fillRect(x, y, buildingWidth, 1.5);
+          bg.fillRect(x + buildingWidth * 0.16, y, 1.5, buildingHeightPx);
+
+          const windowSize = Math.max(1.5, previewWidth * 0.004);
+          const columnCount = Math.max(2, Math.floor(buildingWidth / 20));
+          const rowCount = Math.floor(buildingHeightPx / 12);
+          for (let row = 0; row < rowCount; row++) {
+            for (let column = 0; column < columnCount; column++) {
+              if ((row * 3 + column * 5 + index) % 4 === 0) continue;
+              bg.fillStyle =
+                (row + column + index) % 5 === 0
+                  ? "rgba(255, 190, 105, 0.62)"
+                  : "rgba(124, 184, 226, 0.35)";
+              bg.fillRect(
+                x + 5 + column * 14,
+                y + 6 + row * 11,
+                windowSize,
+                Math.max(2, windowSize * 1.25),
+              );
+            }
+          }
+        });
+
+        const sidewalkHeight = Math.max(8, previewHeight * 0.06);
+        const sidewalk = bg.createLinearGradient(0, groundY, 0, groundY + sidewalkHeight);
+        sidewalk.addColorStop(0, "#46505d");
+        sidewalk.addColorStop(1, "#252e3c");
+        bg.fillStyle = sidewalk;
+        bg.fillRect(0, groundY, previewWidth, sidewalkHeight);
+        bg.strokeStyle = "rgba(207, 220, 234, 0.28)";
+        bg.beginPath();
+        bg.moveTo(0, groundY + 1);
+        bg.lineTo(previewWidth, groundY + 1);
+        bg.stroke();
+
+        const roadTop = groundY + sidewalkHeight;
+        const road = bg.createLinearGradient(0, roadTop, 0, previewHeight);
+        road.addColorStop(0, "#202938");
+        road.addColorStop(1, "#090d15");
+        bg.fillStyle = road;
+        bg.fillRect(0, roadTop, previewWidth, previewHeight - roadTop);
+        bg.strokeStyle = "rgba(192, 207, 224, 0.16)";
+        bg.beginPath();
+        bg.moveTo(previewWidth * 0.42, roadTop);
+        bg.lineTo(-previewWidth * 0.12, previewHeight);
+        bg.moveTo(previewWidth * 0.58, roadTop);
+        bg.lineTo(previewWidth * 1.12, previewHeight);
+        bg.stroke();
+        bg.fillStyle = "rgba(243, 197, 109, 0.48)";
+        for (let i = 0; i < 3; i++) {
+          const x = previewWidth * 0.5;
+          const y = roadTop + (previewHeight - roadTop) * (0.18 + i * 0.27);
+          const markerWidth = previewWidth * (0.003 + i * 0.002);
+          bg.fillRect(x - markerWidth * 0.5, y, markerWidth, 2 + i);
+        }
+      }
+
       let lastPreviewRender = 0;
       function drawCharacterPreview(timestamp = performance.now()) {
         const preview = document.getElementById("characterSelectCanvas");
@@ -3174,9 +3297,28 @@
           preview.width = pixelWidth;
           preview.height = pixelHeight;
         }
+        if (
+          characterPreviewBackgroundCanvas.width !== pixelWidth ||
+          characterPreviewBackgroundCanvas.height !== pixelHeight ||
+          characterPreviewBackgroundDpr !== previewDpr
+        ) {
+          characterPreviewBackgroundCanvas.width = pixelWidth;
+          characterPreviewBackgroundCanvas.height = pixelHeight;
+          characterPreviewBackgroundDpr = previewDpr;
+          const backgroundCtx = characterPreviewBackgroundCanvas.getContext("2d");
+          backgroundCtx.setTransform(previewDpr, 0, 0, previewDpr, 0, 0);
+          drawCharacterPreviewBackground(backgroundCtx, rect.width, rect.height);
+        }
         const pctx = preview.getContext("2d");
         pctx.setTransform(previewDpr, 0, 0, previewDpr, 0, 0);
         pctx.clearRect(0, 0, rect.width, rect.height);
+        pctx.drawImage(
+          characterPreviewBackgroundCanvas,
+          0,
+          0,
+          rect.width,
+          rect.height,
+        );
 
         const keys = [selectedPlayerKey, selectedEnemyKey];
         keys.forEach((key, index) => {
