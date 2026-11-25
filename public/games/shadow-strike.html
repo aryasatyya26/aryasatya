@@ -1586,7 +1586,9 @@
             this.punchBus = compressor;
           }
           if (this.ctx.state === "suspended") {
-            this.ctx.resume();
+            this.ctx.resume().catch((error) => {
+              console.error("Unable to resume the combat audio context:", error);
+            });
           }
           if (!this.punchBufferPromise) {
             this.loadPunchBuffer().catch((error) => {
@@ -1610,6 +1612,10 @@
                 return response.arrayBuffer();
               })
               .then((audioData) => this.ctx.decodeAudioData(audioData));
+            this.punchBufferPromise = this.punchBufferPromise.catch((error) => {
+              this.punchBufferPromise = null;
+              throw error;
+            });
           }
           return this.punchBufferPromise;
         }
@@ -1838,6 +1844,7 @@
       let p2 = createFighter(false);
       let projectiles = [];
       let particles = [];
+      let fireParticles = [];
       let shockwaves = [];
       let callouts = [];
 
@@ -1953,6 +1960,7 @@
 
         projectiles = [];
         particles = [];
+        fireParticles = [];
         shockwaves = [];
         callouts = [];
 
@@ -2094,9 +2102,9 @@
         const c = CHARACTERS[fighter.characterKey];
         if (type === "PUNCH") {
           return {
-            duration: c.name === "RAKA" ? 0.32 : c.name === "SORA" ? 0.18 : 0.24,
-            activeStart: c.name === "SORA" ? 0.04 : 0.07,
-            activeEnd: c.name === "RAKA" ? 0.21 : 0.16,
+            duration: c.name === "RAKA" ? 0.32 : c.name === "SORA" ? 0.32 : c.name === "DAMAR" ? 0.34 : 0.24,
+            activeStart: c.name === "SORA" ? 0.07 : c.name === "DAMAR" ? 0.08 : 0.07,
+            activeEnd: c.name === "RAKA" ? 0.21 : c.name === "SORA" ? 0.25 : c.name === "DAMAR" ? 0.27 : 0.16,
             range: c.name === "DAMAR" ? 82 : c.range * 0.82,
             damage: c.punchDamage,
             stun: c.name === "RAKA" ? 0.34 : 0.22,
@@ -2182,12 +2190,20 @@
             fighter.specialNextSoundAt = Infinity;
           }
           if (c.name === "RAKA") fighter.vx = fighter.facing * 105;
+          triggerShake(0.18, 8);
+          spawnFireBurst(
+            fighter.x + fighter.facing * 30,
+            fighter.y - 54,
+            1,
+            22,
+          );
           spawnCallout(fighter.x, fighter.y - 108, profile.callout, c.primary);
           spawnANShockwave(
             fighter.x + fighter.facing * 35,
             fighter.y - 54,
             c.primary,
             80,
+            true,
           );
         } else {
           fighter.vx = fighter.facing * (type === "KICK" ? 145 : 85);
@@ -2218,6 +2234,7 @@
           fighter.throwPhase = "released";
           fighter.throwPhaseStart = fighter.stateTimer;
           audio.playStrike("SPECIAL");
+          spawnFireBurst(target.x, target.y, 1.15, 20);
         } else {
           fighter.throwPhase = "interrupted";
         }
@@ -2244,6 +2261,7 @@
             target.facing = -fighter.facing;
             target.y = floorY - 18;
             audio.playStrike("SPECIAL");
+            spawnFireBurst(target.x, target.y - 25, 0.9, 14);
             spawnCallout(target.x, target.y - 110, "GRAB!", CHARACTERS.sora.primary);
           } else if (fighter.stateTimer >= 0.72) {
             fighter.throwPhase = "miss";
@@ -2296,12 +2314,15 @@
           defender.energy = Math.min(100, defender.energy + 12);
 
           audio.playBlock();
-          spawnParticles(
-            (attacker.x + defender.x) * 0.5,
-            defender.y - 56,
-            "#10b981",
-            14,
-          );
+          const blockX = (attacker.x + defender.x) * 0.5;
+          const blockY = defender.y - 56;
+          if (isSpecial) {
+            triggerShake(0.22, 12);
+            spawnFireBurst(blockX, blockY, 1, 16);
+            spawnANShockwave(blockX, blockY, "#ff6b24", 100, true);
+          } else {
+            spawnParticles(blockX, blockY, "#10b981", 14);
+          }
           spawnCallout(defender.x, defender.y - 102, "GUARD!", "#10b981");
         } else {
           defender.hp = Math.max(0, defender.hp - damage);
@@ -2331,22 +2352,24 @@
               ? damage >= 15 ? 0.085 : 0.048
               : damage >= 15 ? 0.055 : 0.032;
           triggerShake(
-            isSpecial ? 0.16 : damage >= 15 ? 0.22 : 0.12,
-            isSpecial ? 9 : damage >= 15 ? 10 : 5,
+            isSpecial ? 0.28 : damage >= 15 ? 0.22 : 0.12,
+            isSpecial ? 16 : damage >= 15 ? 10 : 5,
           );
           const hitX = (attacker.x + defender.x) * 0.5;
-          const hitY = defender.y - 56;
-          spawnParticles(
-            hitX,
-            hitY,
-            attacker.colorPrimary,
-            isSpecial ? 18 : damage >= 15 ? 22 : 12,
-          );
+          const hitY =
+            defender.y -
+            (isSpecial && attacker.characterKey === "sora" ? 10 : 56);
+          if (isSpecial) {
+            spawnFireBurst(hitX, hitY, damage >= 20 ? 1.25 : 1, 20);
+          } else {
+            spawnParticles(hitX, hitY, attacker.colorPrimary, damage >= 15 ? 22 : 12);
+          }
           spawnANShockwave(
             hitX,
             hitY,
-            attacker.colorPrimary,
-            isSpecial ? 110 : damage >= 15 ? 95 : 65,
+            isSpecial ? "#ff6b24" : attacker.colorPrimary,
+            isSpecial ? 125 : damage >= 15 ? 95 : 65,
+            isSpecial,
           );
 
           const label =
@@ -2395,8 +2418,78 @@
         match.shakeIntensity = intensity;
       }
 
-      function spawnANShockwave(x, y, color, maxRadius) {
-        shockwaves.push({ x, y, radius: 14, maxRadius, life: 1.0, color });
+      function spawnANShockwave(x, y, color, maxRadius, fiery = false) {
+        shockwaves.push({ x, y, radius: 14, maxRadius, life: 1.0, color, fiery });
+      }
+
+      function spawnFireBurst(x, y, scale = 1, count = 18) {
+        for (let i = 0; i < count; i++) {
+          const angle = -Math.PI * 0.5 + (Math.random() - 0.5) * 1.8;
+          const speed = (45 + Math.random() * 150) * scale;
+          const life = 0.38 + Math.random() * 0.28;
+          fireParticles.push({
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            life,
+            maxLife: life,
+            size: (5 + Math.random() * 9) * scale,
+            sway: Math.random() * Math.PI * 2,
+            spin: (Math.random() - 0.5) * 0.7,
+          });
+        }
+      }
+
+      function drawFlameShape(drawCtx, x, y, size, life = 1, rotation = 0) {
+        const flicker = 1 + Math.sin((1 - life) * 22 + rotation) * 0.12;
+        const radius = size * flicker;
+        drawCtx.save();
+        drawCtx.translate(x, y);
+        drawCtx.rotate(rotation);
+        drawCtx.globalAlpha *= Math.max(0, life);
+        drawCtx.shadowColor = "#ff541b";
+        drawCtx.shadowBlur = radius * 1.4;
+
+        const outer = drawCtx.createLinearGradient(0, radius * 0.48, 0, -radius * 1.1);
+        outer.addColorStop(0, "#9d2812");
+        outer.addColorStop(0.35, "#f04b14");
+        outer.addColorStop(0.72, "#ffad32");
+        outer.addColorStop(1, "#fff2bd");
+        drawCtx.fillStyle = outer;
+        drawCtx.beginPath();
+        drawCtx.moveTo(-radius * 0.42, radius * 0.45);
+        drawCtx.bezierCurveTo(
+          -radius * 0.7,
+          radius * 0.05,
+          -radius * 0.18,
+          -radius * 0.62,
+          0,
+          -radius * 1.1,
+        );
+        drawCtx.bezierCurveTo(
+          radius * 0.12,
+          -radius * 0.57,
+          radius * 0.68,
+          -radius * 0.08,
+          radius * 0.42,
+          radius * 0.45,
+        );
+        drawCtx.closePath();
+        drawCtx.fill();
+
+        const core = drawCtx.createLinearGradient(0, radius * 0.36, 0, -radius * 0.48);
+        core.addColorStop(0, "#ff7a18");
+        core.addColorStop(0.62, "#ffe08a");
+        core.addColorStop(1, "#fffdf1");
+        drawCtx.fillStyle = core;
+        drawCtx.beginPath();
+        drawCtx.moveTo(-radius * 0.2, radius * 0.34);
+        drawCtx.quadraticCurveTo(-radius * 0.25, -radius * 0.05, 0, -radius * 0.48);
+        drawCtx.quadraticCurveTo(radius * 0.26, 0, radius * 0.2, radius * 0.34);
+        drawCtx.closePath();
+        drawCtx.fill();
+        drawCtx.restore();
       }
 
       function spawnParticles(x, y, color, count) {
@@ -2628,7 +2721,7 @@
               f.throwOwner = null;
               if (throwOwner && match.phase === "FIGHT") {
                 audio.playStrike("SPECIAL");
-                spawnANShockwave(f.x, floorY - 5, CHARACTERS.sora.primary, 135);
+                spawnFireBurst(f.x, floorY - 18, 1.5, 28);
                 spawnCallout(
                   f.x,
                   floorY - 105,
@@ -2692,13 +2785,7 @@
             } else {
               const isRapidPunch = f.attackType === "PUNCH";
               const soundTimes = isRapidPunch
-                ? [
-                    spec.duration * 0.08,
-                    spec.duration *
-                      (f.characterKey === "sora" || f.characterKey === "damar"
-                        ? 0.3
-                        : 0.58),
-                  ]
+                ? [spec.duration * 0.08, spec.duration * 0.58]
                 : [spec.activeStart];
               while (
                 f.attackSoundIndex < soundTimes.length &&
@@ -2796,6 +2883,16 @@
           pt.vy += 420 * dt;
           pt.life -= pt.decay * rawDt;
           if (pt.life <= 0) particles.splice(i, 1);
+        }
+
+        for (let i = fireParticles.length - 1; i >= 0; i--) {
+          const flame = fireParticles[i];
+          flame.x += flame.vx * dt;
+          flame.y += flame.vy * dt;
+          flame.vx += Math.sin(flame.sway + (flame.maxLife - flame.life) * 12) * 34 * dt;
+          flame.vy -= 50 * dt;
+          flame.life -= rawDt * 1.6;
+          if (flame.life <= 0) fireParticles.splice(i, 1);
         }
 
         for (let i = callouts.length - 1; i >= 0; i--) {
@@ -3170,7 +3267,7 @@
               ? { x: 43, y: shoulderY - 35 }
               : { x: 63, y: shoulderY - 16 }
             : { x: c.name === "SORA" ? 67 : 64, y: shoulderY - 10 };
-          const punchCycles = c.name === "SORA" || c.name === "DAMAR" ? 2 : 1;
+          const punchCycles = 1;
           const punchPhase =
             progress * Math.PI * 2 * punchCycles + (isLead ? 0 : Math.PI);
           const punchBlend = punch ? Math.max(0, Math.sin(punchPhase)) : strike;
@@ -3282,10 +3379,10 @@
           pctx.ellipse(0, 0, 6.4, 5.1, 0, 0, Math.PI * 2);
           pctx.fill();
           if (special && specialStrike > 0.25) {
-            pctx.shadowColor = c.accent;
-            pctx.shadowBlur = 12;
-            pctx.strokeStyle = c.accent;
-            pctx.lineWidth = 2;
+            pctx.shadowColor = "#ff541b";
+            pctx.shadowBlur = 16;
+            pctx.strokeStyle = "#ffd166";
+            pctx.lineWidth = 2.4;
             pctx.beginPath();
             pctx.arc(0, 0, 9 + specialStrike * 4, -0.8, 0.8);
             pctx.stroke();
@@ -3344,24 +3441,52 @@
 
         drawArenaBackground();
 
-        // Draw Shockwaves with Embedded 'AN' Geometric Watermarks
+        // Draw shockwaves; special attacks use fire instead of the AN monogram.
         shockwaves.forEach((sw) => {
           ctx.save();
-          ctx.globalAlpha = Math.max(0, sw.life * 0.6);
-          ctx.strokeStyle = sw.color;
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-          ctx.stroke();
-
-          drawANMonogram(
-            ctx,
-            sw.x,
-            sw.y,
-            sw.radius * 0.78,
-            sw.life * 0.32,
-            sw.color,
-          );
+          if (sw.fiery) {
+            ctx.globalAlpha = Math.max(0, sw.life * 0.78);
+            ctx.shadowColor = "#ff541b";
+            ctx.shadowBlur = 15;
+            ctx.strokeStyle = "#f04b14";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = "#ffd166";
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.arc(sw.x, sw.y, sw.radius * 0.86, 0, Math.PI * 2);
+            ctx.stroke();
+            for (let flame = 0; flame < 8; flame++) {
+              const angle = (flame / 8) * Math.PI * 2;
+              const flameRadius = Math.max(7, sw.radius * 0.15);
+              drawFlameShape(
+                ctx,
+                sw.x + Math.cos(angle) * sw.radius * 0.74,
+                sw.y + Math.sin(angle) * sw.radius * 0.74,
+                flameRadius,
+                sw.life,
+                angle + Math.PI * 0.5,
+              );
+            }
+          } else {
+            ctx.globalAlpha = Math.max(0, sw.life * 0.6);
+            ctx.strokeStyle = sw.color;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            drawANMonogram(
+              ctx,
+              sw.x,
+              sw.y,
+              sw.radius * 0.78,
+              sw.life * 0.32,
+              sw.color,
+            );
+          }
           ctx.restore();
         });
 
@@ -3404,6 +3529,18 @@
         });
         ctx.globalAlpha = 1;
         ctx.shadowBlur = 0;
+
+        fireParticles.forEach((flame) => {
+          const life = Math.max(0, flame.life / flame.maxLife);
+          drawFlameShape(
+            ctx,
+            flame.x,
+            flame.y,
+            flame.size * (0.45 + life * 0.55),
+            life,
+            flame.spin + (flame.maxLife - flame.life) * 0.7,
+          );
+        });
 
         // Draw Combat Callouts ('STRIKE!', 'COMBO!', 'AN-WAVE!')
         callouts.forEach((c) => {
