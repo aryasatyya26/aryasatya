@@ -1303,6 +1303,7 @@ html.page-scrolled .site-header {
   font-family: "Italiana", serif;
   text-align: left;
   transition:
+    top 0.35s ease,
     transform 0.35s ease,
     filter 0.35s ease;
 }
@@ -3932,6 +3933,13 @@ html.page-scrolled .music-player {
   .modal-visual img {
     min-height: 320px;
     max-height: 45vh;
+  }
+}
+
+@media (min-width: 981px) {
+  html.page-scrolled .monogram {
+    position: fixed;
+    top: 18px;
   }
 }
 
