@@ -3006,37 +3006,21 @@
 
           pctx.save();
           pctx.translate(hand.x, hand.y);
-          if ((punch && punchBlend > 0.7 && c.name !== "SORA") || (special && strike > 0.7)) {
-            pctx.fillStyle = c.skin;
-            pctx.beginPath();
-            pctx.ellipse(3, 0, 7, 5.2, 0, 0, Math.PI * 2);
-            pctx.fill();
-          } else {
-            pctx.fillStyle = c.skin;
-            pctx.beginPath();
-            pctx.ellipse(0, 1, 6, 7.5, 0, 0, Math.PI * 2);
-            pctx.fill();
-            pctx.strokeStyle = c.skin;
-            pctx.lineWidth = 2.1;
-            for (let finger = -2; finger <= 2; finger++) {
-              const spread = finger * 2.2;
-              pctx.beginPath();
-              pctx.moveTo(spread * 0.58, -4);
-              pctx.quadraticCurveTo(
-                spread,
-                -8 - (2 - Math.abs(finger)) * 0.5,
-                spread * 1.35,
-                -12 + Math.abs(finger) * 1.2,
-              );
-              pctx.stroke();
-            }
-            pctx.strokeStyle = c.skin;
-            pctx.lineWidth = 2.6;
-            pctx.beginPath();
-            pctx.moveTo(isLead ? -4 : 4, 2);
-            pctx.quadraticCurveTo(isLead ? -10 : 10, -1, isLead ? -8 : 8, -5);
-            pctx.stroke();
-          }
+          pctx.fillStyle = c.skin;
+          pctx.beginPath();
+          pctx.ellipse(1, 0, 7.5, 5.6, -0.08, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = "rgba(255,255,255,.12)";
+          pctx.beginPath();
+          pctx.ellipse(0, -2.6, 5.2, 2.1, -0.08, Math.PI, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = c.skin;
+          pctx.beginPath();
+          pctx.moveTo(2, 0);
+          pctx.quadraticCurveTo(6, -4, 7, -1);
+          pctx.quadraticCurveTo(7, 2, 4, 2.6);
+          pctx.quadraticCurveTo(2, 2, 2, 0);
+          pctx.fill();
           if (special && strike > 0.25) {
             pctx.shadowColor = c.accent;
             pctx.shadowBlur = 12;
