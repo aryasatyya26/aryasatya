@@ -2718,134 +2718,245 @@
       }
 
       function drawHumanBody(pctx, c, t, preview = false, fighter = null) {
-        const ground = 0;
-        const breathe = Math.sin(t * 2.2) * 2;
-        const backLeg = c.name === "RAKA" ? -14 : c.name === "SORA" ? -9 : -12;
-        const frontLeg = c.name === "SORA" ? 12 : 8;
+        const walking = fighter && fighter.state === "WALK";
+        const kick = fighter && fighter.state === "ATTACK" && fighter.attackType === "KICK";
+        const punch = fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH";
+        const special = fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL";
+        const progress = fighter && fighter.state === "ATTACK"
+          ? Math.max(0, Math.min(1, fighter.stateTimer / fighter.stateDuration))
+          : 0;
+        const strike = Math.sin(progress * Math.PI);
+        const step = walking ? Math.sin(t * 1.7) : 0;
+        const bounce = walking ? Math.abs(Math.sin(t * 1.7)) * 1.4 : 0;
+        const breathe = Math.sin(t * 2.1) * 0.8;
+        const shoulderY = -78 - bounce + breathe;
+        const hipY = -46 - bounce;
+        const legWidth = c.name === "RAKA" ? 17 : 14;
+        const backHip = { x: -7, y: hipY };
+        const frontHip = { x: 7, y: hipY };
+        const backKnee = { x: -17 - step * 5, y: -23 - bounce * 0.3 };
+        const backAnkle = { x: -21 - step * 8, y: -5 - bounce };
+        let frontKnee = { x: 16 + step * 5, y: -23 - bounce * 0.3 };
+        let frontAnkle = { x: 21 + step * 8, y: -5 - bounce };
+
+        if (kick) {
+          const kickLift = c.name === "RAKA" ? 8 : c.name === "SORA" ? 34 : 24;
+          const kickReach = c.name === "SORA" ? 52 : c.name === "DAMAR" ? 48 : 40;
+          frontKnee = {
+            x: 16 + kickReach * strike,
+            y: -24 - kickLift * strike,
+          };
+          frontAnkle = {
+            x: 21 + (kickReach + 22) * strike,
+            y: -5 - kickLift * strike - (c.name === "SORA" ? 30 * strike : 18 * strike),
+          };
+        }
+
         pctx.lineCap = "round";
         pctx.lineJoin = "round";
 
         pctx.fillStyle = "rgba(0,0,0,.38)";
         pctx.beginPath();
-        pctx.ellipse(0, ground + 3, 34, 7, 0, 0, Math.PI * 2);
+        pctx.ellipse(0, 3, kick && strike > 0.45 ? 29 : 34, 7, 0, 0, Math.PI * 2);
         pctx.fill();
 
-        // Jeans and sneakers
-        pctx.strokeStyle = c.pants;
-        pctx.lineWidth = c.name === "RAKA" ? 18 : 15;
-        pctx.beginPath();
-        pctx.moveTo(-7, -43); pctx.lineTo(backLeg, -18); pctx.lineTo(backLeg - 3, -5);
-        pctx.moveTo(7, -43); pctx.lineTo(frontLeg, -18); pctx.lineTo(frontLeg + 3, -5);
-        if (fighter && fighter.state === "ATTACK" && fighter.attackType === "KICK") {
-          if (c.name === "ARYA") {
-            pctx.moveTo(7, -43); pctx.lineTo(42, -36); pctx.lineTo(66, -56);
-          } else if (c.name === "RAKA") {
-            pctx.moveTo(7, -43); pctx.lineTo(22, -26); pctx.lineTo(46, -21);
-          } else if (c.name === "SORA") {
-            pctx.moveTo(7, -43); pctx.lineTo(52, -65); pctx.lineTo(68, -46);
-          } else {
-            pctx.moveTo(7, -43); pctx.lineTo(48, -38); pctx.lineTo(72, -38);
-          }
-        }
-        pctx.stroke();
-        pctx.strokeStyle = c.shoes;
-        pctx.lineWidth = 8;
-        pctx.beginPath();
-        pctx.moveTo(backLeg - 7, -4); pctx.lineTo(backLeg + 8, -4);
-        pctx.moveTo(frontLeg - 5, -4); pctx.lineTo(frontLeg + 12, -4);
-        pctx.stroke();
+        const drawLeg = (hip, knee, ankle, isFront) => {
+          pctx.strokeStyle = c.pants;
+          pctx.lineWidth = legWidth;
+          pctx.beginPath();
+          pctx.moveTo(hip.x, hip.y);
+          pctx.quadraticCurveTo(
+            (hip.x + knee.x) * 0.5 + (isFront ? 2 : -2),
+            (hip.y + knee.y) * 0.5,
+            knee.x,
+            knee.y,
+          );
+          pctx.quadraticCurveTo(
+            knee.x + (ankle.x - knee.x) * 0.55,
+            knee.y + (ankle.y - knee.y) * 0.45,
+            ankle.x,
+            ankle.y,
+          );
+          pctx.stroke();
 
-        // Knees and hip joints
-        pctx.fillStyle = c.skin;
-        [[backLeg, -20], [frontLeg, -20], [0, -43]].forEach(([x, y]) => {
-          pctx.beginPath(); pctx.arc(x, y, 4.5, 0, Math.PI * 2); pctx.fill();
-        });
+          pctx.fillStyle = c.pants;
+          pctx.beginPath();
+          pctx.arc(knee.x, knee.y, legWidth * 0.48, 0, Math.PI * 2);
+          pctx.fill();
+          pctx.fillStyle = c.skin;
+          pctx.beginPath();
+          pctx.arc(knee.x, knee.y, 3, 0, Math.PI * 2);
+          pctx.fill();
 
-        // Torso and open jacket
-        const shoulderY = -79 + breathe;
+          pctx.save();
+          pctx.translate(ankle.x, ankle.y);
+          const footAngle = kick && isFront
+            ? Math.atan2(ankle.y - knee.y, ankle.x - knee.x) * 0.45
+            : isFront ? -0.05 : Math.PI + 0.12;
+          pctx.rotate(footAngle);
+          pctx.fillStyle = c.shoes;
+          pctx.beginPath();
+          pctx.moveTo(-6, -4);
+          pctx.quadraticCurveTo(1, -8, 12, -4);
+          pctx.quadraticCurveTo(18, -1, 16, 2);
+          pctx.lineTo(-6, 2);
+          pctx.closePath();
+          pctx.fill();
+          pctx.strokeStyle = c.name === "ARYA" ? "#ef4444" : "rgba(255,255,255,.32)";
+          pctx.lineWidth = 1.5;
+          pctx.beginPath();
+          pctx.moveTo(-3, 1);
+          pctx.lineTo(13, 1);
+          pctx.stroke();
+          pctx.restore();
+        };
+
+        drawLeg(backHip, backKnee, backAnkle, false);
+        drawLeg(frontHip, frontKnee, frontAnkle, true);
+
+        // Hips, jacket and shirt follow the same small breathing/bounce motion.
         pctx.fillStyle = c.jacket;
         pctx.beginPath();
-        pctx.moveTo(-20, -48); pctx.quadraticCurveTo(-23, shoulderY - 4, -17, shoulderY - 12);
-        pctx.lineTo(17, shoulderY - 12); pctx.quadraticCurveTo(23, shoulderY - 4, 20, -48);
-        pctx.closePath(); pctx.fill();
-        pctx.strokeStyle = "rgba(255,255,255,.16)";
-        pctx.lineWidth = 1.5;
+        pctx.moveTo(-18, hipY + 1);
+        pctx.quadraticCurveTo(-23, shoulderY - 10, -16, shoulderY - 15);
+        pctx.quadraticCurveTo(0, shoulderY - 21, 16, shoulderY - 15);
+        pctx.quadraticCurveTo(23, shoulderY - 10, 18, hipY + 1);
+        pctx.closePath();
+        pctx.fill();
+        pctx.strokeStyle = "rgba(255,255,255,.18)";
+        pctx.lineWidth = 1.2;
         pctx.stroke();
         pctx.fillStyle = c.shirt;
         pctx.beginPath();
-        pctx.moveTo(-7, -47); pctx.lineTo(-10, shoulderY - 12); pctx.lineTo(10, shoulderY - 12);
-        pctx.lineTo(7, -47); pctx.closePath(); pctx.fill();
+        pctx.moveTo(-6, hipY);
+        pctx.lineTo(-8, shoulderY - 15);
+        pctx.lineTo(8, shoulderY - 15);
+        pctx.lineTo(6, hipY);
+        pctx.closePath();
+        pctx.fill();
+        pctx.fillStyle = c.pants;
+        pctx.fillRect(-15, hipY - 1, 30, 5);
 
-        // Neck and head
+        // Neck, head and character-specific hair.
         pctx.fillStyle = c.skin;
-        pctx.fillRect(-5, shoulderY - 18, 10, 12);
-        pctx.beginPath(); pctx.arc(0, shoulderY - 27, 12.5, 0, Math.PI * 2); pctx.fill();
+        pctx.fillRect(-4.5, shoulderY - 19, 9, 14);
+        pctx.beginPath();
+        pctx.ellipse(0, shoulderY - 29, 11.5, 14, 0, 0, Math.PI * 2);
+        pctx.fill();
         pctx.fillStyle = c.hair;
         pctx.beginPath();
-        if (c.name === "SORA") {
-          pctx.arc(0, shoulderY - 30, 13.5, Math.PI, Math.PI * 2);
-          pctx.lineTo(12, shoulderY - 20); pctx.lineTo(5, shoulderY - 27);
-        } else if (c.name === "RAKA") {
-          pctx.arc(0, shoulderY - 31, 13, Math.PI * 0.9, Math.PI * 2.1);
-        } else if (c.name === "DAMAR") {
-          pctx.moveTo(-12, shoulderY - 31); pctx.quadraticCurveTo(0, shoulderY - 44, 12, shoulderY - 31);
-          pctx.lineTo(8, shoulderY - 37); pctx.lineTo(-11, shoulderY - 36);
-        } else {
-          pctx.arc(0, shoulderY - 31, 13, Math.PI, Math.PI * 2);
-        }
-        pctx.closePath(); pctx.fill();
-
-        // Face expression
-        pctx.fillStyle = "#0f172a";
-        pctx.beginPath(); pctx.arc(-4, shoulderY - 28, 1.1, 0, Math.PI * 2); pctx.arc(4, shoulderY - 28, 1.1, 0, Math.PI * 2); pctx.fill();
-        pctx.strokeStyle = c.skin;
-        pctx.lineWidth = 1;
-        pctx.beginPath(); pctx.arc(0, shoulderY - 23, 4, 0.1, Math.PI - 0.1); pctx.stroke();
-
-        // Arms, elbows and open palms
-        pctx.strokeStyle = c.skin;
-        pctx.lineWidth = c.name === "RAKA" ? 11 : 9;
+        pctx.arc(0, shoulderY - 34, c.name === "RAKA" ? 12.5 : 13, Math.PI, Math.PI * 2);
+        pctx.lineTo(12, shoulderY - 30);
+        if (c.name === "SORA") pctx.lineTo(8, shoulderY - 17);
+        else if (c.name === "DAMAR") pctx.lineTo(4, shoulderY - 28);
+        pctx.closePath();
+        pctx.fill();
+        pctx.fillStyle = "#111827";
         pctx.beginPath();
-        if (fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH") {
-          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-22, shoulderY + 8); pctx.lineTo(-30, shoulderY + 2);
-          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(38, shoulderY - 8); pctx.lineTo(58, shoulderY - 11);
-        } else if (fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL") {
-          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-4, shoulderY - 18); pctx.lineTo(34, shoulderY - 12);
-          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(8, shoulderY - 16); pctx.lineTo(42, shoulderY - 8);
-          pctx.shadowColor = c.primary; pctx.shadowBlur = 16;
-        } else if (fighter && fighter.state === "BLOCK") {
-          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-10, shoulderY - 26); pctx.lineTo(14, shoulderY - 34);
-          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(20, shoulderY - 24); pctx.lineTo(-6, shoulderY - 32);
-        } else {
-          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-25, shoulderY + 10); pctx.lineTo(-34, shoulderY + 2);
-          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(25, shoulderY + 6); pctx.lineTo(34, shoulderY - 8);
-        }
+        pctx.arc(5, shoulderY - 29, 1.2, 0, Math.PI * 2);
+        pctx.fill();
+        pctx.strokeStyle = c.skin;
+        pctx.lineWidth = 1.2;
+        pctx.beginPath();
+        pctx.moveTo(7, shoulderY - 23);
+        pctx.lineTo(10, shoulderY - 22);
         pctx.stroke();
-        pctx.shadowBlur = 0;
-        pctx.fillStyle = c.skin;
-        pctx.beginPath(); pctx.arc(-34, shoulderY + 2, 5, 0, Math.PI * 2); pctx.arc(34, shoulderY - 8, 5, 0, Math.PI * 2); pctx.fill();
 
-        // Open-palm fingers
-        if (fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH") {
-          pctx.fillStyle = c.skin;
-          pctx.beginPath(); pctx.arc(58, shoulderY - 11, 7, 0, Math.PI * 2); pctx.fill();
-        } else if (fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL") {
-          pctx.fillStyle = c.accent;
-          pctx.shadowColor = c.accent; pctx.shadowBlur = 18;
-          pctx.beginPath(); pctx.arc(38, shoulderY - 12, 8, 0, Math.PI * 2); pctx.fill();
-          pctx.shadowBlur = 0;
-        } else {
+        const drawArm = (isLead) => {
+          const shoulder = {
+            x: isLead ? 13 : -13,
+            y: shoulderY - 13,
+          };
+          const guardHand = isLead
+            ? { x: 29, y: shoulderY - 28 }
+            : { x: -13, y: shoulderY - 31 };
+          const punchHand = isLead
+            ? { x: 58, y: shoulderY - 18 }
+            : { x: -17, y: shoulderY - 29 };
+          const specialHand = isLead
+            ? { x: 38, y: shoulderY - 31 }
+            : { x: 29, y: shoulderY - 27 };
+          let hand = { ...guardHand };
+          if (punch && isLead) {
+            hand.x += (punchHand.x - hand.x) * strike;
+            hand.y += (punchHand.y - hand.y) * strike;
+          } else if (special) {
+            hand.x += (specialHand.x - hand.x) * strike;
+            hand.y += (specialHand.y - hand.y) * strike;
+          } else if (fighter && fighter.state === "BLOCK") {
+            hand.x += (isLead ? 6 : 12);
+            hand.y -= 5;
+          } else if (walking) {
+            hand.y += Math.sin(t * 1.7 + (isLead ? 0 : Math.PI)) * 2;
+          }
+
+          const elbow = {
+            x: (shoulder.x + hand.x) * 0.5 + (isLead ? -7 : 6),
+            y: Math.min(shoulder.y, hand.y) + (punch && isLead ? 9 * (1 - strike) : 10),
+          };
+          pctx.strokeStyle = c.jacket;
+          pctx.lineWidth = c.name === "RAKA" ? 12 : 10;
+          pctx.beginPath();
+          pctx.moveTo(shoulder.x, shoulder.y);
+          pctx.quadraticCurveTo(elbow.x, elbow.y, elbow.x, elbow.y);
+          pctx.stroke();
           pctx.strokeStyle = c.skin;
-          pctx.lineWidth = 2;
-          [-34, 34].forEach((hx) => {
-            for (let i = -2; i <= 2; i++) {
+          pctx.lineWidth = c.name === "RAKA" ? 9 : 7.5;
+          pctx.beginPath();
+          pctx.moveTo(elbow.x, elbow.y);
+          pctx.quadraticCurveTo(
+            elbow.x + (hand.x - elbow.x) * 0.55,
+            elbow.y + (hand.y - elbow.y) * 0.45,
+            hand.x,
+            hand.y,
+          );
+          pctx.stroke();
+          pctx.fillStyle = c.skin;
+          pctx.beginPath();
+          pctx.arc(elbow.x, elbow.y, 4, 0, Math.PI * 2);
+          pctx.fill();
+
+          pctx.save();
+          pctx.translate(hand.x, hand.y);
+          if ((punch && isLead) || (special && strike > 0.7)) {
+            pctx.fillStyle = c.skin;
+            pctx.beginPath();
+            pctx.ellipse(3, 0, 7, 5.2, 0, 0, Math.PI * 2);
+            pctx.fill();
+          } else {
+            pctx.rotate(isLead ? -0.38 : 0.42);
+            pctx.fillStyle = c.skin;
+            pctx.beginPath();
+            pctx.ellipse(0, 1, 5.2, 7, 0, 0, Math.PI * 2);
+            pctx.fill();
+            pctx.strokeStyle = c.skin;
+            pctx.lineWidth = 1.8;
+            for (let finger = -2; finger <= 2; finger++) {
               pctx.beginPath();
-              pctx.moveTo(hx, shoulderY + (hx < 0 ? 2 : -8));
-              pctx.lineTo(hx + i * 2.1, shoulderY + (hx < 0 ? 12 : -18) + Math.abs(i) * 1.5);
+              pctx.moveTo(finger * 1.8, -3);
+              pctx.quadraticCurveTo(finger * 2.2, -8, finger * 2.5, -11 + Math.abs(finger) * 1.2);
               pctx.stroke();
             }
-          });
-        }
+            pctx.beginPath();
+            pctx.moveTo(isLead ? -4 : 4, 2);
+            pctx.quadraticCurveTo(isLead ? -9 : 9, -1, isLead ? -7 : 7, -4);
+            pctx.stroke();
+          }
+          if (special && strike > 0.25) {
+            pctx.shadowColor = c.accent;
+            pctx.shadowBlur = 12;
+            pctx.strokeStyle = c.accent;
+            pctx.lineWidth = 2;
+            pctx.beginPath();
+            pctx.arc(0, 0, 9 + strike * 4, -0.8, 0.8);
+            pctx.stroke();
+            pctx.shadowBlur = 0;
+          }
+          pctx.restore();
+        };
+
+        drawArm(false);
+        drawArm(true);
       }
 
       function drawFighter(f) {
@@ -2861,9 +2972,9 @@
         // Subtle Fighter Aura
         drawANMonogram(ctx, 0, -54, 46, 0.11, f.colorPrimary);
 
-        // Flip by facing direction & apply squash-and-stretch + lean
+        // Mirror the stance toward the opponent; keep body lean subtle and grounded.
         ctx.scale(f.facing * f.squashX, f.squashY);
-        ctx.rotate(f.leanAngle);
+        ctx.rotate(Math.max(-0.035, Math.min(0.035, f.leanAngle * 0.25)));
 
         if (f.state === "KO") {
           ctx.rotate(-Math.PI * 0.44);
@@ -2871,163 +2982,6 @@
         }
 
         drawHumanBody(ctx, CHARACTERS[f.characterKey], f.animPhase, false, f);
-        ctx.restore();
-        return;
-
-        const breathe = Math.sin(f.animPhase) * 2.5;
-        const walkBob =
-          f.state === "WALK" ? Math.abs(Math.sin(f.animPhase * 1.8)) * 5 : 0;
-        const hipY = -36 - walkBob;
-        const shoulderY = -66 - walkBob + breathe * 0.5;
-
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-
-        // 1. Back Leg
-        const stride =
-          f.state === "WALK" ? Math.sin(f.animPhase * 1.8) * 14 : 0;
-        ctx.strokeStyle = "#1e293b";
-        ctx.lineWidth = 10;
-        ctx.beginPath();
-        ctx.moveTo(-6, hipY);
-        ctx.lineTo(-14 - stride, -18);
-        ctx.lineTo(-18 - stride, -3);
-        ctx.stroke();
-
-        // 2. Front Leg (or Extended Kick!)
-        ctx.strokeStyle = "#334155";
-        ctx.lineWidth = 10.5;
-        ctx.beginPath();
-        ctx.moveTo(6, hipY);
-        if (f.state === "ATTACK" && f.attackType === "KICK") {
-          // High Roundhouse Kick Pose!
-          ctx.lineTo(34, -50);
-          ctx.lineTo(66, -64);
-          ctx.stroke();
-
-          // Glowing Kick Motion Arc
-          ctx.strokeStyle = f.colorPrimary;
-          ctx.lineWidth = 4;
-          ctx.shadowColor = f.colorPrimary;
-          ctx.shadowBlur = 16;
-          ctx.beginPath();
-          ctx.arc(10, -46, 58, -0.75, 0.15);
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-        } else {
-          ctx.lineTo(14 + stride, -18);
-          ctx.lineTo(18 + stride, -3);
-          ctx.stroke();
-        }
-
-        // 3. Martial Arts Gi Torso
-        ctx.fillStyle = f.isPlayer ? "#0f172a" : "#1f1018";
-        ctx.strokeStyle = f.colorPrimary;
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-        ctx.moveTo(-14, hipY);
-        ctx.lineTo(-17, shoulderY);
-        ctx.lineTo(17, shoulderY);
-        ctx.lineTo(14, hipY);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Glowing Martial Arts Belt
-        ctx.fillStyle = f.colorAccent;
-        ctx.fillRect(-14, hipY - 4, 28, 6);
-
-        // 4. Head & Flowing Headband
-        const headY = shoulderY - 17;
-        ctx.fillStyle = "#f8fafc";
-        ctx.beginPath();
-        ctx.arc(2, headY, 11.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Cyber Headband
-        ctx.fillStyle = f.colorPrimary;
-        ctx.fillRect(-10, headY - 6, 24, 4.5);
-
-        // Flowing Headband Tails
-        const tailWave = Math.sin(f.animPhase * 1.6) * 5;
-        ctx.strokeStyle = f.colorPrimary;
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(-10, headY - 4);
-        ctx.quadraticCurveTo(
-          -22,
-          headY - 8 + tailWave,
-          -30,
-          headY - 2 - tailWave,
-        );
-        ctx.stroke();
-
-        // 5. Arms & Combat Poses
-        ctx.strokeStyle = "#e2e8f0";
-        ctx.lineWidth = 8.5;
-
-        if (f.state === "BLOCK") {
-          // Defensive Cross Guard
-          ctx.beginPath();
-          ctx.moveTo(8, shoulderY + 4);
-          ctx.lineTo(22, shoulderY - 2);
-          ctx.lineTo(20, shoulderY - 20);
-          ctx.stroke();
-
-          // Hexagonal Energy Guard Shield
-          ctx.strokeStyle = "#10b981";
-          ctx.fillStyle = "rgba(16, 185, 129, 0.16)";
-          ctx.lineWidth = 2.5;
-          ctx.shadowColor = "#10b981";
-          ctx.shadowBlur = 14;
-          ctx.beginPath();
-          ctx.arc(26, shoulderY - 6, 26, -Math.PI * 0.45, Math.PI * 0.45);
-          ctx.stroke();
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        } else if (f.state === "ATTACK" && f.attackType === "PUNCH") {
-          // Lightning Straight Jab!
-          ctx.beginPath();
-          ctx.moveTo(10, shoulderY + 4);
-          ctx.lineTo(54, shoulderY + 2);
-          ctx.stroke();
-
-          // Glowing Fist & Streak
-          ctx.fillStyle = f.colorPrimary;
-          ctx.shadowColor = f.colorPrimary;
-          ctx.shadowBlur = 16;
-          ctx.beginPath();
-          ctx.arc(56, shoulderY + 2, 7.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        } else if (f.state === "ATTACK" && f.attackType === "SPECIAL") {
-          // Double-Palm Hadouken / AN-WAVE Thrust!
-          ctx.beginPath();
-          ctx.moveTo(10, shoulderY + 5);
-          ctx.lineTo(44, shoulderY + 6);
-          ctx.stroke();
-
-          ctx.fillStyle = "#f59e0b";
-          ctx.shadowColor = "#f59e0b";
-          ctx.shadowBlur = 18;
-          ctx.beginPath();
-          ctx.arc(46, shoulderY + 6, 9, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        } else {
-          // Ready Martial Arts Stance
-          ctx.beginPath();
-          ctx.moveTo(10, shoulderY + 4);
-          ctx.lineTo(22, shoulderY + 12);
-          ctx.lineTo(28, shoulderY - 2);
-          ctx.stroke();
-
-          ctx.fillStyle = f.colorPrimary;
-          ctx.beginPath();
-          ctx.arc(28, shoulderY - 3, 5.5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
         ctx.restore();
       }
 
