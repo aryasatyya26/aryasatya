@@ -2132,9 +2132,9 @@
         }
         if (type === "KICK") {
           return {
-            duration: c.name === "SORA" ? 0.44 : c.name === "RAKA" ? 0.46 : 0.38,
-            activeStart: c.name === "SORA" ? 0.12 : 0.12,
-            activeEnd: c.name === "SORA" ? 0.31 : 0.24,
+            duration: c.name === "SORA" ? 0.44 : c.name === "RAKA" ? 0.42 : 0.38,
+            activeStart: c.name === "RAKA" ? 0.1 : 0.12,
+            activeEnd: c.name === "SORA" ? 0.31 : c.name === "RAKA" ? 0.22 : 0.24,
             range: c.name === "SORA" ? 112 : c.range,
             damage: c.kickDamage,
             stun: c.name === "RAKA" ? 0.44 : 0.34,
@@ -2161,7 +2161,7 @@
           ARYA: { interval: 0.2, soundInterval: 0.1, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
           RAKA: { interval: 0.64, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
           SORA: { interval: 3, range: 270, knockback: 360, stun: 0.72, callout: "PHANTOM SLAM!" },
-          DAMAR: { interval: 0.4, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // KICK FLURRY!" },
+          DAMAR: { interval: 0.86, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // LEAP PUNCH!" },
         };
         const profile = profiles[c.name];
         const firstHitAt = profile.interval * 0.5;
@@ -2210,6 +2210,7 @@
             fighter.specialNextSoundAt = Infinity;
           }
           if (c.name === "RAKA") fighter.vx = fighter.facing * 105;
+          if (c.name === "DAMAR") fighter.vx = fighter.facing * 125;
           triggerShake(0.18, 8);
           spawnCallout(fighter.x, fighter.y - 108, profile.callout, c.primary);
         } else {
@@ -3072,10 +3073,10 @@
           frontAnkle = { x: 24, y: -37 };
         }
 
-        if (kick || (special && (c.name === "RAKA" || c.name === "DAMAR"))) {
+        if (kick || (special && c.name === "RAKA")) {
           const kickPose = {
             ARYA: { kneeX: 40, kneeY: -31, ankleX: 76, ankleY: -18 },
-            RAKA: { kneeX: 40, kneeY: -24, ankleX: 73, ankleY: -8 },
+            RAKA: { kneeX: 40, kneeY: -29, ankleX: 73, ankleY: -14 },
             SORA: { kneeX: 46, kneeY: -34, ankleX: 82, ankleY: -17 },
             DAMAR: { kneeX: 39, kneeY: -28, ankleX: 79, ankleY: -14 },
           }[c.name];
@@ -3090,6 +3091,13 @@
           };
         }
 
+        if (special && c.name === "DAMAR") {
+          backKnee = { x: -18 - specialStrike * 2, y: -24 - specialStrike * 7 };
+          backAnkle = { x: -27 - specialStrike * 2, y: -5 - specialStrike * 8 };
+          frontKnee = { x: 22 + specialStrike * 3, y: -24 - specialStrike * 8 };
+          frontAnkle = { x: 31 + specialStrike * 3, y: -5 - specialStrike * 10 };
+        }
+
         pctx.lineCap = "round";
         pctx.lineJoin = "round";
 
@@ -3101,6 +3109,8 @@
         pctx.save();
         if (special && c.name === "RAKA") {
           pctx.translate(0, -specialStrike * 13);
+        } else if (special && c.name === "DAMAR") {
+          pctx.translate(0, -specialStrike * 12);
         }
 
         const kickEffectStrength = kick ? strike : 0;
@@ -3285,7 +3295,9 @@
                 : throwPhase === "released"
                   ? { x: 72, y: shoulderY - 24 }
                   : { x: 80, y: shoulderY - 17 }
-              : { x: 38, y: shoulderY - 16 }
+              : c.name === "DAMAR"
+                ? { x: 70, y: shoulderY - 28 }
+                : { x: 38, y: shoulderY - 16 }
             : c.name === "SORA" && throwPhase === "lift"
               ? { x: 12, y: shoulderY - 34 }
               : { x: 28, y: shoulderY - 10 };
