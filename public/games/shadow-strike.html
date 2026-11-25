@@ -1743,7 +1743,7 @@
           name: "SORA", title: "Agile Acrobat", style: "Taekwondo // Jeet Kune Do",
           primary: "#a855f7", accent: "#facc15", skin: "#d3a17e", hair: "#2b181b",
           jacket: "#7f1d1d", shirt: "#090b10", pants: "#aeb5bf", shoes: "#e9eef6",
-          speed: 98, power: 68, range: 92, special: "PHANTOM FLASH",
+          speed: 98, power: 68, range: 92, special: "PHANTOM SLAM",
           moveSpeed: 250, punchDamage: 8, kickDamage: 14, specialDamage: 21
         },
         damar: {
@@ -1806,10 +1806,17 @@
           hp: 100,
           maxHp: 100,
           energy: isPlayer ? 25 : 0,
-          state: "IDLE", // IDLE, WALK, BLOCK, ATTACK, HITSTUN, KO
+          state: "IDLE", // IDLE, WALK, BLOCK, ATTACK, HITSTUN, GRABBED, AIRBORNE, KO
           attackType: null, // PUNCH, KICK, SPECIAL
           stateTimer: 0,
           stateDuration: 0,
+          vy: 0,
+          throwRotation: 0,
+          throwOwner: null,
+          grabbedBy: null,
+          throwTarget: null,
+          throwPhase: null,
+          throwPhaseStart: 0,
           specialNextHitAt: 0,
           specialNextSoundAt: 0,
           attackSoundIndex: 0,
@@ -2127,7 +2134,7 @@
         const profiles = {
           ARYA: { interval: 0.32, soundInterval: 0.16, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
           RAKA: { interval: 0.64, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
-          SORA: { interval: 3, range: 250, knockback: 420, stun: 0.3, callout: "PHANTOM FLASH // LONG REACH!" },
+          SORA: { interval: 3, range: 270, knockback: 360, stun: 0.72, callout: "PHANTOM SLAM!" },
           DAMAR: { interval: 0.4, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // KICK FLURRY!" },
         };
         const profile = profiles[c.name];
@@ -2159,6 +2166,21 @@
           const profile = getSpecialProfile(fighter);
           fighter.specialNextHitAt = profile.firstHitAt;
           fighter.specialNextSoundAt = profile.firstSoundAt;
+          if (c.name === "SORA") {
+            const target = fighter.isPlayer ? p2 : p1;
+            fighter.facing = target.x >= fighter.x ? 1 : -1;
+            const targetDistance = Math.abs(target.x - fighter.x);
+            fighter.throwTarget =
+              targetDistance <= profile.range &&
+              target.state !== "KO" &&
+              target.state !== "GRABBED" &&
+              target.state !== "AIRBORNE"
+                ? target
+                : null;
+            fighter.throwPhase = fighter.throwTarget ? "approach" : "miss";
+            fighter.throwPhaseStart = 0;
+            fighter.specialNextSoundAt = Infinity;
+          }
           if (c.name === "RAKA") fighter.vx = fighter.facing * 105;
           spawnCallout(fighter.x, fighter.y - 108, profile.callout, c.primary);
           spawnANShockwave(
@@ -2182,6 +2204,67 @@
         fighter.hasDealtHit = false;
       }
 
+      function releaseSoraTarget(fighter, successfulThrow) {
+        const target = fighter.throwTarget;
+        if (!target || target.state !== "GRABBED") return;
+        target.grabbedBy = null;
+        target.throwOwner = successfulThrow ? fighter : null;
+        target.state = "AIRBORNE";
+        target.vx = successfulThrow ? fighter.facing * 320 : fighter.facing * 120;
+        target.vy = successfulThrow ? -850 : -360;
+        target.y = Math.min(target.y, floorY - (successfulThrow ? 135 : 55));
+        target.throwRotation = 0;
+        if (successfulThrow) {
+          fighter.throwPhase = "released";
+          fighter.throwPhaseStart = fighter.stateTimer;
+          audio.playStrike("SPECIAL");
+        } else {
+          fighter.throwPhase = "interrupted";
+        }
+      }
+
+      function updateSoraThrow(fighter) {
+        const target = fighter.throwTarget;
+        if (fighter.throwPhase === "approach") {
+          if (!target || target.state === "KO" || target.state === "AIRBORNE") {
+            fighter.throwPhase = "miss";
+            return;
+          }
+          const distance = Math.abs(target.x - fighter.x);
+          const inFront = (target.x - fighter.x) * fighter.facing >= -12;
+          if (distance <= 132 && inFront) {
+            fighter.throwPhase = "lift";
+            fighter.throwPhaseStart = fighter.stateTimer;
+            fighter.vx = 0;
+            target.state = "GRABBED";
+            target.grabbedBy = fighter;
+            target.throwOwner = null;
+            target.vx = 0;
+            target.vy = 0;
+            target.facing = -fighter.facing;
+            target.y = floorY - 18;
+            audio.playStrike("SPECIAL");
+            spawnCallout(target.x, target.y - 110, "GRAB!", CHARACTERS.sora.primary);
+          } else if (fighter.stateTimer >= 0.72) {
+            fighter.throwPhase = "miss";
+            fighter.throwTarget = null;
+          }
+          return;
+        }
+
+        if (fighter.throwPhase !== "lift" || !target || target.state !== "GRABBED") {
+          return;
+        }
+
+        const liftProgress = Math.max(
+          0,
+          Math.min(1, (fighter.stateTimer - fighter.throwPhaseStart) / 0.52),
+        );
+        target.x = fighter.x + fighter.facing * 42;
+        target.y = floorY - (18 + Math.sin(liftProgress * Math.PI * 0.5) * 112);
+        if (liftProgress >= 1) releaseSoraTarget(fighter, true);
+      }
+
       function applyStrikeHit(
         attacker,
         defender,
@@ -2191,6 +2274,19 @@
         isSpecial = false,
       ) {
         const isBlocking = defender.state === "BLOCK";
+
+        if (
+          defender.state === "ATTACK" &&
+          defender.attackType === "SPECIAL" &&
+          defender.characterKey === "sora"
+        ) {
+          if (defender.throwPhase === "lift") {
+            releaseSoraTarget(defender, false);
+          } else {
+            defender.throwPhase = "interrupted";
+            defender.throwTarget = null;
+          }
+        }
 
         if (isBlocking) {
           const chipDmg = Math.max(2, Math.round(damage * 0.22));
@@ -2330,7 +2426,9 @@
         if (
           p2.state === "ATTACK" ||
           p2.state === "HITSTUN" ||
-          p2.state === "KO"
+          p2.state === "KO" ||
+          p2.state === "GRABBED" ||
+          p2.state === "AIRBORNE"
         )
           return;
 
@@ -2429,7 +2527,9 @@
           (playerSpecialActive ||
             (p1.state !== "ATTACK" &&
               p1.state !== "HITSTUN" &&
-              p1.state !== "KO"))
+              p1.state !== "KO" &&
+              p1.state !== "GRABBED" &&
+              p1.state !== "AIRBORNE"))
         ) {
           if (playerSpecialActive) {
             if (input.left && !input.right) {
@@ -2486,6 +2586,16 @@
             if (f.comboResetTimer <= 0) f.comboCount = 0;
           }
 
+          if (
+            f.state === "ATTACK" &&
+            f.attackType === "SPECIAL" &&
+            f.characterKey === "sora" &&
+            f.throwPhase === "approach" &&
+            (!f.isPlayer || (!input.left && !input.right))
+          ) {
+            f.vx = f.facing * 900;
+          }
+
           // Apply velocity & friction
           f.x += f.vx * dt;
           if (
@@ -2500,38 +2610,84 @@
           const padX = 60;
           f.x = Math.max(padX, Math.min(width - padX, f.x));
 
+          if (f.state === "GRABBED") {
+            f.vx = 0;
+            f.vy = 0;
+            return;
+          }
+
+          if (f.state === "AIRBORNE") {
+            f.y += f.vy * dt;
+            f.vy += 1800 * dt;
+            f.throwRotation += dt * 4.2;
+            if (f.y >= floorY) {
+              f.y = floorY;
+              f.vy = 0;
+              f.throwRotation = 0;
+              const throwOwner = f.throwOwner;
+              f.throwOwner = null;
+              if (throwOwner && match.phase === "FIGHT") {
+                audio.playStrike("SPECIAL");
+                spawnANShockwave(f.x, floorY - 5, CHARACTERS.sora.primary, 135);
+                spawnCallout(
+                  f.x,
+                  floorY - 105,
+                  "PHANTOM SLAM!",
+                  CHARACTERS.sora.primary,
+                );
+                applyStrikeHit(
+                  throwOwner,
+                  f,
+                  CHARACTERS.sora.specialDamage + 8,
+                  320,
+                  0.72,
+                  true,
+                );
+              } else {
+                f.state = "HITSTUN";
+                f.stateTimer = 0;
+                f.stateDuration = 0.3;
+              }
+            }
+            return;
+          }
+
           // State timers
           if (f.state === "ATTACK") {
             f.stateTimer += dt;
             const spec = getAttackSpec(f, f.attackType);
             if (f.attackType === "SPECIAL") {
               const profile = getSpecialProfile(f);
-              while (
-                f.stateTimer >= f.specialNextSoundAt &&
-                f.specialNextSoundAt <= f.stateDuration
-              ) {
-                audio.playStrike("SPECIAL");
-                f.specialNextSoundAt += profile.soundInterval;
-              }
-              while (
-                f.stateTimer >= f.specialNextHitAt &&
-                f.specialNextHitAt <= f.stateDuration &&
-                match.phase === "FIGHT"
-              ) {
-                const target = f.isPlayer ? p2 : p1;
-                const dist = Math.abs(target.x - f.x);
-                const inFront = (target.x - f.x) * f.facing >= -12;
-                if (dist <= profile.range && inFront && target.state !== "KO") {
-                  applyStrikeHit(
-                    f,
-                    target,
-                    profile.damagePerHit,
-                    profile.knockback,
-                    profile.stun,
-                    true,
-                  );
+              if (f.characterKey === "sora") {
+                updateSoraThrow(f);
+              } else {
+                while (
+                  f.stateTimer >= f.specialNextSoundAt &&
+                  f.specialNextSoundAt <= f.stateDuration
+                ) {
+                  audio.playStrike("SPECIAL");
+                  f.specialNextSoundAt += profile.soundInterval;
                 }
-                f.specialNextHitAt += profile.interval;
+                while (
+                  f.stateTimer >= f.specialNextHitAt &&
+                  f.specialNextHitAt <= f.stateDuration &&
+                  match.phase === "FIGHT"
+                ) {
+                  const target = f.isPlayer ? p2 : p1;
+                  const dist = Math.abs(target.x - f.x);
+                  const inFront = (target.x - f.x) * f.facing >= -12;
+                  if (dist <= profile.range && inFront && target.state !== "KO") {
+                    applyStrikeHit(
+                      f,
+                      target,
+                      profile.damagePerHit,
+                      profile.knockback,
+                      profile.stun,
+                      true,
+                    );
+                  }
+                  f.specialNextHitAt += profile.interval;
+                }
               }
             } else {
               const isRapidPunch = f.attackType === "PUNCH";
@@ -2591,7 +2747,9 @@
         if (
           Math.abs(diffX) < minSep &&
           p1.state !== "KO" &&
-          p2.state !== "KO"
+          p2.state !== "KO" &&
+          p1.state !== "GRABBED" &&
+          p2.state !== "GRABBED"
         ) {
           const overlap = (minSep - Math.abs(diffX)) * 0.5;
           const sign = diffX >= 0 ? 1 : -1;
@@ -2771,9 +2929,12 @@
             fighter.attackType === "SPECIAL" &&
             Math.abs(fighter.vx) > 25)
         );
+        const grabbed = fighter && fighter.state === "GRABBED";
+        const airborne = fighter && fighter.state === "AIRBORNE";
         const kick = fighter && fighter.state === "ATTACK" && fighter.attackType === "KICK";
         const punch = fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH";
         const special = fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL";
+        const throwPhase = fighter ? fighter.throwPhase : null;
         const progress = fighter && fighter.state === "ATTACK"
           ? Math.max(0, Math.min(1, fighter.stateTimer / fighter.stateDuration))
           : 0;
@@ -2791,10 +2952,17 @@
         const legWidth = c.name === "RAKA" ? 17 : 14;
         const backHip = { x: -7, y: hipY };
         const frontHip = { x: 7, y: hipY };
-        const backKnee = { x: -22 - step * 3, y: -24 - bounce * 0.3 };
-        const backAnkle = { x: -30 - step * 5, y: -5 - bounce };
+        let backKnee = { x: -22 - step * 3, y: -24 - bounce * 0.3 };
+        let backAnkle = { x: -30 - step * 5, y: -5 - bounce };
         let frontKnee = { x: 22 + step * 3, y: -24 - bounce * 0.3 };
         let frontAnkle = { x: 31 + step * 5, y: -5 - bounce };
+
+        if (grabbed || airborne) {
+          backKnee = { x: -16, y: -25 };
+          backAnkle = { x: -23, y: -39 };
+          frontKnee = { x: 15, y: -23 };
+          frontAnkle = { x: 24, y: -37 };
+        }
 
         if (kick || (special && (c.name === "RAKA" || c.name === "DAMAR"))) {
           const kickPose = {
@@ -3008,11 +3176,20 @@
           const punchBlend = punch ? Math.max(0, Math.sin(punchPhase)) : strike;
           const specialHand = isLead
             ? c.name === "SORA"
-              ? { x: 96, y: shoulderY - 18 }
+              ? throwPhase === "lift"
+                ? { x: 42, y: shoulderY - 40 }
+                : throwPhase === "released"
+                  ? { x: 72, y: shoulderY - 24 }
+                  : { x: 80, y: shoulderY - 17 }
               : { x: 38, y: shoulderY - 16 }
-            : { x: 28, y: shoulderY - 10 };
+            : c.name === "SORA" && throwPhase === "lift"
+              ? { x: 12, y: shoulderY - 34 }
+              : { x: 28, y: shoulderY - 10 };
           let hand = { ...guardHand };
-          if (punch) {
+          if (grabbed || airborne) {
+            hand.x = isLead ? 16 : -16;
+            hand.y = shoulderY - 40;
+          } else if (punch) {
             hand.x += (punchHand.x - hand.x) * punchBlend;
             hand.y += (punchHand.y - hand.y) * punchBlend;
           } else if (special) {
@@ -3130,7 +3307,7 @@
         // Ground Contact Shadow
         ctx.fillStyle = "rgba(0, 0, 0, 0.48)";
         ctx.beginPath();
-        ctx.ellipse(0, 0, 32, 7, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, floorY - f.y, 32, 7, 0, 0, Math.PI * 2);
         ctx.fill();
 
         // Subtle Fighter Aura
@@ -3139,6 +3316,10 @@
         // Mirror the stance toward the opponent; keep body lean subtle and grounded.
         ctx.scale(f.facing * f.squashX, f.squashY);
         ctx.rotate(Math.max(-0.035, Math.min(0.035, f.leanAngle * 0.25)));
+
+        if (f.state === "AIRBORNE") {
+          ctx.rotate(f.throwRotation);
+        }
 
         if (f.state === "KO") {
           ctx.rotate(-Math.PI * 0.44);
