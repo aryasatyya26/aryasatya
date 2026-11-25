@@ -414,6 +414,17 @@
             color: var(--amber-neon);
         }
 
+        .btn-secondary.is-liked {
+            background: rgba(255, 42, 95, 0.12);
+            border-color: var(--danger-red);
+            color: var(--danger-red);
+            box-shadow: 0 0 18px rgba(255, 42, 95, 0.18);
+        }
+
+        .btn-secondary.is-liked svg {
+            fill: currentColor;
+        }
+
         /* Game Over Stats Card */
         .stats-grid {
             display: grid;
@@ -668,15 +679,11 @@
                     </svg>
                     <span>MAIN LAGI</span>
                 </button>
-                <button id="btn-share" class="btn-secondary">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                <button id="btn-like" class="btn-secondary" type="button" aria-pressed="false">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8z"></path>
                     </svg>
-                    <span>SALIN SKOR PORTOFOLIO</span>
+                    <span id="like-label">LIKE THIS GAME</span>
                 </button>
                 <div class="dev-footer">
                     ENJOY GOOD LUCK
@@ -685,7 +692,7 @@
         </section>
 
         <!-- Custom Notification Toast -->
-        <div id="toast-msg">Skor berhasil disalin ke clipboard!</div>
+        <div id="toast-msg">Thanks for liking Neon Dash!</div>
     </div>
 
     <a class="portfolio-return-link" href="/#projects" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
@@ -827,7 +834,8 @@
         const gameoverScreen = document.getElementById('gameover-screen');
         const btnStart = document.getElementById('btn-start');
         const btnRestart = document.getElementById('btn-restart');
-        const btnShare = document.getElementById('btn-share');
+        const btnLike = document.getElementById('btn-like');
+        const likeLabel = document.getElementById('like-label');
         const btnMute = document.getElementById('btn-mute');
         const iconSoundOn = document.getElementById('icon-sound-on');
         const iconSoundOff = document.getElementById('icon-sound-off');
@@ -1082,19 +1090,12 @@
             iconSoundOff.style.display = isMuted ? 'block' : 'none';
         });
 
-        btnShare.addEventListener('click', () => {
-            const shareText = `⚡ NEON DASH: PROTOCOL — Skor saya ${state.score.toLocaleString('id-ID')} (Max Combo x${Math.max(1, state.maxCombo)}) di Interactive Portfolio Showcase!`;
-            const tempInput = document.createElement('textarea');
-            tempInput.value = shareText;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            try {
-                document.execCommand('copy');
-                showToast('Skor portofolio berhasil disalin!');
-            } catch (err) {
-                showToast('Gagal menyalin skor');
-            }
-            document.body.removeChild(tempInput);
+        btnLike.addEventListener('click', () => {
+            const liked = btnLike.getAttribute('aria-pressed') !== 'true';
+            btnLike.setAttribute('aria-pressed', String(liked));
+            btnLike.classList.toggle('is-liked', liked);
+            likeLabel.textContent = liked ? 'LIKED THIS GAME' : 'LIKE THIS GAME';
+            showToast(liked ? 'Thanks for liking Neon Dash!' : 'Your like was removed.');
         });
 
         function showToast(message) {

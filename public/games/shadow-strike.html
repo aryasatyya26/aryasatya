@@ -800,6 +800,17 @@
         border-color: var(--cyan);
       }
 
+      .btn-secondary-glass.is-liked {
+        border-color: var(--crimson);
+        color: var(--crimson);
+        background: rgba(244, 63, 94, 0.1);
+        box-shadow: 0 0 16px rgba(244, 63, 94, 0.16);
+      }
+
+      .btn-secondary-glass.is-liked svg {
+        fill: currentColor;
+      }
+
       /* License Certificate Modal */
       #license-modal {
         position: absolute;
@@ -1287,8 +1298,11 @@
             <span>REMATCH SEKARANG</span>
           </button>
           <div class="btn-dual-row">
-            <button id="btn-copy-result" class="btn-secondary-glass">
-              <span>📋 SALIN HASIL DUEL</span>
+            <button id="btn-like" class="btn-secondary-glass" type="button" aria-pressed="false">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8z"></path>
+              </svg>
+              <span id="like-label">LIKE THIS GAME</span>
             </button>
             <button id="btn-result-license" class="btn-secondary-glass">
               <span>🛡️ LISENSI AN</span>
@@ -1373,7 +1387,7 @@
       </div>
 
       <!-- Toast Notification -->
-      <div id="toast-box">Tersalin ke clipboard!</div>
+      <div id="toast-box">Thanks for liking Shadow Strike!</div>
     </main>
 
     <a class="portfolio-return-link" href="/#projects" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
@@ -1553,6 +1567,8 @@
       const resultOverlay = document.getElementById("result-overlay");
       const licenseModal = document.getElementById("license-modal");
       const toastBox = document.getElementById("toast-box");
+      const likeButton = document.getElementById("btn-like");
+      const likeLabel = document.getElementById("like-label");
 
       const audio = new ANCombatAudio();
       const WINS_STORAGE_KEY = "shadow_strike_an_wins_v1";
@@ -2840,22 +2856,13 @@
         .getElementById("btn-confirm-license")
         .addEventListener("click", closeLicense);
 
-      document
-        .getElementById("btn-copy-result")
-        .addEventListener("click", () => {
-          const summary = `🥊 STREET FIGHTER // AN EDITION — Skor Ronde ${match.p1Wins}-${match.p2Wins} (Max Combo x${Math.max(1, match.maxPlayerCombo)}) | Crafted by ARYASATYA NARYAMA`;
-          const tmp = document.createElement("textarea");
-          tmp.value = summary;
-          document.body.appendChild(tmp);
-          tmp.select();
-          try {
-            document.execCommand("copy");
-            showToast("Hasil duel & kredit ARYASATYA NARYAMA disalin!");
-          } catch (e) {
-            showToast("Gagal menyalin hasil");
-          }
-          document.body.removeChild(tmp);
-        });
+      likeButton.addEventListener("click", () => {
+        const liked = likeButton.getAttribute("aria-pressed") !== "true";
+        likeButton.setAttribute("aria-pressed", String(liked));
+        likeButton.classList.toggle("is-liked", liked);
+        likeLabel.textContent = liked ? "LIKED THIS GAME" : "LIKE THIS GAME";
+        showToast(liked ? "Thanks for liking Shadow Strike!" : "Your like was removed.");
+      });
 
       function showToast(msg) {
         toastBox.textContent = msg;

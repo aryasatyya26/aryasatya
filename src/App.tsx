@@ -894,8 +894,10 @@ function PerformanceHud() {
 }
 
 export default function App() {
-  const [entered, setEntered] = useState(false);
-  const [introVisible, setIntroVisible] = useState(true);
+  const returningToProjects =
+    typeof window !== "undefined" && window.location.hash === "#projects";
+  const [entered, setEntered] = useState(returningToProjects);
+  const [introVisible, setIntroVisible] = useState(!returningToProjects);
   const [entryLoading, setEntryLoading] = useState(false);
   const [entryWelcome, setEntryWelcome] = useState(false);
   const [entryTransition, setEntryTransition] = useState(false);
@@ -1056,6 +1058,11 @@ export default function App() {
 
   const returnToEntrance = () => {
     void setMusicOn(false);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
     if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true, force: true });
     } else {
