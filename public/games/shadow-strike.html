@@ -1236,7 +1236,7 @@
         </div>
       </header>
 
-      <!-- Dynamic Rooftop Dojo Fight Canvas -->
+      <!-- Night City Street Fight Canvas -->
       <section id="arena-stage">
         <canvas id="fightCanvas"></canvas>
 
@@ -1716,6 +1716,9 @@
       const stage = document.getElementById("arena-stage");
       const canvas = document.getElementById("fightCanvas");
       const ctx = canvas.getContext("2d");
+      const arenaBackgroundCanvas = document.createElement("canvas");
+      const arenaBackgroundCtx = arenaBackgroundCanvas.getContext("2d");
+      let arenaBackgroundDirty = true;
 
       const p1HpFill = document.getElementById("p1-hp-fill");
       const p1HpTrail = document.getElementById("p1-hp-trail");
@@ -1863,6 +1866,7 @@
       let projectiles = [];
       let particles = [];
       let fireParticles = [];
+      const MAX_FIRE_PARTICLES = 36;
       let shockwaves = [];
       let callouts = [];
 
@@ -1877,6 +1881,7 @@
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        arenaBackgroundDirty = true;
 
         if (match.phase === "MENU") {
           p1.x = width * 0.28;
@@ -2246,7 +2251,7 @@
           fighter.throwPhase = "released";
           fighter.throwPhaseStart = fighter.stateTimer;
           audio.playStrike("SPECIAL");
-          spawnFireBurst(target.x, target.y, 0.65, 8);
+          spawnFireBurst(target.x, target.y, 0.65, 6);
         } else {
           fighter.throwPhase = "interrupted";
         }
@@ -2273,7 +2278,7 @@
             target.facing = -fighter.facing;
             target.y = floorY - 18;
             audio.playStrike("SPECIAL");
-            spawnFireBurst(target.x, target.y - 25, 0.55, 6);
+            spawnFireBurst(target.x, target.y - 25, 0.55, 4);
             spawnCallout(target.x, target.y - 110, "GRAB!", CHARACTERS.sora.primary);
           } else if (fighter.stateTimer >= 0.72) {
             fighter.throwPhase = "miss";
@@ -2435,7 +2440,8 @@
       }
 
       function spawnFireBurst(x, y, scale = 1, count = 18) {
-        for (let i = 0; i < count; i++) {
+        const available = Math.max(0, MAX_FIRE_PARTICLES - fireParticles.length);
+        for (let i = 0; i < Math.min(count, available); i++) {
           const angle = -Math.PI * 0.5 + (Math.random() - 0.5) * 1.8;
           const speed = (45 + Math.random() * 150) * scale;
           const life = 0.38 + Math.random() * 0.28;
@@ -2733,7 +2739,7 @@
               f.throwOwner = null;
               if (throwOwner && match.phase === "FIGHT") {
                 audio.playStrike("SPECIAL");
-                spawnFireBurst(f.x, floorY - 18, 0.75, 12);
+                spawnFireBurst(f.x, floorY - 18, 0.75, 8);
                 spawnCallout(
                   f.x,
                   floorY - 105,
@@ -2917,102 +2923,269 @@
 
       // --- 9. PROCEDURAL VECTOR ARENA & MARTIAL ARTS RENDERER ---
       function drawArenaBackground() {
-        // Night Rooftop Dojo Sky Gradient
-        const skyGrad = ctx.createLinearGradient(0, 0, 0, floorY);
-        skyGrad.addColorStop(0, "#06080f");
-        skyGrad.addColorStop(0.65, "#0d1424");
-        skyGrad.addColorStop(1, "#141e33");
-        ctx.fillStyle = skyGrad;
-        ctx.fillRect(0, 0, width, height);
+        const pixelWidth = Math.max(1, Math.round(width * dpr));
+        const pixelHeight = Math.max(1, Math.round(height * dpr));
+        if (
+          arenaBackgroundDirty ||
+          arenaBackgroundCanvas.width !== pixelWidth ||
+          arenaBackgroundCanvas.height !== pixelHeight
+        ) {
+          if (arenaBackgroundCanvas.width !== pixelWidth) {
+            arenaBackgroundCanvas.width = pixelWidth;
+          }
+          if (arenaBackgroundCanvas.height !== pixelHeight) {
+            arenaBackgroundCanvas.height = pixelHeight;
+          }
+          const bg = arenaBackgroundCtx;
+          bg.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-        // Glowing Moon / Cyber Halo behind Dojo
-        ctx.save();
-        ctx.fillStyle = "rgba(56, 189, 248, 0.06)";
-        ctx.beginPath();
-        ctx.arc(width * 0.5, floorY * 0.34, 88, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
+          const sky = bg.createLinearGradient(0, 0, 0, floorY);
+          sky.addColorStop(0, "#070b18");
+          sky.addColorStop(0.58, "#18253b");
+          sky.addColorStop(1, "#51566a");
+          bg.fillStyle = sky;
+          bg.fillRect(0, 0, width, height);
 
-        // Distant Skyline Silhouettes
-        ctx.fillStyle = "#080c16";
-        const bldgs = [
-          [0.02, 0.48, 0.14],
-          [0.18, 0.38, 0.12],
-          [0.33, 0.52, 0.15],
-          [0.54, 0.44, 0.14],
-          [0.71, 0.36, 0.13],
-          [0.86, 0.49, 0.14],
-        ];
-        bldgs.forEach(([bx, by, bw]) => {
-          ctx.fillRect(width * bx, floorY * by, width * bw, floorY * (1 - by));
-        });
+          for (let i = 0; i < 34; i++) {
+            const starX = (((i * 73 + 19) % 97) / 97) * width;
+            const starY = (((i * 31 + 7) % 59) / 100) * floorY;
+            bg.globalAlpha = 0.25 + ((i * 17) % 6) * 0.08;
+            bg.fillStyle = i % 4 === 0 ? "#f8dca0" : "#c8d8f2";
+            bg.fillRect(starX, starY, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
+          }
+          bg.globalAlpha = 1;
 
-        // Glowing Architectural Neon Billboard with 'AN' Monogram & Creator License
-        const boardW = Math.min(250, width * 0.64);
-        const boardH = 68;
-        const boardX = (width - boardW) * 0.5;
-        const boardY = floorY * 0.16;
+          const moonX = width * 0.78;
+          const moonY = floorY * 0.22;
+          const moonRadius = Math.min(31, width * 0.075);
+          const moonGlow = bg.createRadialGradient(
+            moonX,
+            moonY,
+            moonRadius * 0.35,
+            moonX,
+            moonY,
+            moonRadius * 3.2,
+          );
+          moonGlow.addColorStop(0, "rgba(209, 224, 255, 0.25)");
+          moonGlow.addColorStop(0.35, "rgba(157, 184, 232, 0.1)");
+          moonGlow.addColorStop(1, "rgba(157, 184, 232, 0)");
+          bg.fillStyle = moonGlow;
+          bg.fillRect(
+            moonX - moonRadius * 3.2,
+            moonY - moonRadius * 3.2,
+            moonRadius * 6.4,
+            moonRadius * 6.4,
+          );
+          bg.save();
+          bg.shadowColor = "rgba(220, 232, 255, 0.7)";
+          bg.shadowBlur = 18;
+          bg.fillStyle = "#e6edfa";
+          bg.beginPath();
+          bg.arc(moonX, moonY, moonRadius, 0, Math.PI * 2);
+          bg.fill();
+          bg.restore();
+          bg.fillStyle = "rgba(139, 158, 194, 0.3)";
+          bg.beginPath();
+          bg.arc(moonX - moonRadius * 0.28, moonY - moonRadius * 0.18, moonRadius * 0.13, 0, Math.PI * 2);
+          bg.arc(moonX + moonRadius * 0.3, moonY + moonRadius * 0.24, moonRadius * 0.09, 0, Math.PI * 2);
+          bg.fill();
 
-        ctx.save();
-        ctx.fillStyle = "rgba(10, 15, 26, 0.85)";
-        ctx.strokeStyle = "rgba(56, 189, 248, 0.35)";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.roundRect(boardX, boardY, boardW, boardH, 12);
-        ctx.fill();
-        ctx.stroke();
+          const skylineBase = floorY * 0.84;
+          const buildings = [
+            [-0.04, 0.16, 0.36, "#111a2a"],
+            [0.09, 0.13, 0.54, "#0e1929"],
+            [0.2, 0.17, 0.4, "#131e30"],
+            [0.35, 0.14, 0.62, "#0d1728"],
+            [0.47, 0.18, 0.46, "#111b2c"],
+            [0.63, 0.13, 0.57, "#0c1727"],
+            [0.75, 0.17, 0.41, "#121d2e"],
+            [0.9, 0.14, 0.53, "#0d1727"],
+          ];
+          buildings.forEach(([bx, bw, buildingHeight, color], index) => {
+            const x = width * bx;
+            const buildingWidth = width * bw;
+            const h = floorY * buildingHeight;
+            const y = skylineBase - h;
+            bg.fillStyle = color;
+            bg.fillRect(x, y, buildingWidth, h);
+            bg.fillStyle = "rgba(119, 152, 194, 0.12)";
+            bg.fillRect(x, y, buildingWidth, 2);
+            bg.fillRect(x + buildingWidth * 0.16, y, 2, h);
 
-        drawANMonogram(ctx, width * 0.5, boardY + 24, 26, 0.9, "#38bdf8");
+            const windowSize = Math.max(2, width * 0.006);
+            const columnCount = Math.max(2, Math.floor(buildingWidth / 18));
+            const rowCount = Math.floor(h / 17);
+            for (let row = 0; row < rowCount; row++) {
+              for (let column = 0; column < columnCount; column++) {
+                if ((row * 3 + column * 5 + index) % 4 === 0) continue;
+                bg.fillStyle =
+                  (row + column + index) % 5 === 0
+                    ? "rgba(255, 190, 105, 0.62)"
+                    : "rgba(124, 184, 226, 0.35)";
+                bg.fillRect(
+                  x + 7 + column * 15,
+                  y + 9 + row * 16,
+                  windowSize,
+                  Math.max(3, windowSize * 1.35),
+                );
+              }
+            }
 
-        ctx.font = '800 8.5px "JetBrains Mono", monospace';
-        ctx.fillStyle = "rgba(248, 250, 252, 0.78)";
-        ctx.textAlign = "center";
-        ctx.fillText(
-          "ARYASATYA NARYAMA // COMBAT ENGINE",
-          width * 0.5,
-          boardY + 52,
-        );
-        ctx.restore();
+            if (index === 1 || index === 5) {
+              bg.strokeStyle = "rgba(140, 164, 196, 0.38)";
+              bg.lineWidth = 2;
+              bg.beginPath();
+              bg.moveTo(x + buildingWidth * 0.5, y);
+              bg.lineTo(x + buildingWidth * 0.5, y - floorY * 0.07);
+              bg.moveTo(x + buildingWidth * 0.38, y - floorY * 0.055);
+              bg.lineTo(x + buildingWidth * 0.62, y - floorY * 0.055);
+              bg.stroke();
+            }
+          });
 
-        // Rooftop Dojo Floor Platform
-        const floorGrad = ctx.createLinearGradient(0, floorY, 0, height);
-        floorGrad.addColorStop(0, "#162033");
-        floorGrad.addColorStop(1, "#070a12");
-        ctx.fillStyle = floorGrad;
-        ctx.fillRect(0, floorY, width, height - floorY);
+          const signWidth = Math.min(190, width * 0.42);
+          const signHeight = 34;
+          const signX = (width - signWidth) * 0.5;
+          const signY = floorY * 0.35;
+          bg.fillStyle = "rgba(5, 12, 22, 0.9)";
+          bg.strokeStyle = "rgba(56, 189, 248, 0.65)";
+          bg.lineWidth = 1.2;
+          bg.beginPath();
+          bg.roundRect(signX, signY, signWidth, signHeight, 5);
+          bg.fill();
+          bg.stroke();
+          drawANMonogram(bg, signX + 19, signY + signHeight * 0.5, 18, 0.9, "#38bdf8");
+          bg.font = '700 7px "JetBrains Mono", monospace';
+          bg.fillStyle = "rgba(239, 246, 255, 0.9)";
+          bg.textAlign = "center";
+          bg.fillText("AN // ARYASATYA NARYAMA", signX + signWidth * 0.59, signY + 20);
 
-        // Luminous Floor Edge Trim
-        ctx.strokeStyle = "#38bdf8";
-        ctx.lineWidth = 2;
-        ctx.shadowColor = "#38bdf8";
-        ctx.shadowBlur = 12;
-        ctx.beginPath();
-        ctx.moveTo(0, floorY);
-        ctx.lineTo(width, floorY);
-        ctx.stroke();
-        ctx.shadowBlur = 0;
+          [0.045, 0.955].forEach((ratio, index) => {
+            const lampX = width * ratio;
+            const lampTop = floorY * (index === 0 ? 0.38 : 0.43);
+            const lampGlow = bg.createRadialGradient(
+              lampX,
+              lampTop,
+              1,
+              lampX,
+              lampTop,
+              width * 0.14,
+            );
+            lampGlow.addColorStop(0, "rgba(255, 196, 112, 0.2)");
+            lampGlow.addColorStop(1, "rgba(255, 196, 112, 0)");
+            bg.fillStyle = lampGlow;
+            bg.fillRect(
+              lampX - width * 0.14,
+              lampTop - width * 0.14,
+              width * 0.28,
+              width * 0.28,
+            );
+            bg.strokeStyle = "#273447";
+            bg.lineWidth = 3;
+            bg.beginPath();
+            bg.moveTo(lampX, floorY + 3);
+            bg.lineTo(lampX, lampTop + 4);
+            bg.lineTo(lampX + (index === 0 ? 11 : -11), lampTop + 4);
+            bg.stroke();
+            bg.fillStyle = "#ffd895";
+            bg.beginPath();
+            bg.arc(lampX + (index === 0 ? 11 : -11), lampTop + 5, 3, 0, Math.PI * 2);
+            bg.fill();
+          });
 
-        // Perspective Floor Grid Lines
-        ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
-        ctx.lineWidth = 1;
-        for (let i = -4; i <= 4; i++) {
-          const topX = width * 0.5 + i * 48;
-          const botX = width * 0.5 + i * 86;
-          ctx.beginPath();
-          ctx.moveTo(topX, floorY);
-          ctx.lineTo(botX, height);
-          ctx.stroke();
+          const sidewalkHeight = Math.max(13, height * 0.025);
+          const sidewalk = bg.createLinearGradient(0, floorY, 0, floorY + sidewalkHeight);
+          sidewalk.addColorStop(0, "#46505d");
+          sidewalk.addColorStop(1, "#252e3c");
+          bg.fillStyle = sidewalk;
+          bg.fillRect(0, floorY, width, sidewalkHeight);
+          bg.strokeStyle = "rgba(207, 220, 234, 0.28)";
+          bg.lineWidth = 1;
+          bg.beginPath();
+          bg.moveTo(0, floorY + 2);
+          bg.lineTo(width, floorY + 2);
+          bg.stroke();
+          bg.fillStyle = "#171e29";
+          bg.fillRect(0, floorY + sidewalkHeight, width, height - floorY - sidewalkHeight);
+          bg.strokeStyle = "rgba(169, 184, 206, 0.14)";
+          for (let i = 0; i <= 8; i++) {
+            const seamX = (width * i) / 8;
+            bg.beginPath();
+            bg.moveTo(seamX, floorY + 4);
+            bg.lineTo(seamX + (i - 4) * 4, floorY + sidewalkHeight);
+            bg.stroke();
+          }
+
+          const roadTop = floorY + sidewalkHeight;
+          const road = bg.createLinearGradient(0, roadTop, 0, height);
+          road.addColorStop(0, "#202938");
+          road.addColorStop(0.42, "#151d29");
+          road.addColorStop(1, "#090d15");
+          bg.fillStyle = road;
+          bg.fillRect(0, roadTop, width, height - roadTop);
+
+          bg.strokeStyle = "rgba(192, 207, 224, 0.16)";
+          bg.lineWidth = 1;
+          bg.beginPath();
+          bg.moveTo(width * 0.42, roadTop);
+          bg.lineTo(-width * 0.12, height);
+          bg.moveTo(width * 0.58, roadTop);
+          bg.lineTo(width * 1.12, height);
+          bg.stroke();
+
+          bg.fillStyle = "rgba(243, 197, 109, 0.48)";
+          for (let i = 0; i < 5; i++) {
+            const y = roadTop + (height - roadTop) * (0.18 + i * 0.16);
+            const nextY = Math.min(height, y + (height - roadTop) * 0.075);
+            const halfWidth = width * (0.003 + i * 0.002);
+            bg.beginPath();
+            bg.moveTo(width * 0.5 - halfWidth * 0.3, y);
+            bg.lineTo(width * 0.5 + halfWidth * 0.3, y);
+            bg.lineTo(width * 0.5 + halfWidth, nextY);
+            bg.lineTo(width * 0.5 - halfWidth, nextY);
+            bg.closePath();
+            bg.fill();
+          }
+
+          bg.strokeStyle = "rgba(117, 159, 195, 0.14)";
+          bg.lineWidth = 2;
+          [
+            [0.08, 0.86, 0.18, 0.82],
+            [0.75, 0.91, 0.88, 0.89],
+            [0.3, 0.97, 0.39, 0.95],
+          ].forEach(([x1, y1, x2, y2]) => {
+            bg.beginPath();
+            bg.moveTo(width * x1, height * y1);
+            bg.lineTo(width * x2, height * y2);
+            bg.stroke();
+          });
+
+          arenaBackgroundDirty = false;
         }
+
+        ctx.drawImage(arenaBackgroundCanvas, 0, 0, width, height);
       }
 
-      function drawCharacterPreview(characterKey, side = "p1") {
+      let lastPreviewRender = 0;
+      function drawCharacterPreview(timestamp = performance.now()) {
         const preview = document.getElementById("characterSelectCanvas");
-        if (!preview) return;
+        if (!preview || startOverlay.classList.contains("hidden")) return;
+        if (timestamp - lastPreviewRender < 1000 / 30) {
+          requestAnimationFrame(drawCharacterPreview);
+          return;
+        }
+        lastPreviewRender = timestamp;
+
         const rect = preview.getBoundingClientRect();
-        preview.width = Math.max(1, rect.width * window.devicePixelRatio);
-        preview.height = Math.max(1, rect.height * window.devicePixelRatio);
+        const previewDpr = Math.min(window.devicePixelRatio || 1, 2);
+        const pixelWidth = Math.max(1, Math.round(rect.width * previewDpr));
+        const pixelHeight = Math.max(1, Math.round(rect.height * previewDpr));
+        if (preview.width !== pixelWidth || preview.height !== pixelHeight) {
+          preview.width = pixelWidth;
+          preview.height = pixelHeight;
+        }
         const pctx = preview.getContext("2d");
-        pctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+        pctx.setTransform(previewDpr, 0, 0, previewDpr, 0, 0);
         pctx.clearRect(0, 0, rect.width, rect.height);
 
         const keys = [selectedPlayerKey, selectedEnemyKey];
@@ -3028,7 +3201,7 @@
           pctx.restore();
         });
 
-        requestAnimationFrame(() => drawCharacterPreview(characterKey));
+        requestAnimationFrame(drawCharacterPreview);
       }
 
       function drawHumanBody(pctx, c, t, preview = false, fighter = null) {
@@ -3413,14 +3586,16 @@
               flameLife * 0.72,
               0.16 - flicker * 0.14,
             );
-            drawFlameShape(
-              pctx,
-              0,
-              -5 + flicker,
-              flameSize * 0.72,
-              flameLife * 0.65,
-              -0.02 + flicker * 0.16,
-            );
+            if (c.name !== "SORA") {
+              drawFlameShape(
+                pctx,
+                0,
+                -5 + flicker,
+                flameSize * 0.72,
+                flameLife * 0.65,
+                -0.02 + flicker * 0.16,
+              );
+            }
           }
           pctx.fillStyle = c.skin;
           pctx.beginPath();
