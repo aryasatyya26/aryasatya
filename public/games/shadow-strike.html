@@ -1,0 +1,2846 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>SHADOW STRIKE // AN EDITION — Aryasatya Naryama</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg-void: #05070b;
+        --bg-arena: #090c14;
+        --bg-glass: rgba(15, 20, 32, 0.82);
+        --bg-glass-strong: rgba(11, 15, 25, 0.94);
+        --border-glass: rgba(255, 255, 255, 0.1);
+        --cyan: #38bdf8;
+        --cyan-glow: rgba(56, 189, 248, 0.5);
+        --amber: #f59e0b;
+        --amber-glow: rgba(245, 158, 11, 0.5);
+        --crimson: #f43f5e;
+        --crimson-glow: rgba(244, 63, 94, 0.5);
+        --emerald: #10b981;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --font-display: "Chakra Petch", sans-serif;
+        --font-sans: "Plus Jakarta Sans", sans-serif;
+        --font-mono: "JetBrains Mono", monospace;
+        --spring-ease: cubic-bezier(0.22, 1.35, 0.36, 1);
+        --smooth-ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100dvh;
+        background-color: var(--bg-void);
+        color: var(--text-primary);
+        font-family: var(--font-sans);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        touch-action: none;
+      }
+
+      /* Ambient Desktop Studio Grid */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            circle at 18% 22%,
+            rgba(56, 189, 248, 0.07),
+            transparent 45%
+          ),
+          radial-gradient(
+            circle at 82% 78%,
+            rgba(244, 63, 94, 0.07),
+            transparent 45%
+          ),
+          linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.02) 1px,
+            transparent 1px
+          );
+        background-size:
+          100% 100%,
+          100% 100%,
+          36px 36px,
+          36px 36px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* Main Responsive Arcade Cabinet Frame */
+      #arcade-cabinet {
+        position: relative;
+        width: 100%;
+        height: 100dvh;
+        max-width: 520px;
+        background-color: var(--bg-arena);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+      }
+
+      @media (min-width: 540px) {
+        #arcade-cabinet {
+          height: 92dvh;
+          max-height: 860px;
+          border-radius: 28px;
+          border: 1px solid rgba(56, 189, 248, 0.25);
+          box-shadow:
+            0 30px 80px -15px rgba(0, 0, 0, 0.92),
+            0 0 45px rgba(56, 189, 248, 0.1),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+      }
+
+      /* Top Creator & Utility Ribbon */
+      #top-brand-bar {
+        position: relative;
+        z-index: 20;
+        padding: 10px 14px 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(
+          to bottom,
+          rgba(5, 7, 11, 0.95),
+          rgba(5, 7, 11, 0.4)
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .creator-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 10px;
+        border-radius: 10px;
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px solid rgba(56, 189, 248, 0.25);
+        cursor: pointer;
+        transition:
+          transform 0.2s var(--spring-ease),
+          border-color 0.2s ease;
+      }
+
+      .creator-chip:active {
+        transform: scale(0.95);
+      }
+
+      .creator-chip-text {
+        font-family: var(--font-mono);
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        color: var(--text-secondary);
+      }
+
+      .creator-chip-text strong {
+        color: var(--text-primary);
+        font-weight: 800;
+      }
+
+      .top-tools {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .tool-btn {
+        height: 32px;
+        padding: 0 10px;
+        border-radius: 9px;
+        background: var(--bg-glass);
+        border: 1px solid var(--border-glass);
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: 0.62rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition:
+          transform 0.2s var(--spring-ease),
+          border-color 0.2s ease,
+          color 0.2s ease;
+      }
+
+      .tool-btn:hover,
+      .tool-btn:active {
+        transform: scale(0.94);
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+
+      /* Arcade Fighting HUD (Health Bars, Timer, Rounds, Energy) */
+      #fight-hud {
+        position: relative;
+        z-index: 15;
+        padding: 8px 14px 4px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        pointer-events: none;
+      }
+
+      .hud-bars-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .fighter-hud-col {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .fighter-hud-col.p2 {
+        align-items: flex-end;
+      }
+
+      .fighter-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .fighter-hud-col.p2 .fighter-meta {
+        flex-direction: row-reverse;
+      }
+
+      .round-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .r-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        transition: all 0.3s var(--spring-ease);
+      }
+
+      .r-dot.won-p1 {
+        background: var(--cyan);
+        border-color: #ffffff;
+        box-shadow: 0 0 8px var(--cyan-glow);
+        transform: scale(1.15);
+      }
+
+      .r-dot.won-p2 {
+        background: var(--crimson);
+        border-color: #ffffff;
+        box-shadow: 0 0 8px var(--crimson-glow);
+        transform: scale(1.15);
+      }
+
+      /* Dual-Layer Health Bar (Instant + Delayed Damage Trail) */
+      .hp-track {
+        position: relative;
+        width: 100%;
+        height: 14px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1.5px solid rgba(255, 255, 255, 0.18);
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.7);
+      }
+
+      .hp-trail {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        background: #facc15;
+        transition: width 0.38s ease-out;
+      }
+
+      .hp-fill {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+        transition: width 0.12s ease-out;
+      }
+
+      .fighter-hud-col.p1 .hp-trail,
+      .fighter-hud-col.p1 .hp-fill {
+        right: 0; /* Drains inward toward center timer */
+      }
+
+      .fighter-hud-col.p1 .hp-fill {
+        background: linear-gradient(90deg, #0284c7, var(--cyan));
+        box-shadow: 0 0 12px var(--cyan-glow);
+      }
+
+      .fighter-hud-col.p2 .hp-trail,
+      .fighter-hud-col.p2 .hp-fill {
+        left: 0; /* Drains inward toward center timer */
+      }
+
+      .fighter-hud-col.p2 .hp-fill {
+        background: linear-gradient(270deg, #be123c, var(--crimson));
+        box-shadow: 0 0 12px var(--crimson-glow);
+      }
+
+      /* Energy / Super Meter */
+      .energy-track {
+        width: 82%;
+        height: 6px;
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .energy-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--amber), #fde047);
+        transition: width 0.18s ease-out;
+      }
+
+      .energy-fill.ready {
+        box-shadow: 0 0 10px var(--amber-glow);
+        animation: pulseEnergy 0.9s infinite alternate;
+      }
+
+      @keyframes pulseEnergy {
+        from {
+          filter: brightness(1);
+        }
+        to {
+          filter: brightness(1.4);
+        }
+      }
+
+      /* Center Round Timer Box */
+      .timer-box {
+        width: 48px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--bg-glass-strong);
+        border: 1.5px solid rgba(245, 158, 11, 0.45);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+      }
+
+      .timer-label {
+        font-family: var(--font-mono);
+        font-size: 0.48rem;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        color: var(--amber);
+      }
+
+      #hud-timer {
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--text-primary);
+      }
+
+      /* Arena Viewport Container */
+      #arena-stage {
+        position: relative;
+        flex: 1;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      #fightCanvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      /* Dynamic Round / KO Callout Banner */
+      #announcer-banner {
+        position: absolute;
+        top: 38%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.75);
+        z-index: 18;
+        text-align: center;
+        pointer-events: none;
+        opacity: 0;
+        transition:
+          opacity 0.25s ease,
+          transform 0.32s var(--spring-ease);
+      }
+
+      #announcer-banner.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      .announcer-sub {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.24em;
+        color: var(--amber);
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+      }
+
+      .announcer-main {
+        font-family: var(--font-display);
+        font-size: 2.85rem;
+        font-weight: 700;
+        font-style: italic;
+        line-height: 0.95;
+        letter-spacing: 0.04em;
+        background: linear-gradient(180deg, #ffffff 25%, #38bdf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 6px 22px rgba(0, 0, 0, 0.95));
+      }
+
+      /* Mobile-First Ergonomic Arcade Fight Pad */
+      #fight-pad {
+        position: relative;
+        z-index: 20;
+        padding: 12px 14px 16px;
+        background: linear-gradient(to top, #05070b 65%, rgba(9, 12, 20, 0.92));
+        border-top: 1px solid rgba(56, 189, 248, 0.16);
+        display: grid;
+        grid-template-columns: 1.15fr 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+
+      /* Left Pad: Movement + Guard */
+      .pad-left {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .move-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .pad-btn {
+        position: relative;
+        border-radius: 16px;
+        background: rgba(22, 29, 46, 0.85);
+        border: 1.5px solid rgba(255, 255, 255, 0.11);
+        color: var(--text-primary);
+        font-family: var(--font-display);
+        font-weight: 700;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow:
+          0 6px 16px rgba(0, 0, 0, 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        transition:
+          transform 0.14s var(--spring-ease),
+          background 0.14s ease,
+          border-color 0.14s ease,
+          box-shadow 0.14s ease;
+      }
+
+      .pad-btn.pressed,
+      .pad-btn:active {
+        transform: scale(0.92) translateY(2px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+      }
+
+      .btn-move {
+        height: 54px;
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+      }
+
+      .btn-move.pressed {
+        background: rgba(56, 189, 248, 0.18);
+        border-color: var(--cyan);
+        color: var(--cyan);
+      }
+
+      .btn-guard {
+        height: 44px;
+        flex-direction: row;
+        gap: 8px;
+        font-size: 0.78rem;
+        letter-spacing: 0.1em;
+        background: rgba(16, 185, 129, 0.1);
+        border-color: rgba(16, 185, 129, 0.3);
+        color: #6ee7b7;
+      }
+
+      .btn-guard.pressed {
+        background: rgba(16, 185, 129, 0.28);
+        border-color: var(--emerald);
+        color: #ffffff;
+        box-shadow: 0 0 18px rgba(16, 185, 129, 0.4);
+      }
+
+      /* Right Pad: Punch, Kick, AN-Wave Special */
+      .pad-right {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .strike-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .btn-punch {
+        height: 54px;
+        background: rgba(56, 189, 248, 0.12);
+        border-color: rgba(56, 189, 248, 0.35);
+        color: var(--cyan);
+        font-size: 0.82rem;
+        letter-spacing: 0.06em;
+      }
+
+      .btn-punch.pressed {
+        background: var(--cyan);
+        color: #05070b;
+        box-shadow: 0 0 20px var(--cyan-glow);
+      }
+
+      .btn-kick {
+        height: 54px;
+        background: rgba(244, 63, 94, 0.13);
+        border-color: rgba(244, 63, 94, 0.38);
+        color: #fda4af;
+        font-size: 0.82rem;
+        letter-spacing: 0.06em;
+      }
+
+      .btn-kick.pressed {
+        background: var(--crimson);
+        color: #ffffff;
+        box-shadow: 0 0 20px var(--crimson-glow);
+      }
+
+      .btn-special {
+        height: 44px;
+        flex-direction: row;
+        gap: 8px;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: var(--text-secondary);
+        opacity: 0.65;
+      }
+
+      .btn-special.charged {
+        opacity: 1;
+        background: linear-gradient(
+          135deg,
+          rgba(245, 158, 11, 0.25),
+          rgba(56, 189, 248, 0.25)
+        );
+        border-color: var(--amber);
+        color: #fde047;
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.32);
+      }
+
+      .btn-special.charged.pressed {
+        background: linear-gradient(135deg, var(--amber), var(--cyan));
+        color: #05070b;
+      }
+
+      .key-hint {
+        font-family: var(--font-mono);
+        font-size: 0.55rem;
+        opacity: 0.65;
+        margin-top: 1px;
+      }
+
+      /* Glassmorphism Overlays (Start Screen, Match Result, License Modal) */
+      .overlay-screen {
+        position: absolute;
+        inset: 0;
+        z-index: 35;
+        background: rgba(7, 10, 18, 0.86);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 24px 20px 20px;
+        opacity: 1;
+        transform: scale(1);
+        transition:
+          opacity 0.3s var(--smooth-ease),
+          transform 0.35s var(--spring-ease),
+          visibility 0.3s;
+      }
+
+      .overlay-screen.hidden {
+        opacity: 0;
+        transform: scale(0.96);
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .studio-pill {
+        align-self: center;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-glass);
+        font-family: var(--font-mono);
+        font-size: 0.64rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--text-primary);
+      }
+
+      .hero-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 12px;
+      }
+
+      .an-crest {
+        width: 74px;
+        height: 74px;
+        border-radius: 22px;
+        background: linear-gradient(
+          145deg,
+          rgba(56, 189, 248, 0.16),
+          rgba(15, 20, 32, 0.95)
+        );
+        border: 1.5px solid rgba(56, 189, 248, 0.42);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+          0 16px 36px rgba(0, 0, 0, 0.6),
+          0 0 28px rgba(56, 189, 248, 0.22);
+      }
+
+      .edition-tag {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.24em;
+        color: var(--amber);
+      }
+
+      .game-title {
+        font-family: var(--font-display);
+        font-size: 2.55rem;
+        font-weight: 700;
+        font-style: italic;
+        line-height: 0.96;
+        letter-spacing: 0.02em;
+        background: linear-gradient(135deg, #ffffff 30%, #38bdf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .game-subtitle {
+        font-size: 0.88rem;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        max-width: 330px;
+      }
+
+      .versus-card {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border-glass);
+        margin-top: 4px;
+      }
+
+      .fighter-card-item {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .fighter-card-item.left {
+        text-align: left;
+      }
+      .fighter-card-item.right {
+        text-align: right;
+      }
+
+      .vs-badge {
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        font-style: italic;
+        color: var(--amber);
+        padding: 4px 10px;
+        border-radius: 8px;
+        background: rgba(245, 158, 11, 0.14);
+        border: 1px solid rgba(245, 158, 11, 0.35);
+      }
+
+      .cta-group {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .btn-primary-fight {
+        width: 100%;
+        padding: 16px 20px;
+        border-radius: 16px;
+        border: none;
+        background: linear-gradient(135deg, var(--cyan) 0%, #0284c7 100%);
+        color: #04070d;
+        font-family: var(--font-display);
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        cursor: pointer;
+        box-shadow: 0 10px 28px rgba(56, 189, 248, 0.38);
+        transition: transform 0.2s var(--spring-ease);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .btn-primary-fight:active {
+        transform: scale(0.95);
+      }
+
+      .btn-dual-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .btn-secondary-glass {
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-glass);
+        color: var(--text-primary);
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        transition:
+          transform 0.2s var(--spring-ease),
+          border-color 0.2s ease;
+      }
+
+      .btn-secondary-glass:active {
+        transform: scale(0.95);
+        border-color: var(--cyan);
+      }
+
+      /* License Certificate Modal */
+      #license-modal {
+        position: absolute;
+        inset: 0;
+        z-index: 50;
+        background: rgba(5, 7, 11, 0.9);
+        backdrop-filter: blur(18px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        opacity: 1;
+        transition:
+          opacity 0.25s ease,
+          visibility 0.25s ease;
+      }
+
+      #license-modal.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .license-panel {
+        width: 100%;
+        background: var(--bg-glass-strong);
+        border: 1.5px solid rgba(56, 189, 248, 0.38);
+        border-radius: 24px;
+        padding: 22px 20px;
+        box-shadow:
+          0 25px 60px rgba(0, 0, 0, 0.85),
+          0 0 32px rgba(56, 189, 248, 0.14);
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .license-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--border-glass);
+        padding-bottom: 12px;
+      }
+
+      .license-statement {
+        background: rgba(56, 189, 248, 0.07);
+        border: 1px solid rgba(56, 189, 248, 0.24);
+        border-radius: 14px;
+        padding: 13px;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        line-height: 1.6;
+        color: var(--text-primary);
+      }
+
+      .license-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        font-family: var(--font-mono);
+        font-size: 0.66rem;
+        color: var(--text-secondary);
+      }
+
+      .license-row-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 7px 10px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+      }
+
+      .license-row-item strong {
+        color: var(--cyan);
+      }
+
+      /* Toast Feedback */
+      #toast-box {
+        position: absolute;
+        top: 56px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        z-index: 60;
+        background: var(--bg-glass-strong);
+        border: 1px solid var(--cyan);
+        color: var(--cyan);
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 700;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.25s var(--spring-ease);
+        white-space: nowrap;
+      }
+
+      #toast-box.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <main id="arcade-cabinet">
+      <!-- Persistent Top Creator Signature Bar -->
+      <div id="top-brand-bar">
+        <div
+          id="badge-creator-license"
+          class="creator-chip"
+          title="Lihat Sertifikat Lisensi Aryasatya Naryama"
+        >
+          <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
+            <path d="M6 32L15 8H20L11 32H6Z" fill="#38BDF8" />
+            <path d="M14 23H22L20 27H12L14 23Z" fill="#F8FAFC" />
+            <path
+              d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z"
+              fill="#F8FAFC"
+            />
+            <circle cx="34" cy="6" r="2.3" fill="#F59E0B" />
+          </svg>
+          <span class="creator-chip-text"
+            >CRAFTED BY <strong>ARYASATYA NARYAMA</strong> • AN LICENSED</span
+          >
+        </div>
+
+        <div class="top-tools">
+          <button id="btn-open-license-top" class="tool-btn">
+            <span>AN LICENSE</span>
+          </button>
+          <button id="btn-mute" class="tool-btn" aria-label="Suara">
+            <svg
+              id="icon-audio-on"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <svg
+              id="icon-audio-off"
+              style="display: none"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+            >
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <line x1="23" y1="9" x2="17" y2="15"></line>
+              <line x1="17" y1="9" x2="23" y2="15"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Arcade Duel HUD -->
+      <header id="fight-hud">
+        <div class="hud-bars-row">
+          <!-- Player 1: KAI // AN-01 -->
+          <div class="fighter-hud-col p1">
+            <div class="fighter-meta">
+              <span style="color: var(--cyan)">KAI // AN-01</span>
+              <div class="round-dots">
+                <span id="p1-dot-1" class="r-dot"></span>
+                <span id="p1-dot-2" class="r-dot"></span>
+              </div>
+            </div>
+            <div class="hp-track">
+              <div id="p1-hp-trail" class="hp-trail"></div>
+              <div id="p1-hp-fill" class="hp-fill"></div>
+            </div>
+            <div class="energy-track">
+              <div id="p1-energy-fill" class="energy-fill"></div>
+            </div>
+          </div>
+
+          <!-- Center Round Timer -->
+          <div class="timer-box">
+            <span id="hud-round-label" class="timer-label">R-01</span>
+            <span id="hud-timer">60</span>
+          </div>
+
+          <!-- Opponent: VIPER // CPU-X -->
+          <div class="fighter-hud-col p2">
+            <div class="fighter-meta">
+              <span style="color: var(--crimson)">VIPER // CPU-X</span>
+              <div class="round-dots">
+                <span id="p2-dot-1" class="r-dot"></span>
+                <span id="p2-dot-2" class="r-dot"></span>
+              </div>
+            </div>
+            <div class="hp-track">
+              <div id="p2-hp-trail" class="hp-trail"></div>
+              <div id="p2-hp-fill" class="hp-fill"></div>
+            </div>
+            <div class="energy-track">
+              <div id="p2-energy-fill" class="energy-fill"></div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dynamic Rooftop Dojo Fight Canvas -->
+      <section id="arena-stage">
+        <canvas id="fightCanvas"></canvas>
+
+        <!-- Center Fight Callout Banner -->
+        <div id="announcer-banner">
+          <div id="announcer-sub" class="announcer-sub">ROUND 01</div>
+          <div id="announcer-main" class="announcer-main">FIGHT!</div>
+        </div>
+      </section>
+
+      <!-- Mobile-First Ergonomic Fight Controls -->
+      <footer id="fight-pad">
+        <!-- Left Controls: Move Left / Right + Guard -->
+        <div class="pad-left">
+          <div class="move-row">
+            <button id="ctrl-left" class="pad-btn btn-move" data-action="left">
+              <span>◄ MUNDUR</span>
+              <span class="key-hint">[A / ◄]</span>
+            </button>
+            <button
+              id="ctrl-right"
+              class="pad-btn btn-move"
+              data-action="right"
+            >
+              <span>MAJU ►</span>
+              <span class="key-hint">[D / ►]</span>
+            </button>
+          </div>
+          <button id="ctrl-block" class="pad-btn btn-guard" data-action="block">
+            <svg
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <span>GUARD / BLOCK</span>
+            <span class="key-hint">[S]</span>
+          </button>
+        </div>
+
+        <!-- Right Controls: Punch, Kick, AN-Wave Special -->
+        <div class="pad-right">
+          <div class="strike-row">
+            <button
+              id="ctrl-punch"
+              class="pad-btn btn-punch"
+              data-action="punch"
+            >
+              <span>PUNCH</span>
+              <span class="key-hint">CEPAT [J]</span>
+            </button>
+            <button id="ctrl-kick" class="pad-btn btn-kick" data-action="kick">
+              <span>KICK</span>
+              <span class="key-hint">BERAT [K]</span>
+            </button>
+          </div>
+          <button
+            id="ctrl-special"
+            class="pad-btn btn-special"
+            data-action="special"
+          >
+            <span>⚡ AN-WAVE SPECIAL</span>
+            <span id="special-pct" class="key-hint">0% [L]</span>
+          </button>
+        </div>
+      </footer>
+
+      <!-- START SCREEN OVERLAY -->
+      <div id="start-overlay" class="overlay-screen">
+        <div class="studio-pill">
+          <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
+            <path d="M6 32L15 8H20L11 32H6Z" fill="#38BDF8" />
+            <path d="M14 23H22L20 27H12L14 23Z" fill="#F8FAFC" />
+            <path
+              d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z"
+              fill="#F8FAFC"
+            />
+          </svg>
+          <span>ARYASATYA NARYAMA • COMBAT ENGINE</span>
+        </div>
+
+        <div class="hero-stack">
+          <div class="an-crest">
+            <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
+              <path d="M6 32L15 8H20L11 32H6Z" fill="#38BDF8" />
+              <path d="M14 23H22L20 27H12L14 23Z" fill="#F8FAFC" />
+              <path
+                d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z"
+                fill="#F8FAFC"
+              />
+              <circle cx="34" cy="6" r="2.5" fill="#F59E0B" />
+            </svg>
+          </div>
+
+          <div>
+            <div class="edition-tag">AN EDITION // ARCADE DUEL</div>
+            <h1 class="game-title">SHADOW STRIKE</h1>
+          </div>
+
+          <p class="game-subtitle">
+            Duel bela diri 1v1 <strong>Best-of-3 Rounds</strong>. Rangkai kombo
+            pukulan & tendangan untuk mengisi energi dan lepaskan gelombang
+            <strong>AN-WAVE</strong>!
+          </p>
+
+          <div class="versus-card">
+            <div class="fighter-card-item left">
+              <span
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 0.6rem;
+                  color: var(--cyan);
+                "
+                >PLAYER 01</span
+              >
+              <strong
+                style="font-family: var(--font-display); font-size: 0.95rem"
+                >KAI // AN-01</strong
+              >
+              <span style="font-size: 0.68rem; color: var(--text-secondary)"
+                >Kinetic Striker</span
+              >
+            </div>
+            <div class="vs-badge">VS</div>
+            <div class="fighter-card-item right">
+              <span
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 0.6rem;
+                  color: var(--crimson);
+                "
+                >AI OPPONENT</span
+              >
+              <strong
+                style="font-family: var(--font-display); font-size: 0.95rem"
+                >VIPER // CPU-X</strong
+              >
+              <span style="font-size: 0.68rem; color: var(--text-secondary)"
+                >Adaptive Rival</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-group">
+          <button id="btn-start-duel" class="btn-primary-fight">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>MULAI PERTARUNGAN</span>
+          </button>
+          <div class="btn-dual-row">
+            <button id="btn-start-license" class="btn-secondary-glass">
+              <span>🛡️ SERTIFIKAT LISENSI AN</span>
+            </button>
+            <div class="btn-secondary-glass" style="cursor: default">
+              <span
+                >VICTORIES:
+                <strong id="start-wins-count" style="color: var(--amber)"
+                  >0</strong
+                ></span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATCH END OVERLAY -->
+      <div id="result-overlay" class="overlay-screen hidden">
+        <div class="studio-pill" style="border-color: rgba(245, 158, 11, 0.38)">
+          <span style="color: var(--amber)">MATCH TELEMETRY // BEST OF 3</span>
+        </div>
+
+        <div class="hero-stack">
+          <div id="result-sub" class="edition-tag">ARENA CHAMPION</div>
+          <h2 id="result-title" class="game-title" style="font-size: 2.3rem">
+            KAI WINS!
+          </h2>
+          <p id="result-desc" class="game-subtitle">
+            Kemenangan mutlak di Night Rooftop Dojo dengan teknik kombo presisi.
+          </p>
+
+          <div
+            class="versus-card"
+            style="grid-template-columns: 1fr 1fr; text-align: center"
+          >
+            <div class="fighter-card-item" style="text-align: center">
+              <span
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 0.62rem;
+                  color: var(--text-secondary);
+                "
+                >SKOR RONDE</span
+              >
+              <strong
+                id="result-rounds"
+                style="
+                  font-family: var(--font-display);
+                  font-size: 1.55rem;
+                  color: var(--cyan);
+                "
+                >2 - 0</strong
+              >
+            </div>
+            <div class="fighter-card-item" style="text-align: center">
+              <span
+                style="
+                  font-family: var(--font-mono);
+                  font-size: 0.62rem;
+                  color: var(--text-secondary);
+                "
+                >MAX COMBO</span
+              >
+              <strong
+                id="result-combo"
+                style="
+                  font-family: var(--font-display);
+                  font-size: 1.55rem;
+                  color: var(--amber);
+                "
+                >x4</strong
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-group">
+          <button id="btn-rematch" class="btn-primary-fight">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.6"
+            >
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            <span>REMATCH SEKARANG</span>
+          </button>
+          <div class="btn-dual-row">
+            <button id="btn-copy-result" class="btn-secondary-glass">
+              <span>📋 SALIN HASIL DUEL</span>
+            </button>
+            <button id="btn-result-license" class="btn-secondary-glass">
+              <span>🛡️ LISENSI AN</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- OFFICIAL CREATOR LICENSE MODAL -->
+      <div id="license-modal" class="hidden">
+        <div class="license-panel">
+          <div class="license-top">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div
+                class="an-crest"
+                style="width: 40px; height: 40px; border-radius: 12px"
+              >
+                <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+                  <path d="M6 32L15 8H20L11 32H6Z" fill="#38BDF8" />
+                  <path d="M14 23H22L20 27H12L14 23Z" fill="#F8FAFC" />
+                  <path
+                    d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z"
+                    fill="#F8FAFC"
+                  />
+                  <circle cx="34" cy="6" r="2.3" fill="#F59E0B" />
+                </svg>
+              </div>
+              <div>
+                <div style="font-size: 0.92rem; font-weight: 800">
+                  ARYASATYA NARYAMA
+                </div>
+                <div
+                  style="
+                    font-family: var(--font-mono);
+                    font-size: 0.6rem;
+                    color: var(--cyan);
+                    letter-spacing: 0.1em;
+                  "
+                >
+                  VERIFIED CREATOR CERTIFICATE
+                </div>
+              </div>
+            </div>
+            <button
+              id="btn-close-license"
+              class="tool-btn"
+              style="padding: 0 9px"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="license-statement">
+            Original Martial Arts Combat Engine, Procedural Vector Animation,
+            Audio Synthesizer & UI/UX Architecture
+            <strong>© 2026 ARYASATYA NARYAMA (AN)</strong>. All Rights Reserved.
+          </div>
+
+          <div class="license-rows">
+            <div class="license-row-item">
+              <span>CREATOR & ARCHITECT</span>
+              <strong>ARYASATYA NARYAMA</strong>
+            </div>
+            <div class="license-row-item">
+              <span>ENGINE SIGNATURE</span>
+              <strong>AN // COMBAT ENGINE v3.0</strong>
+            </div>
+            <div class="license-row-item">
+              <span>FX WATERMARK</span>
+              <strong>AN-WAVE & KO AURA EMBEDDED</strong>
+            </div>
+          </div>
+
+          <button
+            id="btn-confirm-license"
+            class="btn-primary-fight"
+            style="padding: 13px; font-size: 0.95rem"
+          >
+            TUTUP SERTIFIKAT
+          </button>
+        </div>
+      </div>
+
+      <!-- Toast Notification -->
+      <div id="toast-box">Tersalin ke clipboard!</div>
+    </main>
+
+    <script>
+      /**
+       * ============================================================================
+       * SHADOW STRIKE // AN EDITION
+       * Original Arcade Combat Engine, Vector Rigging, Audio & UI/UX Architecture
+       * © 2026 ARYASATYA NARYAMA (AN). All Rights Reserved.
+       * ============================================================================
+       */
+
+      // --- 1. PROCEDURAL MARTIAL ARTS WEB AUDIO SYNTHESIZER ---
+      class ANCombatAudio {
+        constructor() {
+          this.ctx = null;
+          this.muted = false;
+        }
+
+        init() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioCtx();
+          }
+          if (this.ctx.state === "suspended") {
+            this.ctx.resume();
+          }
+        }
+
+        toggleMute() {
+          this.muted = !this.muted;
+          return this.muted;
+        }
+
+        playWhiff(isHeavy = false) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(isHeavy ? 190 : 280, now);
+            osc.frequency.exponentialRampToValueAtTime(75, now + 0.11);
+            gain.gain.setValueAtTime(0.11, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.12);
+          } catch (e) {}
+        }
+
+        playHit(isHeavy = false) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = isHeavy ? "sawtooth" : "square";
+            osc.frequency.setValueAtTime(isHeavy ? 150 : 210, now);
+            osc.frequency.exponentialRampToValueAtTime(
+              38,
+              now + (isHeavy ? 0.22 : 0.14),
+            );
+            gain.gain.setValueAtTime(isHeavy ? 0.26 : 0.18, now);
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              now + (isHeavy ? 0.23 : 0.15),
+            );
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.24);
+          } catch (e) {}
+        }
+
+        playBlock() {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(680, now);
+            osc.frequency.exponentialRampToValueAtTime(320, now + 0.09);
+            gain.gain.setValueAtTime(0.16, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+          } catch (e) {}
+        }
+
+        playSpecialWave() {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime;
+            const osc1 = this.ctx.createOscillator();
+            const osc2 = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc1.type = "sawtooth";
+            osc2.type = "sine";
+            osc1.frequency.setValueAtTime(240, now);
+            osc1.frequency.exponentialRampToValueAtTime(760, now + 0.28);
+            osc2.frequency.setValueAtTime(480, now);
+            osc2.frequency.exponentialRampToValueAtTime(1120, now + 0.28);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc1.start(now);
+            osc2.start(now);
+            osc1.stop(now + 0.31);
+            osc2.stop(now + 0.31);
+          } catch (e) {}
+        }
+
+        playBell(isKO = false) {
+          if (this.muted || !this.ctx) return;
+          try {
+            const now = this.ctx.currentTime;
+            const freqs = isKO ? [220, 164.81, 110] : [523.25, 783.99];
+            freqs.forEach((f, idx) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = "triangle";
+              osc.frequency.setValueAtTime(f, now + idx * 0.08);
+              gain.gain.setValueAtTime(0.22, now + idx * 0.08);
+              gain.gain.exponentialRampToValueAtTime(
+                0.001,
+                now + idx * 0.08 + 0.65,
+              );
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + idx * 0.08);
+              osc.stop(now + idx * 0.08 + 0.66);
+            });
+          } catch (e) {}
+        }
+      }
+
+      // --- 2. DOM & STATE INITIALIZATION ---
+      const stage = document.getElementById("arena-stage");
+      const canvas = document.getElementById("fightCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const p1HpFill = document.getElementById("p1-hp-fill");
+      const p1HpTrail = document.getElementById("p1-hp-trail");
+      const p1EnergyFill = document.getElementById("p1-energy-fill");
+      const p2HpFill = document.getElementById("p2-hp-fill");
+      const p2HpTrail = document.getElementById("p2-hp-trail");
+      const p2EnergyFill = document.getElementById("p2-energy-fill");
+
+      const p1Dot1 = document.getElementById("p1-dot-1");
+      const p1Dot2 = document.getElementById("p1-dot-2");
+      const p2Dot1 = document.getElementById("p2-dot-1");
+      const p2Dot2 = document.getElementById("p2-dot-2");
+
+      const hudRoundLabel = document.getElementById("hud-round-label");
+      const hudTimer = document.getElementById("hud-timer");
+      const announcerBanner = document.getElementById("announcer-banner");
+      const announcerSub = document.getElementById("announcer-sub");
+      const announcerMain = document.getElementById("announcer-main");
+
+      const ctrlSpecial = document.getElementById("ctrl-special");
+      const specialPct = document.getElementById("special-pct");
+
+      const startOverlay = document.getElementById("start-overlay");
+      const resultOverlay = document.getElementById("result-overlay");
+      const licenseModal = document.getElementById("license-modal");
+      const toastBox = document.getElementById("toast-box");
+
+      const audio = new ANCombatAudio();
+      const WINS_STORAGE_KEY = "shadow_strike_an_wins_v1";
+
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let floorY = 0;
+
+      const match = {
+        phase: "MENU", // MENU, INTRO, FIGHT, ROUND_END, MATCH_END
+        round: 1,
+        p1Wins: 0,
+        p2Wins: 0,
+        totalCareerWins: parseInt(
+          localStorage.getItem(WINS_STORAGE_KEY) || "0",
+          10,
+        ),
+        timer: 60,
+        timerAccum: 0,
+        hitStop: 0,
+        timeScale: 1.0,
+        shakeTime: 0,
+        shakeIntensity: 0,
+        maxPlayerCombo: 0,
+        lastTime: 0,
+      };
+
+      document.getElementById("start-wins-count").textContent =
+        match.totalCareerWins;
+
+      // Input State
+      const input = {
+        left: false,
+        right: false,
+        block: false,
+      };
+
+      // Fighter Factory
+      function createFighter(isPlayer) {
+        return {
+          isPlayer,
+          name: isPlayer ? "KAI" : "VIPER",
+          x: isPlayer ? 110 : 340,
+          y: 0,
+          vx: 0,
+          facing: isPlayer ? 1 : -1,
+          hp: 100,
+          maxHp: 100,
+          energy: isPlayer ? 25 : 0,
+          state: "IDLE", // IDLE, WALK, BLOCK, ATTACK, HITSTUN, KO
+          attackType: null, // PUNCH, KICK, SPECIAL
+          stateTimer: 0,
+          stateDuration: 0,
+          hasDealtHit: false,
+          comboCount: 0,
+          comboResetTimer: 0,
+          squashX: 1,
+          squashY: 1,
+          leanAngle: 0,
+          animPhase: Math.random() * Math.PI * 2,
+          colorPrimary: isPlayer ? "#38bdf8" : "#f43f5e",
+          colorAccent: isPlayer ? "#f59e0b" : "#a855f7",
+          aiDecisionTimer: 0.35,
+          aiDesiredAction: "IDLE",
+        };
+      }
+
+      let p1 = createFighter(true);
+      let p2 = createFighter(false);
+      let projectiles = [];
+      let particles = [];
+      let shockwaves = [];
+      let callouts = [];
+
+      // --- 3. CANVAS RESIZING ---
+      function resizeCanvas() {
+        const rect = stage.getBoundingClientRect();
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = rect.width;
+        height = rect.height;
+        floorY = height * 0.84;
+
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        if (match.phase === "MENU") {
+          p1.x = width * 0.28;
+          p2.x = width * 0.72;
+        }
+        p1.y = floorY;
+        p2.y = floorY;
+      }
+      window.addEventListener("resize", resizeCanvas);
+
+      // --- 4. GEOMETRIC 'AN' MONOGRAM VECTOR RENDERER ---
+      function drawANMonogram(
+        ctx,
+        x,
+        y,
+        size,
+        alpha,
+        primaryColor = "#38bdf8",
+      ) {
+        ctx.save();
+        ctx.translate(x, y);
+        const scale = size / 40;
+        ctx.scale(scale, scale);
+        ctx.translate(-20, -20);
+        ctx.globalAlpha = alpha;
+
+        // 'A' Pillar
+        ctx.fillStyle = primaryColor;
+        ctx.beginPath();
+        ctx.moveTo(6, 32);
+        ctx.lineTo(15, 8);
+        ctx.lineTo(20, 8);
+        ctx.lineTo(11, 32);
+        ctx.closePath();
+        ctx.fill();
+
+        // Crossbar
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.moveTo(14, 23);
+        ctx.lineTo(22, 23);
+        ctx.lineTo(20, 27);
+        ctx.lineTo(12, 27);
+        ctx.closePath();
+        ctx.fill();
+
+        // 'N' Pillar
+        ctx.beginPath();
+        ctx.moveTo(21, 32);
+        ctx.lineTo(21, 8);
+        ctx.lineTo(25.5, 8);
+        ctx.lineTo(32, 22.5);
+        ctx.lineTo(32, 8);
+        ctx.lineTo(36, 8);
+        ctx.lineTo(36, 32);
+        ctx.lineTo(31.5, 32);
+        ctx.lineTo(25, 17.5);
+        ctx.lineTo(25, 32);
+        ctx.closePath();
+        ctx.fill();
+
+        // Amber Spark Dot
+        ctx.fillStyle = "#f59e0b";
+        ctx.beginPath();
+        ctx.arc(34, 6, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      // --- 5. MATCH & ROUND LIFECYCLE ---
+      function startNewMatch() {
+        audio.init();
+        match.round = 1;
+        match.p1Wins = 0;
+        match.p2Wins = 0;
+        match.maxPlayerCombo = 0;
+        updateRoundDots();
+
+        startOverlay.classList.add("hidden");
+        resultOverlay.classList.add("hidden");
+        beginRound(1);
+      }
+
+      function beginRound(roundNum) {
+        match.round = roundNum;
+        match.phase = "INTRO";
+        match.timer = 60;
+        match.timerAccum = 0;
+        match.hitStop = 0;
+        match.timeScale = 1.0;
+
+        p1 = createFighter(true);
+        p2 = createFighter(false);
+        p1.x = width * 0.26;
+        p2.x = width * 0.74;
+        p1.y = floorY;
+        p2.y = floorY;
+
+        projectiles = [];
+        particles = [];
+        shockwaves = [];
+        callouts = [];
+
+        hudRoundLabel.textContent = `R-0${roundNum}`;
+        hudTimer.textContent = "60";
+        syncHUD();
+
+        showAnnouncer(`ROUND 0${roundNum}`, "READY...", 950);
+        setTimeout(() => {
+          if (match.phase === "INTRO") {
+            match.phase = "FIGHT";
+            audio.playBell(false);
+            showAnnouncer("AN COMBAT ENGINE", "FIGHT!", 750);
+          }
+        }, 1000);
+      }
+
+      function showAnnouncer(subText, mainText, durationMs) {
+        announcerSub.textContent = subText;
+        announcerMain.textContent = mainText;
+        announcerBanner.classList.add("show");
+        setTimeout(() => {
+          announcerBanner.classList.remove("show");
+        }, durationMs);
+      }
+
+      function updateRoundDots() {
+        p1Dot1.classList.toggle("won-p1", match.p1Wins >= 1);
+        p1Dot2.classList.toggle("won-p1", match.p1Wins >= 2);
+        p2Dot1.classList.toggle("won-p2", match.p2Wins >= 1);
+        p2Dot2.classList.toggle("won-p2", match.p2Wins >= 2);
+      }
+
+      function handleRoundEnd(winner) {
+        if (match.phase !== "FIGHT") return;
+        match.phase = "ROUND_END";
+        match.timeScale = 0.28; // Dramatic slow-motion KO finish!
+        audio.playBell(true);
+        triggerShake(0.45, 16);
+
+        const loser = winner === "P1" ? p2 : p1;
+        loser.state = "KO";
+        loser.vx = -loser.facing * 240;
+        spawnANShockwave(
+          loser.x,
+          loser.y - 52,
+          winner === "P1" ? "#38bdf8" : "#f43f5e",
+          145,
+        );
+        spawnParticles(loser.x, loser.y - 50, "#f59e0b", 34);
+
+        if (winner === "P1") {
+          match.p1Wins++;
+          showAnnouncer("KAI // AN-01", "K.O. VICTORY!", 1800);
+        } else if (winner === "P2") {
+          match.p2Wins++;
+          showAnnouncer("VIPER // CPU-X", "K.O. DEFEAT", 1800);
+        } else {
+          showAnnouncer("TIME OVER", "DRAW ROUND", 1800);
+        }
+        updateRoundDots();
+
+        setTimeout(() => {
+          match.timeScale = 1.0;
+          if (match.p1Wins >= 2 || match.p2Wins >= 2) {
+            concludeMatch();
+          } else {
+            beginRound(match.round + 1);
+          }
+        }, 2200);
+      }
+
+      function concludeMatch() {
+        match.phase = "MATCH_END";
+        const playerWon = match.p1Wins > match.p2Wins;
+
+        if (playerWon) {
+          match.totalCareerWins++;
+          localStorage.setItem(
+            WINS_STORAGE_KEY,
+            match.totalCareerWins.toString(),
+          );
+          document.getElementById("start-wins-count").textContent =
+            match.totalCareerWins;
+        }
+
+        document.getElementById("result-sub").textContent = playerWon
+          ? "★ DOJO CHAMPION // AN VERIFIED ★"
+          : "SIMULATION COMPLETE";
+        document.getElementById("result-title").textContent = playerWon
+          ? "KAI WINS!"
+          : "VIPER WINS";
+        document.getElementById("result-desc").textContent = playerWon
+          ? "Dominasi teknik bela diri & gelombang energi AN-WAVE berhasil menaklukkan arena!"
+          : "VIPER membaca celah pertahananmu. Gunakan Guard & AN-WAVE untuk membalikkan keadaan!";
+        document.getElementById("result-rounds").textContent =
+          `${match.p1Wins} - ${match.p2Wins}`;
+        document.getElementById("result-combo").textContent =
+          `x${Math.max(1, match.maxPlayerCombo)}`;
+
+        resultOverlay.classList.remove("hidden");
+      }
+
+      // --- 6. COMBAT ACTIONS & HITBOXES ---
+      const ATTACK_SPECS = {
+        PUNCH: {
+          duration: 0.24,
+          activeStart: 0.07,
+          activeEnd: 0.16,
+          range: 74,
+          damage: 9,
+          stun: 0.22,
+          knockback: 140,
+          energyGain: 14,
+        },
+        KICK: {
+          duration: 0.38,
+          activeStart: 0.12,
+          activeEnd: 0.24,
+          range: 92,
+          damage: 16,
+          stun: 0.34,
+          knockback: 260,
+          energyGain: 20,
+        },
+        SPECIAL: {
+          duration: 0.42,
+          activeStart: 0.16,
+          activeEnd: 0.24,
+          range: 60,
+          damage: 24,
+          stun: 0.42,
+          knockback: 310,
+          energyCost: 50,
+        },
+      };
+
+      function triggerAttack(fighter, type) {
+        if (match.phase !== "FIGHT") return;
+        if (
+          fighter.state === "ATTACK" ||
+          fighter.state === "HITSTUN" ||
+          fighter.state === "KO"
+        )
+          return;
+
+        if (type === "SPECIAL") {
+          if (fighter.energy < 50) return;
+          fighter.energy -= 50;
+          audio.playSpecialWave();
+          fighter.squashX = 1.25;
+          fighter.squashY = 0.82;
+
+          // Spawn glowing AN-WAVE energy projectile!
+          projectiles.push({
+            owner: fighter.isPlayer ? "P1" : "P2",
+            x: fighter.x + fighter.facing * 44,
+            y: fighter.y - 54,
+            vx: fighter.facing * 540,
+            radius: 24,
+            damage: 24,
+            color: fighter.colorPrimary,
+            life: 1.8,
+          });
+          spawnANShockwave(
+            fighter.x + fighter.facing * 35,
+            fighter.y - 54,
+            fighter.colorPrimary,
+            80,
+          );
+          spawnCallout(fighter.x, fighter.y - 108, "AN-WAVE!", "#f59e0b");
+        } else {
+          audio.playWhiff(type === "KICK");
+          fighter.vx = fighter.facing * (type === "KICK" ? 145 : 85);
+          fighter.squashX = 1.18;
+          fighter.squashY = 0.86;
+        }
+
+        const spec = ATTACK_SPECS[type];
+        fighter.state = "ATTACK";
+        fighter.attackType = type;
+        fighter.stateTimer = 0;
+        fighter.stateDuration = spec.duration;
+        fighter.hasDealtHit = false;
+      }
+
+      function applyStrikeHit(
+        attacker,
+        defender,
+        damage,
+        knockback,
+        stunDuration,
+        isSpecial = false,
+      ) {
+        const isBlocking = defender.state === "BLOCK";
+
+        if (isBlocking) {
+          const chipDmg = Math.max(2, Math.round(damage * 0.22));
+          defender.hp = Math.max(0, defender.hp - chipDmg);
+          defender.vx = attacker.facing * (knockback * 0.55);
+          attacker.energy = Math.min(100, attacker.energy + 8);
+          defender.energy = Math.min(100, defender.energy + 12);
+
+          audio.playBlock();
+          spawnParticles(
+            (attacker.x + defender.x) * 0.5,
+            defender.y - 56,
+            "#10b981",
+            14,
+          );
+          spawnCallout(defender.x, defender.y - 102, "GUARD!", "#10b981");
+        } else {
+          defender.hp = Math.max(0, defender.hp - damage);
+          defender.state = "HITSTUN";
+          defender.stateTimer = 0;
+          defender.stateDuration = stunDuration;
+          defender.vx = attacker.facing * knockback;
+          defender.squashX = 0.78;
+          defender.squashY = 1.24;
+
+          attacker.comboCount += 1;
+          attacker.comboResetTimer = 1.4;
+          if (attacker.isPlayer && attacker.comboCount > match.maxPlayerCombo) {
+            match.maxPlayerCombo = attacker.comboCount;
+          }
+
+          if (!isSpecial) {
+            attacker.energy = Math.min(
+              100,
+              attacker.energy + (damage > 12 ? 20 : 14),
+            );
+          }
+
+          // Tactile Hit-Stop Freeze Frame & Camera Shake
+          match.hitStop = damage >= 15 ? 0.055 : 0.032;
+          triggerShake(damage >= 15 ? 0.22 : 0.12, damage >= 15 ? 10 : 5);
+          audio.playHit(damage >= 15);
+
+          const hitX = (attacker.x + defender.x) * 0.5;
+          const hitY = defender.y - 56;
+          spawnParticles(
+            hitX,
+            hitY,
+            attacker.colorPrimary,
+            damage >= 15 ? 22 : 12,
+          );
+          spawnANShockwave(
+            hitX,
+            hitY,
+            attacker.colorPrimary,
+            damage >= 15 ? 95 : 65,
+          );
+
+          const label =
+            attacker.comboCount >= 2
+              ? `${attacker.comboCount} HIT COMBO!`
+              : damage >= 15
+                ? "HEAVY STRIKE!"
+                : "HIT!";
+          spawnCallout(
+            defender.x,
+            defender.y - 105,
+            label,
+            attacker.colorPrimary,
+          );
+        }
+
+        syncHUD();
+
+        if (defender.hp <= 0) {
+          handleRoundEnd(attacker.isPlayer ? "P1" : "P2");
+        }
+      }
+
+      function syncHUD() {
+        const p1Pct = Math.max(0, (p1.hp / p1.maxHp) * 100);
+        const p2Pct = Math.max(0, (p2.hp / p2.maxHp) * 100);
+
+        p1HpFill.style.width = `${p1Pct}%`;
+        p1HpTrail.style.width = `${p1Pct}%`;
+        p2HpFill.style.width = `${p2Pct}%`;
+        p2HpTrail.style.width = `${p2Pct}%`;
+
+        p1EnergyFill.style.width = `${p1.energy}%`;
+        p2EnergyFill.style.width = `${p2.energy}%`;
+
+        const specialReady = p1.energy >= 50;
+        p1EnergyFill.classList.toggle("ready", specialReady);
+        ctrlSpecial.classList.toggle("charged", specialReady);
+        specialPct.textContent = specialReady
+          ? "READY [L]"
+          : `${Math.floor(p1.energy)}% [L]`;
+      }
+
+      function triggerShake(duration, intensity) {
+        match.shakeTime = duration;
+        match.shakeIntensity = intensity;
+      }
+
+      function spawnANShockwave(x, y, color, maxRadius) {
+        shockwaves.push({ x, y, radius: 14, maxRadius, life: 1.0, color });
+      }
+
+      function spawnParticles(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+          const ang = Math.random() * Math.PI * 2;
+          const spd = 80 + Math.random() * 260;
+          particles.push({
+            x,
+            y,
+            vx: Math.cos(ang) * spd,
+            vy: Math.sin(ang) * spd - 40,
+            life: 1.0,
+            decay: 2.0 + Math.random() * 1.5,
+            size: 2.5 + Math.random() * 3.5,
+            color,
+          });
+        }
+      }
+
+      function spawnCallout(x, y, text, color) {
+        callouts.push({ x, y, text, color, life: 1.0 });
+      }
+
+      // --- 7. ADAPTIVE AI OPPONENT CONTROLLER ('VIPER // CPU-X') ---
+      function updateAI(dt) {
+        if (match.phase !== "FIGHT") return;
+        if (
+          p2.state === "ATTACK" ||
+          p2.state === "HITSTUN" ||
+          p2.state === "KO"
+        )
+          return;
+
+        p2.aiDecisionTimer -= dt;
+        const dist = Math.abs(p1.x - p2.x);
+        const incomingProj = projectiles.some(
+          (pr) => pr.owner === "P1" && Math.abs(pr.x - p2.x) < 150,
+        );
+
+        if (p2.aiDecisionTimer <= 0) {
+          // Difficulty scales slightly per round
+          const aggression = 0.45 + match.round * 0.12;
+          p2.aiDecisionTimer =
+            Math.max(0.18, 0.42 - match.round * 0.06) + Math.random() * 0.16;
+
+          if (
+            incomingProj ||
+            (p1.state === "ATTACK" && dist < 105 && Math.random() < 0.58)
+          ) {
+            p2.aiDesiredAction = "BLOCK";
+          } else if (p2.energy >= 50 && dist > 130 && Math.random() < 0.55) {
+            p2.aiDesiredAction = "SPECIAL";
+          } else if (dist <= 86) {
+            const roll = Math.random();
+            if (roll < 0.45 * aggression) p2.aiDesiredAction = "PUNCH";
+            else if (roll < 0.78 * aggression) p2.aiDesiredAction = "KICK";
+            else if (roll < 0.9) p2.aiDesiredAction = "BLOCK";
+            else p2.aiDesiredAction = "RETREAT";
+          } else {
+            p2.aiDesiredAction = Math.random() < 0.8 ? "APPROACH" : "IDLE";
+          }
+        }
+
+        // Execute AI desired action
+        if (p2.aiDesiredAction === "BLOCK") {
+          p2.state = "BLOCK";
+          p2.vx = 0;
+        } else if (p2.aiDesiredAction === "PUNCH") {
+          triggerAttack(p2, "PUNCH");
+          p2.aiDesiredAction = "IDLE";
+        } else if (p2.aiDesiredAction === "KICK") {
+          triggerAttack(p2, "KICK");
+          p2.aiDesiredAction = "IDLE";
+        } else if (p2.aiDesiredAction === "SPECIAL") {
+          triggerAttack(p2, "SPECIAL");
+          p2.aiDesiredAction = "IDLE";
+        } else if (p2.aiDesiredAction === "APPROACH") {
+          p2.state = "WALK";
+          p2.vx = p2.facing * 185;
+        } else if (p2.aiDesiredAction === "RETREAT") {
+          p2.state = "WALK";
+          p2.vx = -p2.facing * 150;
+        } else {
+          p2.state = "IDLE";
+          p2.vx = 0;
+        }
+      }
+
+      // --- 8. PHYSICS & COMBAT SIMULATION LOOP ---
+      function update(rawDt) {
+        if (match.hitStop > 0) {
+          match.hitStop = Math.max(0, match.hitStop - rawDt);
+          return; // Crisp impact freeze frame!
+        }
+
+        const dt = rawDt * match.timeScale;
+
+        if (match.shakeTime > 0) {
+          match.shakeTime = Math.max(0, match.shakeTime - rawDt);
+        }
+
+        // Round countdown timer
+        if (match.phase === "FIGHT") {
+          match.timerAccum += dt;
+          if (match.timerAccum >= 1.0) {
+            match.timerAccum -= 1.0;
+            match.timer = Math.max(0, match.timer - 1);
+            hudTimer.textContent = match.timer.toString().padStart(2, "0");
+            if (match.timer === 0) {
+              if (p1.hp > p2.hp) handleRoundEnd("P1");
+              else if (p2.hp > p1.hp) handleRoundEnd("P2");
+              else handleRoundEnd("DRAW");
+            }
+          }
+        }
+
+        // Player 1 Input Handling
+        if (
+          match.phase === "FIGHT" &&
+          p1.state !== "ATTACK" &&
+          p1.state !== "HITSTUN" &&
+          p1.state !== "KO"
+        ) {
+          if (input.block) {
+            p1.state = "BLOCK";
+            p1.vx = 0;
+          } else if (input.left && !input.right) {
+            p1.state = "WALK";
+            p1.vx = -225;
+          } else if (input.right && !input.left) {
+            p1.state = "WALK";
+            p1.vx = 225;
+          } else {
+            p1.state = "IDLE";
+            p1.vx = 0;
+          }
+        }
+
+        updateAI(dt);
+
+        // Auto-facing when neutral
+        if (match.phase === "FIGHT") {
+          if (
+            p1.state === "IDLE" ||
+            p1.state === "WALK" ||
+            p1.state === "BLOCK"
+          ) {
+            p1.facing = p2.x >= p1.x ? 1 : -1;
+          }
+          if (
+            p2.state === "IDLE" ||
+            p2.state === "WALK" ||
+            p2.state === "BLOCK"
+          ) {
+            p2.facing = p1.x >= p2.x ? 1 : -1;
+          }
+        }
+
+        // Update both fighters
+        [p1, p2].forEach((f) => {
+          f.animPhase += dt * 7.5;
+          f.squashX += (1 - f.squashX) * Math.min(1, rawDt * 15);
+          f.squashY += (1 - f.squashY) * Math.min(1, rawDt * 15);
+
+          const targetLean = (f.vx / 240) * 0.16;
+          f.leanAngle += (targetLean - f.leanAngle) * Math.min(1, rawDt * 14);
+
+          if (f.comboResetTimer > 0) {
+            f.comboResetTimer -= dt;
+            if (f.comboResetTimer <= 0) f.comboCount = 0;
+          }
+
+          // Apply velocity & friction
+          f.x += f.vx * dt;
+          if (
+            f.state === "ATTACK" ||
+            f.state === "HITSTUN" ||
+            f.state === "KO"
+          ) {
+            f.vx *= 0.88;
+          }
+
+          // Arena boundaries
+          const padX = 38;
+          f.x = Math.max(padX, Math.min(width - padX, f.x));
+
+          // State timers
+          if (f.state === "ATTACK") {
+            f.stateTimer += dt;
+            const spec = ATTACK_SPECS[f.attackType];
+            if (
+              f.attackType !== "SPECIAL" &&
+              !f.hasDealtHit &&
+              f.stateTimer >= spec.activeStart &&
+              f.stateTimer <= spec.activeEnd
+            ) {
+              const target = f.isPlayer ? p2 : p1;
+              const dist = Math.abs(target.x - f.x);
+              const inFront = (target.x - f.x) * f.facing >= -12;
+              if (dist <= spec.range && inFront) {
+                f.hasDealtHit = true;
+                applyStrikeHit(
+                  f,
+                  target,
+                  spec.damage,
+                  spec.knockback,
+                  spec.stun,
+                  false,
+                );
+              }
+            }
+            if (f.stateTimer >= f.stateDuration) {
+              f.state = "IDLE";
+              f.attackType = null;
+            }
+          } else if (f.state === "HITSTUN") {
+            f.stateTimer += dt;
+            if (f.stateTimer >= f.stateDuration) {
+              f.state = "IDLE";
+            }
+          }
+        });
+
+        // Soft pushbox separation so fighters don't overlap completely
+        const minSep = 44;
+        const diffX = p2.x - p1.x;
+        if (
+          Math.abs(diffX) < minSep &&
+          p1.state !== "KO" &&
+          p2.state !== "KO"
+        ) {
+          const overlap = (minSep - Math.abs(diffX)) * 0.5;
+          const sign = diffX >= 0 ? 1 : -1;
+          p1.x = Math.max(38, p1.x - sign * overlap);
+          p2.x = Math.min(width - 38, p2.x + sign * overlap);
+        }
+
+        // Update AN-WAVE Projectiles
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+          const pr = projectiles[i];
+          pr.x += pr.vx * dt;
+          pr.life -= dt;
+
+          const target = pr.owner === "P1" ? p2 : p1;
+          const attacker = pr.owner === "P1" ? p1 : p2;
+
+          if (
+            match.phase === "FIGHT" &&
+            Math.abs(pr.x - target.x) < pr.radius + 20
+          ) {
+            applyStrikeHit(attacker, target, pr.damage, 300, 0.4, true);
+            spawnANShockwave(pr.x, pr.y, pr.color, 110);
+            projectiles.splice(i, 1);
+            continue;
+          }
+
+          if (pr.life <= 0 || pr.x < -40 || pr.x > width + 40) {
+            projectiles.splice(i, 1);
+          }
+        }
+
+        // Update Shockwaves, Particles & Callouts
+        for (let i = shockwaves.length - 1; i >= 0; i--) {
+          const sw = shockwaves[i];
+          sw.radius += (sw.maxRadius - sw.radius) * Math.min(1, rawDt * 8);
+          sw.life -= rawDt * 1.6;
+          if (sw.life <= 0) shockwaves.splice(i, 1);
+        }
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const pt = particles[i];
+          pt.x += pt.vx * dt;
+          pt.y += pt.vy * dt;
+          pt.vy += 420 * dt;
+          pt.life -= pt.decay * rawDt;
+          if (pt.life <= 0) particles.splice(i, 1);
+        }
+
+        for (let i = callouts.length - 1; i >= 0; i--) {
+          const c = callouts[i];
+          c.y -= 48 * rawDt;
+          c.life -= 1.2 * rawDt;
+          if (c.life <= 0) callouts.splice(i, 1);
+        }
+      }
+
+      // --- 9. PROCEDURAL VECTOR ARENA & MARTIAL ARTS RENDERER ---
+      function drawArenaBackground() {
+        // Night Rooftop Dojo Sky Gradient
+        const skyGrad = ctx.createLinearGradient(0, 0, 0, floorY);
+        skyGrad.addColorStop(0, "#06080f");
+        skyGrad.addColorStop(0.65, "#0d1424");
+        skyGrad.addColorStop(1, "#141e33");
+        ctx.fillStyle = skyGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Glowing Moon / Cyber Halo behind Dojo
+        ctx.save();
+        ctx.fillStyle = "rgba(56, 189, 248, 0.06)";
+        ctx.beginPath();
+        ctx.arc(width * 0.5, floorY * 0.34, 88, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        // Distant Skyline Silhouettes
+        ctx.fillStyle = "#080c16";
+        const bldgs = [
+          [0.02, 0.48, 0.14],
+          [0.18, 0.38, 0.12],
+          [0.33, 0.52, 0.15],
+          [0.54, 0.44, 0.14],
+          [0.71, 0.36, 0.13],
+          [0.86, 0.49, 0.14],
+        ];
+        bldgs.forEach(([bx, by, bw]) => {
+          ctx.fillRect(width * bx, floorY * by, width * bw, floorY * (1 - by));
+        });
+
+        // Glowing Architectural Neon Billboard with 'AN' Monogram & Creator License
+        const boardW = Math.min(250, width * 0.64);
+        const boardH = 68;
+        const boardX = (width - boardW) * 0.5;
+        const boardY = floorY * 0.16;
+
+        ctx.save();
+        ctx.fillStyle = "rgba(10, 15, 26, 0.85)";
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.35)";
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(boardX, boardY, boardW, boardH, 12);
+        ctx.fill();
+        ctx.stroke();
+
+        drawANMonogram(ctx, width * 0.5, boardY + 24, 26, 0.9, "#38bdf8");
+
+        ctx.font = '800 8.5px "JetBrains Mono", monospace';
+        ctx.fillStyle = "rgba(248, 250, 252, 0.78)";
+        ctx.textAlign = "center";
+        ctx.fillText(
+          "ARYASATYA NARYAMA // COMBAT ENGINE",
+          width * 0.5,
+          boardY + 52,
+        );
+        ctx.restore();
+
+        // Rooftop Dojo Floor Platform
+        const floorGrad = ctx.createLinearGradient(0, floorY, 0, height);
+        floorGrad.addColorStop(0, "#162033");
+        floorGrad.addColorStop(1, "#070a12");
+        ctx.fillStyle = floorGrad;
+        ctx.fillRect(0, floorY, width, height - floorY);
+
+        // Luminous Floor Edge Trim
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 2;
+        ctx.shadowColor = "#38bdf8";
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(0, floorY);
+        ctx.lineTo(width, floorY);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Perspective Floor Grid Lines
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.12)";
+        ctx.lineWidth = 1;
+        for (let i = -4; i <= 4; i++) {
+          const topX = width * 0.5 + i * 48;
+          const botX = width * 0.5 + i * 86;
+          ctx.beginPath();
+          ctx.moveTo(topX, floorY);
+          ctx.lineTo(botX, height);
+          ctx.stroke();
+        }
+      }
+
+      function drawFighter(f) {
+        ctx.save();
+        ctx.translate(f.x, f.y);
+
+        // Ground Contact Shadow
+        ctx.fillStyle = "rgba(0, 0, 0, 0.48)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 32, 7, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Subtle Fighter Aura
+        drawANMonogram(ctx, 0, -54, 46, 0.11, f.colorPrimary);
+
+        // Flip by facing direction & apply squash-and-stretch + lean
+        ctx.scale(f.facing * f.squashX, f.squashY);
+        ctx.rotate(f.leanAngle);
+
+        if (f.state === "KO") {
+          ctx.rotate(-Math.PI * 0.44);
+          ctx.translate(22, -12);
+        }
+
+        const breathe = Math.sin(f.animPhase) * 2.5;
+        const walkBob =
+          f.state === "WALK" ? Math.abs(Math.sin(f.animPhase * 1.8)) * 5 : 0;
+        const hipY = -36 - walkBob;
+        const shoulderY = -66 - walkBob + breathe * 0.5;
+
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        // 1. Back Leg
+        const stride =
+          f.state === "WALK" ? Math.sin(f.animPhase * 1.8) * 14 : 0;
+        ctx.strokeStyle = "#1e293b";
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.moveTo(-6, hipY);
+        ctx.lineTo(-14 - stride, -18);
+        ctx.lineTo(-18 - stride, -3);
+        ctx.stroke();
+
+        // 2. Front Leg (or Extended Kick!)
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 10.5;
+        ctx.beginPath();
+        ctx.moveTo(6, hipY);
+        if (f.state === "ATTACK" && f.attackType === "KICK") {
+          // High Roundhouse Kick Pose!
+          ctx.lineTo(34, -50);
+          ctx.lineTo(66, -64);
+          ctx.stroke();
+
+          // Glowing Kick Motion Arc
+          ctx.strokeStyle = f.colorPrimary;
+          ctx.lineWidth = 4;
+          ctx.shadowColor = f.colorPrimary;
+          ctx.shadowBlur = 16;
+          ctx.beginPath();
+          ctx.arc(10, -46, 58, -0.75, 0.15);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        } else {
+          ctx.lineTo(14 + stride, -18);
+          ctx.lineTo(18 + stride, -3);
+          ctx.stroke();
+        }
+
+        // 3. Martial Arts Gi Torso
+        ctx.fillStyle = f.isPlayer ? "#0f172a" : "#1f1018";
+        ctx.strokeStyle = f.colorPrimary;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(-14, hipY);
+        ctx.lineTo(-17, shoulderY);
+        ctx.lineTo(17, shoulderY);
+        ctx.lineTo(14, hipY);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Glowing Martial Arts Belt
+        ctx.fillStyle = f.colorAccent;
+        ctx.fillRect(-14, hipY - 4, 28, 6);
+
+        // 4. Head & Flowing Headband
+        const headY = shoulderY - 17;
+        ctx.fillStyle = "#f8fafc";
+        ctx.beginPath();
+        ctx.arc(2, headY, 11.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Cyber Headband
+        ctx.fillStyle = f.colorPrimary;
+        ctx.fillRect(-10, headY - 6, 24, 4.5);
+
+        // Flowing Headband Tails
+        const tailWave = Math.sin(f.animPhase * 1.6) * 5;
+        ctx.strokeStyle = f.colorPrimary;
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(-10, headY - 4);
+        ctx.quadraticCurveTo(
+          -22,
+          headY - 8 + tailWave,
+          -30,
+          headY - 2 - tailWave,
+        );
+        ctx.stroke();
+
+        // 5. Arms & Combat Poses
+        ctx.strokeStyle = "#e2e8f0";
+        ctx.lineWidth = 8.5;
+
+        if (f.state === "BLOCK") {
+          // Defensive Cross Guard
+          ctx.beginPath();
+          ctx.moveTo(8, shoulderY + 4);
+          ctx.lineTo(22, shoulderY - 2);
+          ctx.lineTo(20, shoulderY - 20);
+          ctx.stroke();
+
+          // Hexagonal Energy Guard Shield
+          ctx.strokeStyle = "#10b981";
+          ctx.fillStyle = "rgba(16, 185, 129, 0.16)";
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = "#10b981";
+          ctx.shadowBlur = 14;
+          ctx.beginPath();
+          ctx.arc(26, shoulderY - 6, 26, -Math.PI * 0.45, Math.PI * 0.45);
+          ctx.stroke();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else if (f.state === "ATTACK" && f.attackType === "PUNCH") {
+          // Lightning Straight Jab!
+          ctx.beginPath();
+          ctx.moveTo(10, shoulderY + 4);
+          ctx.lineTo(54, shoulderY + 2);
+          ctx.stroke();
+
+          // Glowing Fist & Streak
+          ctx.fillStyle = f.colorPrimary;
+          ctx.shadowColor = f.colorPrimary;
+          ctx.shadowBlur = 16;
+          ctx.beginPath();
+          ctx.arc(56, shoulderY + 2, 7.5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else if (f.state === "ATTACK" && f.attackType === "SPECIAL") {
+          // Double-Palm Hadouken / AN-WAVE Thrust!
+          ctx.beginPath();
+          ctx.moveTo(10, shoulderY + 5);
+          ctx.lineTo(44, shoulderY + 6);
+          ctx.stroke();
+
+          ctx.fillStyle = "#f59e0b";
+          ctx.shadowColor = "#f59e0b";
+          ctx.shadowBlur = 18;
+          ctx.beginPath();
+          ctx.arc(46, shoulderY + 6, 9, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        } else {
+          // Ready Martial Arts Stance
+          ctx.beginPath();
+          ctx.moveTo(10, shoulderY + 4);
+          ctx.lineTo(22, shoulderY + 12);
+          ctx.lineTo(28, shoulderY - 2);
+          ctx.stroke();
+
+          ctx.fillStyle = f.colorPrimary;
+          ctx.beginPath();
+          ctx.arc(28, shoulderY - 3, 5.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      function draw() {
+        ctx.save();
+
+        // Screen shake
+        if (match.shakeTime > 0) {
+          const mag = match.shakeIntensity * (match.shakeTime / 0.45);
+          ctx.translate(
+            (Math.random() - 0.5) * mag,
+            (Math.random() - 0.5) * mag,
+          );
+        }
+
+        drawArenaBackground();
+
+        // Draw Shockwaves with Embedded 'AN' Geometric Watermarks
+        shockwaves.forEach((sw) => {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, sw.life * 0.6);
+          ctx.strokeStyle = sw.color;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          drawANMonogram(
+            ctx,
+            sw.x,
+            sw.y,
+            sw.radius * 0.78,
+            sw.life * 0.32,
+            sw.color,
+          );
+          ctx.restore();
+        });
+
+        // Draw Fighters
+        drawFighter(p2);
+        drawFighter(p1);
+
+        // Draw AN-WAVE Energy Projectiles
+        projectiles.forEach((pr) => {
+          ctx.save();
+          ctx.translate(pr.x, pr.y);
+
+          // Outer Plasma Orb
+          const grad = ctx.createRadialGradient(0, 0, 4, 0, 0, pr.radius * 1.4);
+          grad.addColorStop(0, "#ffffff");
+          grad.addColorStop(0.45, pr.color);
+          grad.addColorStop(1, "rgba(56, 189, 248, 0)");
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.arc(0, 0, pr.radius * 1.4, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Core 'AN' Monogram Signature inside the Energy Wave!
+          drawANMonogram(ctx, 0, 0, 26, 0.95, "#05070b");
+          ctx.restore();
+        });
+
+        // Draw Sparks
+        particles.forEach((pt) => {
+          ctx.globalAlpha = Math.max(0, pt.life);
+          ctx.fillStyle = pt.color;
+          ctx.shadowColor = pt.color;
+          ctx.shadowBlur = 8;
+          ctx.fillRect(
+            pt.x - pt.size * 0.5,
+            pt.y - pt.size * 0.5,
+            pt.size,
+            pt.size,
+          );
+        });
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+
+        // Draw Combat Callouts ('STRIKE!', 'COMBO!', 'AN-WAVE!')
+        callouts.forEach((c) => {
+          ctx.globalAlpha = Math.max(0, c.life);
+          ctx.font = 'italic 800 15px "Chakra Petch", sans-serif';
+          ctx.fillStyle = c.color;
+          ctx.textAlign = "center";
+          ctx.fillText(c.text, c.x, c.y);
+        });
+        ctx.globalAlpha = 1;
+
+        ctx.restore();
+      }
+
+      // --- 10. MOBILE TOUCH & KEYBOARD BINDINGS ---
+      function bindPadButton(id, onDown, onUp) {
+        const el = document.getElementById(id);
+        const press = (e) => {
+          e.preventDefault();
+          audio.init();
+          el.classList.add("pressed");
+          if (onDown) onDown();
+        };
+        const release = (e) => {
+          e.preventDefault();
+          el.classList.remove("pressed");
+          if (onUp) onUp();
+        };
+
+        el.addEventListener("touchstart", press, { passive: false });
+        el.addEventListener("touchend", release, { passive: false });
+        el.addEventListener("touchcancel", release, { passive: false });
+        el.addEventListener("mousedown", press);
+        el.addEventListener("mouseup", release);
+        el.addEventListener("mouseleave", release);
+      }
+
+      bindPadButton(
+        "ctrl-left",
+        () => {
+          input.left = true;
+        },
+        () => {
+          input.left = false;
+        },
+      );
+      bindPadButton(
+        "ctrl-right",
+        () => {
+          input.right = true;
+        },
+        () => {
+          input.right = false;
+        },
+      );
+      bindPadButton(
+        "ctrl-block",
+        () => {
+          input.block = true;
+        },
+        () => {
+          input.block = false;
+        },
+      );
+      bindPadButton("ctrl-punch", () => {
+        triggerAttack(p1, "PUNCH");
+      });
+      bindPadButton("ctrl-kick", () => {
+        triggerAttack(p1, "KICK");
+      });
+      bindPadButton("ctrl-special", () => {
+        triggerAttack(p1, "SPECIAL");
+      });
+
+      // Desktop Keyboard Support
+      window.addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if (k === "a" || e.key === "ArrowLeft") {
+          input.left = true;
+          document.getElementById("ctrl-left").classList.add("pressed");
+        }
+        if (k === "d" || e.key === "ArrowRight") {
+          input.right = true;
+          document.getElementById("ctrl-right").classList.add("pressed");
+        }
+        if (k === "s" || e.key === "ArrowDown") {
+          input.block = true;
+          document.getElementById("ctrl-block").classList.add("pressed");
+        }
+        if (k === "j") {
+          document.getElementById("ctrl-punch").classList.add("pressed");
+          triggerAttack(p1, "PUNCH");
+        }
+        if (k === "k") {
+          document.getElementById("ctrl-kick").classList.add("pressed");
+          triggerAttack(p1, "KICK");
+        }
+        if (k === "l") {
+          document.getElementById("ctrl-special").classList.add("pressed");
+          triggerAttack(p1, "SPECIAL");
+        }
+      });
+
+      window.addEventListener("keyup", (e) => {
+        const k = e.key.toLowerCase();
+        if (k === "a" || e.key === "ArrowLeft") {
+          input.left = false;
+          document.getElementById("ctrl-left").classList.remove("pressed");
+        }
+        if (k === "d" || e.key === "ArrowRight") {
+          input.right = false;
+          document.getElementById("ctrl-right").classList.remove("pressed");
+        }
+        if (k === "s" || e.key === "ArrowDown") {
+          input.block = false;
+          document.getElementById("ctrl-block").classList.remove("pressed");
+        }
+        if (k === "j")
+          document.getElementById("ctrl-punch").classList.remove("pressed");
+        if (k === "k")
+          document.getElementById("ctrl-kick").classList.remove("pressed");
+        if (k === "l")
+          document.getElementById("ctrl-special").classList.remove("pressed");
+      });
+
+      // UI & License Modal Controls
+      document
+        .getElementById("btn-start-duel")
+        .addEventListener("click", startNewMatch);
+      document
+        .getElementById("btn-rematch")
+        .addEventListener("click", startNewMatch);
+
+      document.getElementById("btn-mute").addEventListener("click", () => {
+        audio.init();
+        const muted = audio.toggleMute();
+        document.getElementById("icon-audio-on").style.display = muted
+          ? "none"
+          : "block";
+        document.getElementById("icon-audio-off").style.display = muted
+          ? "block"
+          : "none";
+      });
+
+      function openLicense() {
+        licenseModal.classList.remove("hidden");
+      }
+      function closeLicense() {
+        licenseModal.classList.add("hidden");
+      }
+
+      document
+        .getElementById("badge-creator-license")
+        .addEventListener("click", openLicense);
+      document
+        .getElementById("btn-open-license-top")
+        .addEventListener("click", openLicense);
+      document
+        .getElementById("btn-start-license")
+        .addEventListener("click", openLicense);
+      document
+        .getElementById("btn-result-license")
+        .addEventListener("click", openLicense);
+      document
+        .getElementById("btn-close-license")
+        .addEventListener("click", closeLicense);
+      document
+        .getElementById("btn-confirm-license")
+        .addEventListener("click", closeLicense);
+
+      document
+        .getElementById("btn-copy-result")
+        .addEventListener("click", () => {
+          const summary = `🥊 SHADOW STRIKE // AN EDITION — Skor Ronde ${match.p1Wins}-${match.p2Wins} (Max Combo x${Math.max(1, match.maxPlayerCombo)}) | Crafted by ARYASATYA NARYAMA`;
+          const tmp = document.createElement("textarea");
+          tmp.value = summary;
+          document.body.appendChild(tmp);
+          tmp.select();
+          try {
+            document.execCommand("copy");
+            showToast("Hasil duel & kredit ARYASATYA NARYAMA disalin!");
+          } catch (e) {
+            showToast("Gagal menyalin hasil");
+          }
+          document.body.removeChild(tmp);
+        });
+
+      function showToast(msg) {
+        toastBox.textContent = msg;
+        toastBox.classList.add("show");
+        setTimeout(() => toastBox.classList.remove("show"), 2400);
+      }
+
+      // --- 11. 60FPS MAIN LOOP ---
+      function loop(timestamp) {
+        if (!match.lastTime) match.lastTime = timestamp;
+        const rawDt = Math.min(0.05, (timestamp - match.lastTime) / 1000);
+        match.lastTime = timestamp;
+
+        update(rawDt);
+        draw();
+        requestAnimationFrame(loop);
+      }
+
+      window.onload = () => {
+        resizeCanvas();
+        requestAnimationFrame(loop);
+      };
+    </script>
+  </body>
+</html>

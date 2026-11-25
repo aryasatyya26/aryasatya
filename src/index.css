@@ -1685,6 +1685,84 @@ section {
   letter-spacing: 0.2em;
 }
 
+.hero-game-launcher {
+  position: absolute;
+  z-index: 5;
+  top: clamp(250px, 34vh, 360px);
+  left: clamp(24px, 5vw, 76px);
+  display: grid;
+  width: min(185px, 38vw);
+  gap: 9px;
+}
+
+.hero-game-launcher p {
+  width: max-content;
+  margin-bottom: 4px;
+  color: rgba(255, 224, 229, 0.76);
+  font-family: "Italiana", serif;
+  font-size: clamp(16px, 1.65vw, 21px);
+  letter-spacing: 0.03em;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease,
+    text-shadow 0.3s ease;
+}
+
+.hero-game-launcher:hover p,
+.hero-game-launcher:active p,
+.hero-game-launcher:focus-within p {
+  color: #fff;
+  text-shadow: 0 0 18px rgba(255, 42, 95, 0.62);
+  transform: translateX(4px) scale(1.035);
+}
+
+.hero-game-launcher button,
+.game-start-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 39px;
+  padding: 0 13px;
+  border: 1px solid rgba(255, 42, 95, 0.62);
+  color: #ffe8ec;
+  background:
+    linear-gradient(110deg, rgba(91, 9, 28, 0.8), rgba(27, 8, 15, 0.86)), rgba(20, 6, 12, 0.8);
+  box-shadow:
+    inset 0 0 14px rgba(255, 42, 95, 0.14),
+    0 0 15px rgba(255, 42, 95, 0.18);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition:
+    transform 0.28s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    background 0.28s ease;
+}
+
+.hero-game-launcher button:hover,
+.hero-game-launcher button:focus-visible,
+.game-start-button:hover,
+.game-start-button:focus-visible {
+  border-color: #ff2a5f;
+  background: linear-gradient(110deg, rgba(143, 14, 43, 0.92), rgba(48, 7, 19, 0.94));
+  box-shadow:
+    inset 0 0 18px rgba(255, 42, 95, 0.27),
+    0 0 24px rgba(255, 42, 95, 0.38);
+  transform: translateX(4px) scale(1.035);
+}
+
+.hero-game-launcher button:active,
+.game-start-button:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+.hero-game-launcher button,
+.game-start-button {
+  text-transform: none;
+}
+
 .scroll-cue {
   position: absolute;
   z-index: 5;
@@ -2155,6 +2233,100 @@ blockquote {
   transition:
     transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1),
     filter 0.7s;
+}
+
+.game-artwork {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(20px, 4vw, 45px);
+  color: #f5f7fa;
+  background-color: #080b12;
+  font-family: "JetBrains Mono", monospace;
+}
+
+.game-artwork::before,
+.game-artwork::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+}
+
+.game-artwork::before {
+  opacity: 0.4;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(135deg, #000 0%, transparent 85%);
+}
+
+.game-artwork::after {
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(255, 42, 95, 0.2), transparent 55%),
+    linear-gradient(90deg, rgba(7, 9, 14, 0.92), rgba(7, 9, 14, 0.2) 60%, rgba(7, 9, 14, 0.76));
+}
+
+.game-artwork-neon {
+  background:
+    radial-gradient(ellipse at 70% 40%, rgba(255, 42, 95, 0.28), transparent 32%),
+    linear-gradient(135deg, #10131d, #160b16 60%, #090b12);
+}
+
+.game-artwork-shadow {
+  background:
+    radial-gradient(ellipse at 72% 45%, rgba(239, 68, 68, 0.3), transparent 35%),
+    linear-gradient(135deg, #080a10, #1a090f 62%, #09090d);
+}
+
+.game-art-topline,
+.game-art-bottom,
+.game-art-center {
+  position: relative;
+  z-index: 1;
+}
+
+.game-art-topline,
+.game-art-bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: rgba(255, 235, 239, 0.62);
+  font-size: clamp(7px, 0.8vw, 10px);
+  letter-spacing: 0.18em;
+}
+
+.game-art-center {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  text-shadow: 0 0 28px rgba(255, 42, 95, 0.34);
+}
+
+.game-art-center > span,
+.game-art-center > i {
+  color: rgba(255, 225, 231, 0.68);
+  font-size: clamp(7px, 0.85vw, 11px);
+  font-style: normal;
+  letter-spacing: 0.2em;
+}
+
+.game-art-center strong {
+  font-family: "Italiana", serif;
+  font-size: clamp(42px, 8vw, 108px);
+  font-weight: 400;
+  line-height: 0.77;
+  letter-spacing: -0.07em;
+}
+
+.game-art-bottom b {
+  color: #ff536e;
+  font-weight: 500;
 }
 
 .project-visual:hover img {
@@ -2744,6 +2916,7 @@ html.page-scrolled .music-player {
 }
 
 .modal-visual {
+  position: relative;
   min-height: 530px;
 }
 
@@ -2759,6 +2932,71 @@ html.page-scrolled .music-player {
   flex-direction: column;
   justify-content: center;
   padding: clamp(35px, 5vw, 72px);
+}
+
+.project-modal-game {
+  border-color: rgba(255, 42, 95, 0.42);
+  background:
+    radial-gradient(ellipse at 96% 4%, rgba(150, 14, 44, 0.24), transparent 44%),
+    linear-gradient(135deg, #13080d, #090a0f 70%);
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.75),
+    0 0 60px rgba(255, 42, 95, 0.12);
+}
+
+.project-modal-game .modal-copy .eyebrow {
+  color: #ff7088;
+}
+
+.project-modal-game .modal-facts {
+  border-color: rgba(255, 42, 95, 0.23);
+}
+
+.game-ready-status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  margin-top: 21px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 42, 95, 0.34);
+  color: #ff9aab;
+  background: rgba(92, 8, 29, 0.28);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.game-ready-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ff2a5f;
+  box-shadow: 0 0 11px #ff2a5f;
+  animation: gameStatusPulse 1.5s ease-in-out infinite;
+}
+
+.game-start-button {
+  gap: 18px;
+  width: fit-content;
+  min-height: 48px;
+  margin-top: 12px;
+  padding-inline: 17px;
+  color: #fff2f4;
+  text-decoration: none;
+  font-size: 9px;
+}
+
+.modal-backdrop-game {
+  background: rgba(15, 2, 7, 0.86);
+}
+
+@keyframes gameStatusPulse {
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 4px #ff2a5f;
+  }
 }
 
 .modal-copy h2 {
@@ -4004,6 +4242,25 @@ html.page-scrolled .music-player {
     transform: rotate(-4deg);
   }
 
+  .hero-game-launcher {
+    top: calc(12% + var(--hero-portrait-height) + 8px);
+    left: 20px;
+    width: min(150px, 43vw);
+    gap: 5px;
+  }
+
+  .hero-game-launcher p {
+    margin-bottom: 1px;
+    font-size: 15px;
+  }
+
+  .hero-game-launcher button {
+    min-height: 30px;
+    padding-inline: 9px;
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+
   .hero h1 em {
     margin-left: 0.08em;
   }
@@ -4021,6 +4278,29 @@ html.page-scrolled .music-player {
 
   .hero-actions > * {
     width: 100%;
+  }
+
+  .game-artwork {
+    padding: 18px;
+  }
+
+  .game-art-center strong {
+    font-size: clamp(46px, 16vw, 78px);
+  }
+
+  .game-art-topline,
+  .game-art-bottom,
+  .game-art-center > span,
+  .game-art-center > i {
+    font-size: 7px;
+  }
+
+  .game-ready-status {
+    font-size: 7px;
+  }
+
+  .game-start-button {
+    min-height: 44px;
   }
 
   .scroll-cue {

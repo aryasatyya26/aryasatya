@@ -6,13 +6,35 @@ type Project = {
   title: string;
   label: string;
   description: string;
-  image: string;
+  image?: string;
   technologies: string[];
   role: string;
   live?: string;
+  gameUrl?: string;
+  gameTheme?: "neon" | "shadow";
 };
 
 const projects: Project[] = [
+  {
+    title: "Neon Dash",
+    label: "Interactive arcade game",
+    description:
+      "A three-lane reflex challenge set in an industrial cyber world. Dodge hazards, read the rhythm, and push your run as far as you can.",
+    technologies: ["HTML5 Canvas", "Web Audio API", "TypeScript"],
+    role: "Game design & development",
+    gameUrl: "/games/neon-dash.html",
+    gameTheme: "neon",
+  },
+  {
+    title: "Shadow Strike",
+    label: "1v1 action fighter",
+    description:
+      "An arcade fighting game inspired by classic versus fighters, with punchy hit-stop, responsive controls, and a smooth interface.",
+    technologies: ["HTML5 Canvas", "Physics Engine", "Web Audio API"],
+    role: "Game design & development",
+    gameUrl: "/games/shadow-strike.html",
+    gameTheme: "shadow",
+  },
   {
     title: "Web Profile",
     label: "Brand experience",
@@ -716,9 +738,13 @@ function ProjectModal({
     };
   }, [onClose]);
   return (
-    <div className="modal-backdrop" role="presentation" onMouseDown={onClose}>
+    <div
+      className={`modal-backdrop${project.gameTheme ? " modal-backdrop-game" : ""}`}
+      role="presentation"
+      onMouseDown={onClose}
+    >
       <article
-        className="project-modal"
+        className={`project-modal${project.gameTheme ? ` project-modal-game project-modal-game-${project.gameTheme}` : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="project-title"
@@ -728,11 +754,21 @@ function ProjectModal({
           <Icon name="close" />
         </button>
         <div className="modal-visual">
-          <img src={project.image} alt={`${project.title} project preview`} />
+          {project.gameTheme ? (
+            <GameArtwork project={project} />
+          ) : (
+            <img src={project.image} alt={`${project.title} project preview`} />
+          )}
         </div>
         <div className="modal-copy">
           <p className="eyebrow">{project.label}</p>
           <h2 id="project-title">{project.title}</h2>
+          {project.gameUrl && (
+            <p className="game-ready-status">
+              <i />
+              Ready to play // System armed
+            </p>
+          )}
           <p className="modal-lead">{project.description}</p>
           <div className="modal-facts">
             <div>
@@ -744,16 +780,54 @@ function ProjectModal({
               <strong>{project.technologies.join(" · ")}</strong>
             </div>
           </div>
-          <p className="verified-note">
-            This overview reflects the information available in the original portfolio.
-          </p>
-          {project.live && (
+          {!project.gameUrl && (
+            <p className="verified-note">
+              This overview reflects the information available in the original portfolio.
+            </p>
+          )}
+          {project.gameUrl ? (
+            <a href={project.gameUrl} className="game-start-button">
+              start games arya <Icon name="arrow" size={14} />
+            </a>
+          ) : project.live ? (
             <a href={project.live} target="_blank" rel="noreferrer" className="text-link">
               Visit live project <Icon name="arrow" size={14} />
             </a>
-          )}
+          ) : null}
         </div>
       </article>
+    </div>
+  );
+}
+
+function GameArtwork({ project }: { project: Project }) {
+  const isNeon = project.gameTheme === "neon";
+
+  return (
+    <div className={`game-artwork game-artwork-${project.gameTheme}`} aria-hidden="true">
+      <span className="game-art-topline">ARYA GAMES // {isNeon ? "RUN 001" : "ARENA 002"}</span>
+      <div className="game-art-center">
+        <span>{isNeon ? "RUN // SURVIVE" : "FIGHT // ADAPT"}</span>
+        <strong>
+          {isNeon ? (
+            <>
+              NEON
+              <br />
+              DASH
+            </>
+          ) : (
+            <>
+              SHADOW
+              <br />
+              STRIKE
+            </>
+          )}
+        </strong>
+        <i>{isNeon ? "THREE LANES. ONE CHANCE." : "ENTER THE ARENA."}</i>
+      </div>
+      <span className="game-art-bottom">
+        {isNeon ? "PROTOCOL ACTIVE" : "SYSTEM ARMED"} <b>PLAY NOW ↗</b>
+      </span>
     </div>
   );
 }
@@ -835,6 +909,7 @@ export default function App() {
   const sfxAudioRef = useRef<HTMLAudioElement>(null);
   const lenisRef = useRef<Lenis | null>(null);
   const scrollProgressRef = useRef<HTMLSpanElement>(null);
+  const gameModalTimeoutRef = useRef<number | null>(null);
   const musicRequestRef = useRef(0);
   const navigationTargetRef = useRef<string | null>(null);
   const navigationScrollTimeoutRef = useRef<number | null>(null);
@@ -1145,6 +1220,9 @@ export default function App() {
       if (navigationScrollTimeoutRef.current !== null) {
         window.clearTimeout(navigationScrollTimeoutRef.current);
       }
+      if (gameModalTimeoutRef.current !== null) {
+        window.clearTimeout(gameModalTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -1190,6 +1268,22 @@ export default function App() {
       }
     }
     setMenuOpen(false);
+  };
+
+  const openGameProject = (item: Project) => {
+    if (gameModalTimeoutRef.current !== null) {
+      window.clearTimeout(gameModalTimeoutRef.current);
+    }
+
+    scrollTo("projects");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    gameModalTimeoutRef.current = window.setTimeout(
+      () => {
+        setProject(item);
+        gameModalTimeoutRef.current = null;
+      },
+      prefersReducedMotion ? 0 : 1150,
+    );
   };
 
   useEffect(() => {
@@ -1316,6 +1410,11 @@ export default function App() {
               </div>
             </div>
           </div>
+          <div className="hero-game-launcher">
+            <p>start Arya Games!</p>
+            <button onClick={() => openGameProject(projects[0])}>neon-dash.</button>
+            <button onClick={() => openGameProject(projects[1])}>shadow-strike</button>
+          </div>
           <div className="hero-portrait">
             <img
               src="/portfolio/Aryasatya.jpg"
@@ -1434,12 +1533,16 @@ export default function App() {
                   onClick={() => setProject(item)}
                   aria-label={`Open ${item.title} project details`}
                 >
-                  <img
-                    src={item.image}
-                    alt={`${item.title} preview`}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  {item.gameTheme ? (
+                    <GameArtwork project={item} />
+                  ) : (
+                    <img
+                      src={item.image}
+                      alt={`${item.title} preview`}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                   <span className="project-number">0{index + 1}</span>
                   <span className="project-open">
                     View case <Icon name="arrow" />
