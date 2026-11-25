@@ -1561,10 +1561,10 @@
         constructor() {
           this.ctx = null;
           this.muted = false;
-          this.punchBufferPromise = null;
-          this.punchBus = null;
           this.strikeCounters = { PUNCH: 0, KICK: 0, SPECIAL: 0 };
           this.punchUrl = new URL("../punch.mp3", window.location.href);
+          this.punchPlayers = [];
+          this.punchPlayerIndex = 0;
         }
 
         init() {
@@ -1572,84 +1572,102 @@
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             this.ctx = new AudioCtx();
           }
-          if (!this.punchBus) {
-            const compressor = this.ctx.createDynamicsCompressor();
-            compressor.threshold.value = -6;
-            compressor.knee.value = 0;
-            compressor.ratio.value = 3;
-            compressor.attack.value = 0.003;
-            compressor.release.value = 0.15;
-            const outputGain = this.ctx.createGain();
-            outputGain.gain.value = 1.35;
-            compressor.connect(outputGain);
-            outputGain.connect(this.ctx.destination);
-            this.punchBus = compressor;
+          if (this.punchPlayers.length === 0) {
+            this.punchPlayers = Array.from({ length: 4 }, () => {
+              const player = new Audio(this.punchUrl.href);
+              player.preload = "auto";
+              player.volume = 1;
+              player.addEventListener(
+                "error",
+                () => {
+                  console.error("Unable to load public/punch.mp3:", player.error);
+                },
+                { once: true },
+              );
+              player.load();
+              return { audio: player, token: 0, stopTimer: null };
+            });
           }
           if (this.ctx.state === "suspended") {
             this.ctx.resume().catch((error) => {
               console.error("Unable to resume the combat audio context:", error);
             });
           }
-          if (!this.punchBufferPromise) {
-            this.loadPunchBuffer().catch((error) => {
-              console.error("Unable to load public/punch.mp3:", error);
-            });
-          }
         }
 
         toggleMute() {
           this.muted = !this.muted;
+          if (this.muted) {
+            this.punchPlayers.forEach((slot) => {
+              slot.token += 1;
+              if (slot.stopTimer !== null) clearTimeout(slot.stopTimer);
+              slot.audio.pause();
+              if (slot.audio.readyState >= 1) slot.audio.currentTime = 0;
+              slot.stopTimer = null;
+            });
+          }
           return this.muted;
         }
 
-        loadPunchBuffer() {
-          if (!this.punchBufferPromise) {
-            this.punchBufferPromise = fetch(this.punchUrl)
-              .then((response) => {
-                if (!response.ok) {
-                  throw new Error(`Failed to load punch.mp3 (${response.status})`);
-                }
-                return response.arrayBuffer();
-              })
-              .then((audioData) => this.ctx.decodeAudioData(audioData));
-            this.punchBufferPromise = this.punchBufferPromise.catch((error) => {
-              this.punchBufferPromise = null;
-              throw error;
-            });
-          }
-          return this.punchBufferPromise;
-        }
-
         playStrike(type) {
-          if (this.muted || !this.ctx) return;
+          if (this.muted || this.punchPlayers.length === 0) return;
           const segments = [
             { start: 0.12, end: 0.73 },
             { start: 0.78, end: 1.15 },
           ];
           const segment = segments[this.strikeCounters[type] % segments.length];
           this.strikeCounters[type] += 1;
-          this.loadPunchBuffer()
-            .then((buffer) => {
-              if (this.muted || !this.ctx) return;
-              const source = this.ctx.createBufferSource();
-              const boost = this.ctx.createGain();
-              boost.gain.value = 1.25;
-              source.buffer = buffer;
-              source.connect(boost);
-              boost.connect(this.punchBus);
-              source.onended = () => {
-                source.disconnect();
-                boost.disconnect();
-              };
-              source.start(
-                this.ctx.currentTime,
-                segment.start,
-                segment.end - segment.start,
-              );
-            })
-            .catch((error) => {
+          const slot =
+            this.punchPlayers[this.punchPlayerIndex++ % this.punchPlayers.length];
+          const token = ++slot.token;
+          if (slot.stopTimer !== null) clearTimeout(slot.stopTimer);
+
+          const startSegment = () => {
+            if (token !== slot.token || this.muted) return;
+            slot.audio.pause();
+            slot.audio.currentTime = segment.start;
+            const stopSegment = () => {
+              if (token !== slot.token) return;
+              slot.audio.pause();
+              slot.audio.currentTime = 0;
+              slot.stopTimer = null;
+            };
+            let playback;
+            try {
+              playback = slot.audio.play();
+            } catch (error) {
               console.error("Unable to play public/punch.mp3:", error);
+              return;
+            }
+            if (playback && typeof playback.then === "function") {
+              playback
+                .then(() => {
+                  if (token !== slot.token) return;
+                  slot.stopTimer = setTimeout(
+                    stopSegment,
+                    (segment.end - segment.start) * 1000,
+                  );
+                })
+                .catch((error) => {
+                  if (token === slot.token) {
+                    console.error("Unable to play public/punch.mp3:", error);
+                  }
+                });
+            } else {
+              slot.stopTimer = setTimeout(
+                stopSegment,
+                (segment.end - segment.start) * 1000,
+              );
+            }
+          };
+
+          if (slot.audio.readyState >= 1) {
+            startSegment();
+          } else {
+            slot.audio.addEventListener("loadedmetadata", startSegment, {
+              once: true,
             });
+          }
         }
 
         playBlock() {
@@ -2167,6 +2185,8 @@
         )
           return;
 
+        if (fighter.isPlayer) audio.init();
+
         if (type === "SPECIAL") {
           if (fighter.energy < 50) return;
           fighter.energy -= 50;
@@ -2218,6 +2238,10 @@
         fighter.stateDuration = spec.duration;
         fighter.attackSoundIndex = 0;
         fighter.hasDealtHit = false;
+        if (fighter.isPlayer && type === "PUNCH") {
+          audio.playStrike(type);
+          fighter.attackSoundIndex = 1;
+        }
       }
 
       function releaseSoraTarget(fighter, successfulThrow) {
