@@ -2158,7 +2158,7 @@
       function getSpecialProfile(fighter) {
         const c = CHARACTERS[fighter.characterKey];
         const profiles = {
-          ARYA: { interval: 0.32, soundInterval: 0.16, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
+          ARYA: { interval: 0.2, soundInterval: 0.1, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
           RAKA: { interval: 0.64, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
           SORA: { interval: 3, range: 270, knockback: 360, stun: 0.72, callout: "PHANTOM SLAM!" },
           DAMAR: { interval: 0.4, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // KICK FLURRY!" },
@@ -2211,20 +2211,7 @@
           }
           if (c.name === "RAKA") fighter.vx = fighter.facing * 105;
           triggerShake(0.18, 8);
-          spawnFireBurst(
-            fighter.x + fighter.facing * 30,
-            fighter.y - 54,
-            1,
-            22,
-          );
           spawnCallout(fighter.x, fighter.y - 108, profile.callout, c.primary);
-          spawnANShockwave(
-            fighter.x + fighter.facing * 35,
-            fighter.y - 54,
-            c.primary,
-            80,
-            true,
-          );
         } else {
           fighter.vx = fighter.facing * (type === "KICK" ? 145 : 85);
           fighter.squashX = 1.18;
@@ -2258,7 +2245,7 @@
           fighter.throwPhase = "released";
           fighter.throwPhaseStart = fighter.stateTimer;
           audio.playStrike("SPECIAL");
-          spawnFireBurst(target.x, target.y, 1.15, 20);
+          spawnFireBurst(target.x, target.y, 0.65, 8);
         } else {
           fighter.throwPhase = "interrupted";
         }
@@ -2285,7 +2272,7 @@
             target.facing = -fighter.facing;
             target.y = floorY - 18;
             audio.playStrike("SPECIAL");
-            spawnFireBurst(target.x, target.y - 25, 0.9, 14);
+            spawnFireBurst(target.x, target.y - 25, 0.55, 6);
             spawnCallout(target.x, target.y - 110, "GRAB!", CHARACTERS.sora.primary);
           } else if (fighter.stateTimer >= 0.72) {
             fighter.throwPhase = "miss";
@@ -2342,8 +2329,7 @@
           const blockY = defender.y - 56;
           if (isSpecial) {
             triggerShake(0.22, 12);
-            spawnFireBurst(blockX, blockY, 1, 16);
-            spawnANShockwave(blockX, blockY, "#ff6b24", 100, true);
+            spawnFireBurst(blockX, blockY, 0.65, 8);
           } else {
             spawnParticles(blockX, blockY, "#10b981", 14);
           }
@@ -2384,17 +2370,18 @@
             defender.y -
             (isSpecial && attacker.characterKey === "sora" ? 10 : 56);
           if (isSpecial) {
-            spawnFireBurst(hitX, hitY, damage >= 20 ? 1.25 : 1, 20);
+            spawnFireBurst(hitX, hitY, 0.7, 9);
           } else {
             spawnParticles(hitX, hitY, attacker.colorPrimary, damage >= 15 ? 22 : 12);
           }
-          spawnANShockwave(
-            hitX,
-            hitY,
-            isSpecial ? "#ff6b24" : attacker.colorPrimary,
-            isSpecial ? 125 : damage >= 15 ? 95 : 65,
-            isSpecial,
-          );
+          if (!isSpecial) {
+            spawnANShockwave(
+              hitX,
+              hitY,
+              attacker.colorPrimary,
+              damage >= 15 ? 95 : 65,
+            );
+          }
 
           const label =
             attacker.comboCount >= 2
@@ -2442,8 +2429,8 @@
         match.shakeIntensity = intensity;
       }
 
-      function spawnANShockwave(x, y, color, maxRadius, fiery = false) {
-        shockwaves.push({ x, y, radius: 14, maxRadius, life: 1.0, color, fiery });
+      function spawnANShockwave(x, y, color, maxRadius) {
+        shockwaves.push({ x, y, radius: 14, maxRadius, life: 1.0, color });
       }
 
       function spawnFireBurst(x, y, scale = 1, count = 18) {
@@ -2745,7 +2732,7 @@
               f.throwOwner = null;
               if (throwOwner && match.phase === "FIGHT") {
                 audio.playStrike("SPECIAL");
-                spawnFireBurst(f.x, floorY - 18, 1.5, 28);
+                spawnFireBurst(f.x, floorY - 18, 0.75, 12);
                 spawnCallout(
                   f.x,
                   floorY - 105,
@@ -3116,11 +3103,7 @@
           pctx.translate(0, -specialStrike * 13);
         }
 
-        const kickEffectStrength = kick
-          ? strike
-          : special && (c.name === "RAKA" || c.name === "DAMAR")
-            ? specialStrike
-            : 0;
+        const kickEffectStrength = kick ? strike : 0;
         if (kickEffectStrength > 0.12) {
           pctx.save();
           pctx.globalAlpha = Math.min(0.82, kickEffectStrength * 0.9);
@@ -3398,20 +3381,39 @@
           pctx.save();
           pctx.translate(hand.x, hand.y);
           pctx.rotate(-0.12);
+          if (special) {
+            const flicker = Math.sin(t * 21 + (isLead ? 0 : Math.PI));
+            const flameLife = 0.52 + specialStrike * 0.48;
+            const flameSize = 8.5 + specialStrike * 4.5;
+            drawFlameShape(
+              pctx,
+              -4,
+              -1 + flicker * 1.2,
+              flameSize,
+              flameLife * 0.8,
+              -0.48 + flicker * 0.12,
+            );
+            drawFlameShape(
+              pctx,
+              4,
+              flicker * 0.8,
+              flameSize * 0.78,
+              flameLife * 0.72,
+              0.16 - flicker * 0.14,
+            );
+            drawFlameShape(
+              pctx,
+              0,
+              -5 + flicker,
+              flameSize * 0.72,
+              flameLife * 0.65,
+              -0.02 + flicker * 0.16,
+            );
+          }
           pctx.fillStyle = c.skin;
           pctx.beginPath();
           pctx.ellipse(0, 0, 6.4, 5.1, 0, 0, Math.PI * 2);
           pctx.fill();
-          if (special && specialStrike > 0.25) {
-            pctx.shadowColor = "#ff541b";
-            pctx.shadowBlur = 16;
-            pctx.strokeStyle = "#ffd166";
-            pctx.lineWidth = 2.4;
-            pctx.beginPath();
-            pctx.arc(0, 0, 9 + specialStrike * 4, -0.8, 0.8);
-            pctx.stroke();
-            pctx.shadowBlur = 0;
-          }
           pctx.restore();
         };
 
@@ -3465,52 +3467,23 @@
 
         drawArenaBackground();
 
-        // Draw shockwaves; special attacks use fire instead of the AN monogram.
+        // Draw signature shockwaves for regular strikes.
         shockwaves.forEach((sw) => {
           ctx.save();
-          if (sw.fiery) {
-            ctx.globalAlpha = Math.max(0, sw.life * 0.78);
-            ctx.shadowColor = "#ff541b";
-            ctx.shadowBlur = 15;
-            ctx.strokeStyle = "#f04b14";
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = "#ffd166";
-            ctx.lineWidth = 1.6;
-            ctx.beginPath();
-            ctx.arc(sw.x, sw.y, sw.radius * 0.86, 0, Math.PI * 2);
-            ctx.stroke();
-            for (let flame = 0; flame < 8; flame++) {
-              const angle = (flame / 8) * Math.PI * 2;
-              const flameRadius = Math.max(7, sw.radius * 0.15);
-              drawFlameShape(
-                ctx,
-                sw.x + Math.cos(angle) * sw.radius * 0.74,
-                sw.y + Math.sin(angle) * sw.radius * 0.74,
-                flameRadius,
-                sw.life,
-                angle + Math.PI * 0.5,
-              );
-            }
-          } else {
-            ctx.globalAlpha = Math.max(0, sw.life * 0.6);
-            ctx.strokeStyle = sw.color;
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
-            ctx.stroke();
-            drawANMonogram(
-              ctx,
-              sw.x,
-              sw.y,
-              sw.radius * 0.78,
-              sw.life * 0.32,
-              sw.color,
-            );
-          }
+          ctx.globalAlpha = Math.max(0, sw.life * 0.6);
+          ctx.strokeStyle = sw.color;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+          ctx.stroke();
+          drawANMonogram(
+            ctx,
+            sw.x,
+            sw.y,
+            sw.radius * 0.78,
+            sw.life * 0.32,
+            sw.color,
+          );
           ctx.restore();
         });
 
