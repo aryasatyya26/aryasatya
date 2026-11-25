@@ -144,6 +144,7 @@ function Icon({
     | "mute"
     | "sliders"
     | "close"
+    | "back"
     | "copy"
     | "menu"
     | "smile";
@@ -187,6 +188,12 @@ function Icon({
       <>
         <path d="m6 6 12 12" />
         <path d="M18 6 6 18" />
+      </>
+    ),
+    back: (
+      <>
+        <path d="M19 12H5" />
+        <path d="m12 19-7-7 7-7" />
       </>
     ),
     copy: (
@@ -833,7 +840,7 @@ function GameOverlay({
         onClick={onClose}
         aria-label="Return to portfolio"
       >
-        <Icon name="close" />
+        <Icon name="back" />
       </button>
       <iframe src={url} title="Interactive portfolio game" allow="autoplay; fullscreen" />
     </div>
