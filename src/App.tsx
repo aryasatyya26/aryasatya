@@ -1359,18 +1359,18 @@ export default function App() {
         <span ref={scrollProgressRef} />
       </div>
 
-      <button
-        className="monogram"
-        onClick={returnToEntrance}
-        aria-label="ARYASATYA NARYAMA — return to entrance"
-      >
-        <span className="monogram-symbol">AN</span>
-        <span className="brand-wordmark">
-          <span>ARYASATYA</span>
-          <span>NARYAMA</span>
-        </span>
-      </button>
       <header className="site-header">
+        <button
+          className="monogram"
+          onClick={returnToEntrance}
+          aria-label="ARYASATYA NARYAMA — return to entrance"
+        >
+          <span className="monogram-symbol">AN</span>
+          <span className="brand-wordmark">
+            <span>ARYASATYA</span>
+            <span>NARYAMA</span>
+          </span>
+        </button>
         <nav className={menuOpen ? "open" : ""} aria-label="Primary navigation">
           {navItems.map((item, index) => (
             <button

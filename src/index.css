@@ -3809,8 +3809,9 @@ html.page-scrolled .music-player {
     top: 14px;
   }
 
-  .monogram {
-    top: 26px;
+  .site-header .monogram {
+    top: 12px;
+    left: 18px;
   }
 
   .site-header nav {
@@ -3937,9 +3938,10 @@ html.page-scrolled .music-player {
 }
 
 @media (min-width: 981px) {
-  html.page-scrolled .monogram {
-    position: fixed;
-    top: 18px;
+  .site-header .monogram {
+    position: static;
+    flex: 0 0 auto;
+    margin-right: auto;
   }
 }
 
@@ -3964,7 +3966,8 @@ html.page-scrolled .music-player {
     box-shadow: none;
   }
 
-  .monogram {
+  .site-header .monogram {
+    position: fixed;
     top: 6px;
     left: 50%;
     width: max-content;
