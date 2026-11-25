@@ -1809,6 +1809,7 @@
           attackType: null, // PUNCH, KICK, SPECIAL
           stateTimer: 0,
           stateDuration: 0,
+          specialNextHitAt: 0,
           hasDealtHit: false,
           comboCount: 0,
           comboResetTimer: 0,
@@ -2068,7 +2069,7 @@
           energyGain: 20,
         },
         SPECIAL: {
-          duration: 0.42,
+          duration: 3,
           activeStart: 0.16,
           activeEnd: 0.24,
           range: 60,
@@ -2105,15 +2106,34 @@
             energyGain: 20
           };
         }
+        const profile = getSpecialProfile(fighter);
         return {
-          duration: c.name === "RAKA" ? 0.50 : c.name === "SORA" ? 0.32 : 0.42,
-          activeStart: 0.16,
-          activeEnd: c.name === "RAKA" ? 0.34 : 0.24,
-          range: c.name === "RAKA" ? 82 : c.name === "SORA" ? 130 : 60,
+          duration: 3,
+          activeStart: profile.firstHitAt,
+          activeEnd: 3,
+          range: profile.range,
           damage: c.specialDamage,
-          stun: c.name === "RAKA" ? 0.58 : 0.42,
-          knockback: c.name === "RAKA" ? 390 : 310,
+          stun: profile.stun,
+          knockback: profile.knockback,
           energyCost: 50
+        };
+      }
+
+      function getSpecialProfile(fighter) {
+        const c = CHARACTERS[fighter.characterKey];
+        const profiles = {
+          ARYA: { interval: 0.32, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
+          RAKA: { interval: 0.64, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
+          SORA: { interval: 3, range: 250, knockback: 420, stun: 0.3, callout: "PHANTOM FLASH // LONG REACH!" },
+          DAMAR: { interval: 0.4, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // KICK FLURRY!" },
+        };
+        const profile = profiles[c.name];
+        const firstHitAt = profile.interval * 0.5;
+        const hitCount = Math.floor((3 - firstHitAt) / profile.interval) + 1;
+        return {
+          ...profile,
+          firstHitAt,
+          damagePerHit: c.specialDamage / hitCount,
         };
       }
 
@@ -2130,53 +2150,11 @@
           if (fighter.energy < 50) return;
           fighter.energy -= 50;
           audio.playSpecialWave();
-          fighter.squashX = 1.25;
-          fighter.squashY = 0.82;
           const c = CHARACTERS[fighter.characterKey];
-          const owner = fighter.isPlayer ? "P1" : "P2";
-
-          if (c.name === "ARYA") {
-            projectiles.push({
-              owner, x: fighter.x + fighter.facing * 44, y: fighter.y - 54,
-              vx: fighter.facing * 540, radius: 24, damage: c.specialDamage,
-              color: "#38bdf8", life: 1.8
-            });
-            spawnCallout(fighter.x, fighter.y - 108, "AN-WAVE!", "#38bdf8");
-          } else if (c.name === "RAKA") {
-            fighter.vx = fighter.facing * 80;
-            spawnANShockwave(fighter.x + fighter.facing * 38, fighter.y - 34, "#ef4444", 115);
-            projectiles.push({
-              owner,
-              x: fighter.x + fighter.facing * 42,
-              y: fighter.y - 28,
-              vx: fighter.facing * 430,
-              radius: 38,
-              damage: c.specialDamage,
-              color: "#ef4444",
-              life: 0.72
-            });
-            spawnCallout(fighter.x, fighter.y - 108, "CRIMSON BREAKER!", "#ef4444");
-          } else if (c.name === "SORA") {
-            fighter.vx = fighter.facing * 620;
-            projectiles.push({
-              owner, x: fighter.x + fighter.facing * 48, y: fighter.y - 58,
-              vx: fighter.facing * 760, radius: 18, damage: c.specialDamage,
-              color: "#a855f7", life: 0.7
-            });
-            spawnCallout(fighter.x, fighter.y - 108, "PHANTOM FLASH!", "#facc15");
-          } else {
-            [-10, 18].forEach((offset) => projectiles.push({
-              owner,
-              x: fighter.x + fighter.facing * (44 + offset),
-              y: fighter.y - (54 + Math.abs(offset)),
-              vx: fighter.facing * 620,
-              radius: 15,
-              damage: c.specialDamage,
-              color: "#10b981",
-              life: 1.4
-            }));
-            spawnCallout(fighter.x, fighter.y - 108, "VORTEX PALM!", "#67e8f9");
-          }
+          const profile = getSpecialProfile(fighter);
+          fighter.specialNextHitAt = profile.firstHitAt;
+          if (c.name === "RAKA") fighter.vx = fighter.facing * 105;
+          spawnCallout(fighter.x, fighter.y - 108, profile.callout, c.primary);
           spawnANShockwave(
             fighter.x + fighter.facing * 35,
             fighter.y - 54,
@@ -2245,12 +2223,16 @@
             );
           }
 
-          // Tactile Hit-Stop Freeze Frame & Camera Shake
-          match.hitStop =
-            attacker.characterKey === "raka" ? (damage >= 15 ? 0.085 : 0.048)
-            : damage >= 15 ? 0.055 : 0.032;
-          triggerShake(damage >= 15 ? 0.22 : 0.12, damage >= 15 ? 10 : 5);
-          audio.playHit(damage >= 15);
+          match.hitStop = isSpecial
+            ? 0
+            : attacker.characterKey === "raka"
+              ? damage >= 15 ? 0.085 : 0.048
+              : damage >= 15 ? 0.055 : 0.032;
+          triggerShake(
+            isSpecial ? 0.16 : damage >= 15 ? 0.22 : 0.12,
+            isSpecial ? 9 : damage >= 15 ? 10 : 5,
+          );
+          audio.playHit(isSpecial || damage >= 15);
 
           const hitX = (attacker.x + defender.x) * 0.5;
           const hitY = defender.y - 56;
@@ -2258,13 +2240,13 @@
             hitX,
             hitY,
             attacker.colorPrimary,
-            damage >= 15 ? 22 : 12,
+            isSpecial ? 18 : damage >= 15 ? 22 : 12,
           );
           spawnANShockwave(
             hitX,
             hitY,
             attacker.colorPrimary,
-            damage >= 15 ? 95 : 65,
+            isSpecial ? 110 : damage >= 15 ? 95 : 65,
           );
 
           const label =
@@ -2365,7 +2347,11 @@
             (p1.state === "ATTACK" && dist < 105 && Math.random() < 0.58)
           ) {
             p2.aiDesiredAction = "BLOCK";
-          } else if (p2.energy >= 50 && dist > 130 && Math.random() < 0.55) {
+          } else if (
+            p2.energy >= 50 &&
+            dist <= getSpecialProfile(p2).range &&
+            Math.random() < 0.45
+          ) {
             p2.aiDesiredAction = "SPECIAL";
           } else if (dist <= 86) {
             const roll = Math.random();
@@ -2432,13 +2418,22 @@
         }
 
         // Player 1 Input Handling
+        const playerSpecialActive =
+          p1.state === "ATTACK" && p1.attackType === "SPECIAL";
         if (
           match.phase === "FIGHT" &&
-          p1.state !== "ATTACK" &&
-          p1.state !== "HITSTUN" &&
-          p1.state !== "KO"
+          (playerSpecialActive ||
+            (p1.state !== "ATTACK" &&
+              p1.state !== "HITSTUN" &&
+              p1.state !== "KO"))
         ) {
-          if (input.block) {
+          if (playerSpecialActive) {
+            if (input.left && !input.right) {
+              p1.vx = -CHARACTERS[p1.characterKey].moveSpeed;
+            } else if (input.right && !input.left) {
+              p1.vx = CHARACTERS[p1.characterKey].moveSpeed;
+            }
+          } else if (input.block) {
             p1.state = "BLOCK";
             p1.vx = 0;
           } else if (input.left && !input.right) {
@@ -2505,8 +2500,29 @@
           if (f.state === "ATTACK") {
             f.stateTimer += dt;
             const spec = getAttackSpec(f, f.attackType);
-            if (
-              f.attackType !== "SPECIAL" &&
+            if (f.attackType === "SPECIAL") {
+              const profile = getSpecialProfile(f);
+              while (
+                f.stateTimer >= f.specialNextHitAt &&
+                f.specialNextHitAt <= f.stateDuration &&
+                match.phase === "FIGHT"
+              ) {
+                const target = f.isPlayer ? p2 : p1;
+                const dist = Math.abs(target.x - f.x);
+                const inFront = (target.x - f.x) * f.facing >= -12;
+                if (dist <= profile.range && inFront && target.state !== "KO") {
+                  applyStrikeHit(
+                    f,
+                    target,
+                    profile.damagePerHit,
+                    profile.knockback,
+                    profile.stun,
+                    true,
+                  );
+                }
+                f.specialNextHitAt += profile.interval;
+              }
+            } else if (
               !f.hasDealtHit &&
               f.stateTimer >= spec.activeStart &&
               f.stateTimer <= spec.activeEnd
@@ -2718,7 +2734,12 @@
       }
 
       function drawHumanBody(pctx, c, t, preview = false, fighter = null) {
-        const walking = fighter && fighter.state === "WALK";
+        const walking = fighter && (
+          fighter.state === "WALK" ||
+          (fighter.state === "ATTACK" &&
+            fighter.attackType === "SPECIAL" &&
+            Math.abs(fighter.vx) > 25)
+        );
         const kick = fighter && fighter.state === "ATTACK" && fighter.attackType === "KICK";
         const punch = fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH";
         const special = fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL";
@@ -2726,6 +2747,11 @@
           ? Math.max(0, Math.min(1, fighter.stateTimer / fighter.stateDuration))
           : 0;
         const strike = Math.sin(progress * Math.PI);
+        const specialProfile = special ? getSpecialProfile(fighter) : null;
+        const specialPhase = specialProfile
+          ? ((fighter.stateTimer % specialProfile.interval) / specialProfile.interval) * Math.PI
+          : 0;
+        const specialStrike = Math.max(0, Math.sin(specialPhase));
         const step = walking ? Math.sin(t * 1.7) : 0;
         const bounce = walking ? Math.abs(Math.sin(t * 1.7)) * 1.4 : 0;
         const breathe = Math.sin(t * 2.1) * 0.8;
@@ -2739,20 +2765,21 @@
         let frontKnee = { x: 22 + step * 3, y: -24 - bounce * 0.3 };
         let frontAnkle = { x: 31 + step * 5, y: -5 - bounce };
 
-        if (kick) {
+        if (kick || (special && (c.name === "RAKA" || c.name === "DAMAR"))) {
           const kickPose = {
-            ARYA: { kneeX: 40, kneeY: -28, ankleX: 76, ankleY: -18 },
-            RAKA: { kneeX: 40, kneeY: -21, ankleX: 73, ankleY: -8 },
-            SORA: { kneeX: 46, kneeY: -31, ankleX: 82, ankleY: -17 },
-            DAMAR: { kneeX: 39, kneeY: -25, ankleX: 79, ankleY: -14 },
+            ARYA: { kneeX: 40, kneeY: -31, ankleX: 76, ankleY: -18 },
+            RAKA: { kneeX: 40, kneeY: -24, ankleX: 73, ankleY: -8 },
+            SORA: { kneeX: 46, kneeY: -34, ankleX: 82, ankleY: -17 },
+            DAMAR: { kneeX: 39, kneeY: -28, ankleX: 79, ankleY: -14 },
           }[c.name];
+          const kickStrength = kick ? strike : specialStrike;
           frontKnee = {
-            x: 22 + (kickPose.kneeX - 22) * strike,
-            y: -24 + (kickPose.kneeY + 24) * strike,
+            x: 22 + (kickPose.kneeX - 22) * kickStrength,
+            y: -24 + (kickPose.kneeY + 24) * kickStrength,
           };
           frontAnkle = {
-            x: 31 + (kickPose.ankleX - 31) * strike,
-            y: -5 + (kickPose.ankleY + 5) * strike,
+            x: 31 + (kickPose.ankleX - 31) * kickStrength,
+            y: -5 + (kickPose.ankleY + 5) * kickStrength,
           };
         }
 
@@ -2764,9 +2791,19 @@
         pctx.ellipse(0, 3, kick && strike > 0.45 ? 29 : 34, 7, 0, 0, Math.PI * 2);
         pctx.fill();
 
-        if (kick && strike > 0.12) {
+        pctx.save();
+        if (special && c.name === "RAKA") {
+          pctx.translate(0, -specialStrike * 13);
+        }
+
+        const kickEffectStrength = kick
+          ? strike
+          : special && (c.name === "RAKA" || c.name === "DAMAR")
+            ? specialStrike
+            : 0;
+        if (kickEffectStrength > 0.12) {
           pctx.save();
-          pctx.globalAlpha = Math.min(0.82, strike * 0.9);
+          pctx.globalAlpha = Math.min(0.82, kickEffectStrength * 0.9);
           pctx.lineCap = "round";
           pctx.lineWidth = c.name === "RAKA" ? 4 : 3;
           pctx.strokeStyle = c.name === "ARYA" ? "#38bdf8"
@@ -2939,15 +2976,31 @@
             progress * Math.PI * 2 * punchCycles + (isLead ? 0 : Math.PI);
           const punchBlend = punch ? Math.max(0, Math.sin(punchPhase)) : strike;
           const specialHand = isLead
-            ? { x: 38, y: shoulderY - 16 }
+            ? c.name === "SORA"
+              ? { x: 96, y: shoulderY - 18 }
+              : { x: 38, y: shoulderY - 16 }
             : { x: 28, y: shoulderY - 10 };
           let hand = { ...guardHand };
           if (punch) {
             hand.x += (punchHand.x - hand.x) * punchBlend;
             hand.y += (punchHand.y - hand.y) * punchBlend;
           } else if (special) {
-            hand.x += (specialHand.x - hand.x) * strike;
-            hand.y += (specialHand.y - hand.y) * strike;
+            const armPulse = c.name === "ARYA" && !isLead
+              ? Math.max(
+                  0,
+                  Math.sin(
+                    Math.PI *
+                      (((fighter.stateTimer + specialProfile.interval * 0.5) %
+                        specialProfile.interval) /
+                        specialProfile.interval),
+                  ),
+                )
+              : specialStrike;
+            const activeSpecialHand = c.name === "ARYA"
+              ? punchHand
+              : specialHand;
+            hand.x += (activeSpecialHand.x - hand.x) * armPulse;
+            hand.y += (activeSpecialHand.y - hand.y) * armPulse;
           } else if (fighter && fighter.state === "BLOCK") {
             hand.x += (isLead ? 6 : 12);
             hand.y -= 2;
@@ -3020,13 +3073,13 @@
           pctx.beginPath();
           pctx.ellipse(0, 0, 6.4, 5.1, 0, 0, Math.PI * 2);
           pctx.fill();
-          if (special && strike > 0.25) {
+          if (special && specialStrike > 0.25) {
             pctx.shadowColor = c.accent;
             pctx.shadowBlur = 12;
             pctx.strokeStyle = c.accent;
             pctx.lineWidth = 2;
             pctx.beginPath();
-            pctx.arc(0, 0, 9 + strike * 4, -0.8, 0.8);
+            pctx.arc(0, 0, 9 + specialStrike * 4, -0.8, 0.8);
             pctx.stroke();
             pctx.shadowBlur = 0;
           }
@@ -3035,6 +3088,7 @@
 
         drawArm(true);
         drawArm(false);
+        pctx.restore();
         pctx.restore();
       }
 
