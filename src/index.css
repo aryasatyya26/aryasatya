@@ -2702,6 +2702,10 @@ blockquote {
     box-shadow 0.35s ease;
 }
 
+html.game-playing .app .music-player {
+  z-index: 220;
+}
+
 html.page-scrolled .music-player {
   border-color: rgba(196, 154, 86, 0.28);
   background:
@@ -2902,6 +2906,53 @@ html.page-scrolled .music-player {
 
 .modal-open {
   overflow: hidden;
+}
+
+body.game-open {
+  overflow: hidden;
+}
+
+.game-overlay {
+  position: fixed;
+  z-index: 200;
+  inset: 0;
+  overflow: hidden;
+  background: #07090e;
+}
+
+.game-overlay iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.game-overlay-close {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: max(10px, calc((100vw - 480px) / 2 + 10px));
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(0, 240, 255, 0.34);
+  border-radius: 12px;
+  color: var(--cyan-neon);
+  background: rgba(8, 13, 22, 0.88);
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.16);
+  transform: translateY(-50%);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.game-overlay-close:hover,
+.game-overlay-close:focus-visible {
+  box-shadow: 0 0 24px rgba(0, 240, 255, 0.38);
+  transform: translateY(-50%) scale(1.06);
+}
+
+.game-overlay-close:active {
+  transform: translateY(-50%) scale(0.94);
 }
 
 .modal-backdrop {

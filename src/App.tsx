@@ -724,10 +724,14 @@ function MusicPlayer({
 function ProjectModal({
   project,
   onClose,
+  onPlayGame,
 }: {
   project: Project;
   onClose: () => void;
+  onPlayGame: (url: string) => void;
 }) {
+  const gameUrl = project.gameUrl;
+
   useEffect(() => {
     const key = (event: KeyboardEvent) => event.key === "Escape" && onClose();
     document.body.classList.add("modal-open");
@@ -787,10 +791,14 @@ function ProjectModal({
               This overview reflects the information available in the original portfolio.
             </p>
           )}
-          {project.gameUrl ? (
-            <a href={project.gameUrl} className="game-start-button">
+          {gameUrl ? (
+            <button
+              type="button"
+              onClick={() => onPlayGame(gameUrl)}
+              className="game-start-button"
+            >
               Start Arya's Game <Icon name="arrow" size={14} />
-            </a>
+            </button>
           ) : project.live ? (
             <a href={project.live} target="_blank" rel="noreferrer" className="text-link">
               Visit live project <Icon name="arrow" size={14} />
@@ -798,6 +806,36 @@ function ProjectModal({
           ) : null}
         </div>
       </article>
+    </div>
+  );
+}
+
+function GameOverlay({
+  url,
+  onClose,
+}: {
+  url: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    document.body.classList.add("game-open");
+    document.documentElement.classList.add("game-playing");
+    return () => {
+      document.body.classList.remove("game-open");
+      document.documentElement.classList.remove("game-playing");
+    };
+  }, []);
+
+  return (
+    <div className="game-overlay" role="dialog" aria-modal="true" aria-label="Game player">
+      <button
+        className="game-overlay-close"
+        onClick={onClose}
+        aria-label="Return to portfolio"
+      >
+        <Icon name="close" />
+      </button>
+      <iframe src={url} title="Interactive portfolio game" allow="autoplay; fullscreen" />
     </div>
   );
 }
@@ -905,6 +943,7 @@ export default function App() {
   const [active, setActive] = useState("home");
   const [menuOpen, setMenuOpen] = useState(false);
   const [project, setProject] = useState<Project | null>(null);
+  const [playingGameUrl, setPlayingGameUrl] = useState<string | null>(null);
   const [musicOn, setMusicOnState] = useState(false);
   const [musicPending, setMusicPending] = useState(false);
   const [sfxOn, setSfxOn] = useState(true);
@@ -1697,7 +1736,19 @@ export default function App() {
         sfxOn={sfxOn}
         setSfxOn={setSfxOn}
       />
-      {project && <ProjectModal project={project} onClose={() => setProject(null)} />}
+      {playingGameUrl && (
+        <GameOverlay url={playingGameUrl} onClose={() => setPlayingGameUrl(null)} />
+      )}
+      {project && (
+        <ProjectModal
+          project={project}
+          onClose={() => setProject(null)}
+          onPlayGame={(url) => {
+            setProject(null);
+            setPlayingGameUrl(url);
+          }}
+        />
+      )}
       <div className={`toast ${toast ? "visible" : ""}`} role="status">
         {toast}
       </div>

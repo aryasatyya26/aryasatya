@@ -736,6 +736,11 @@
     </a>
 
     <script>
+        if (window.self !== window.top) {
+            const portfolioReturnLink = document.querySelector('.portfolio-return-link');
+            if (portfolioReturnLink) portfolioReturnLink.remove();
+        }
+
         /**
          * ============================================================================
          * NEON DASH: PROTOCOL
