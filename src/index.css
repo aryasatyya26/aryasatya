@@ -1748,6 +1748,7 @@ section {
   box-shadow:
     inset 0 0 14px rgba(255, 42, 95, 0.14),
     0 0 15px rgba(255, 42, 95, 0.18);
+  animation: gameButtonFire 1.5s ease-in-out infinite alternate;
   font-family: "JetBrains Mono", monospace;
   font-size: 11px;
   letter-spacing: 0.07em;
@@ -1757,6 +1758,11 @@ section {
     border-color 0.28s ease,
     box-shadow 0.28s ease,
     background 0.28s ease;
+}
+
+.hero-game-launcher button {
+  justify-content: center;
+  text-align: center;
 }
 
 .hero-game-launcher button:hover,
@@ -2212,6 +2218,7 @@ blockquote {
   grid-template-columns: 1.35fr 0.65fr;
   align-items: center;
   gap: 55px;
+  scroll-margin-top: 100px;
 }
 
 .project-card:nth-child(even) {

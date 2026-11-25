@@ -389,6 +389,40 @@
             box-shadow: 0 4px 15px rgba(0, 240, 255, 0.25);
         }
 
+        #btn-start {
+            border: 1px solid rgba(255, 42, 95, 0.72);
+            box-shadow:
+                0 0 18px rgba(255, 42, 95, 0.32),
+                0 8px 25px rgba(0, 240, 255, 0.25);
+            animation: neonStartFire 1.4s ease-in-out infinite alternate;
+        }
+
+        #btn-start:hover,
+        #btn-start:focus-visible {
+            box-shadow:
+                0 0 28px rgba(255, 42, 95, 0.58),
+                0 0 40px rgba(249, 115, 22, 0.24);
+        }
+
+        @keyframes neonStartFire {
+            from {
+                box-shadow:
+                    0 0 14px rgba(255, 42, 95, 0.26),
+                    0 8px 25px rgba(0, 240, 255, 0.2);
+            }
+            to {
+                box-shadow:
+                    0 0 26px rgba(255, 42, 95, 0.48),
+                    0 0 36px rgba(249, 115, 22, 0.2);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #btn-start {
+                    animation: none;
+            }
+        }
+
         .btn-secondary {
             width: 100%;
             padding: 13px 20px;

@@ -26,7 +26,7 @@ const projects: Project[] = [
     gameTheme: "neon",
   },
   {
-    title: "Shadow Strike",
+    title: "Street Fighting",
     label: "1v1 action fighter",
     description:
       "An arcade fighting game inspired by classic versus fighters, with punchy hit-stop, responsive controls, and a smooth interface.",
@@ -819,9 +819,9 @@ function GameArtwork({ project }: { project: Project }) {
             </>
           ) : (
             <>
-              SHADOW
+              STREET
               <br />
-              STRIKE
+              FIGHTING
             </>
           )}
         </strong>
@@ -1235,8 +1235,8 @@ export default function App() {
     };
   }, []);
 
-  const scrollTo = (id: string) => {
-    const target = document.getElementById(id);
+  const scrollTo = (id: string, targetOverride?: HTMLElement) => {
+    const target = targetOverride ?? document.getElementById(id);
     if (target) {
       setActive(id);
       const prefersReducedMotion = window.matchMedia(
@@ -1267,7 +1267,9 @@ export default function App() {
       if (lenisRef.current) {
         lenisRef.current.scrollTo(
           target,
-          prefersReducedMotion ? { immediate: true } : { duration: 1.1 },
+          prefersReducedMotion
+            ? { immediate: true, offset: targetOverride ? -100 : 0 }
+            : { duration: 1.1, offset: targetOverride ? -100 : 0 },
         );
       } else {
         target.scrollIntoView({
@@ -1284,7 +1286,15 @@ export default function App() {
       window.clearTimeout(gameModalTimeoutRef.current);
     }
 
-    scrollTo("projects");
+    const target = item.gameTheme
+      ? document.getElementById(`project-${item.gameTheme}`)
+      : null;
+    if (!target) {
+      console.error(`Unable to find the project card for "${item.title}".`);
+      return;
+    }
+
+    scrollTo("projects", target);
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     gameModalTimeoutRef.current = window.setTimeout(
       () => {
@@ -1400,8 +1410,8 @@ export default function App() {
               <p className="hero-greeting">Haii</p>
               <div className="hero-game-launcher">
                 <p>Start Arya's Games</p>
-                <button onClick={() => openGameProject(projects[0])}>neon-dash.</button>
-                <button onClick={() => openGameProject(projects[1])}>shadow-strike</button>
+                <button onClick={() => openGameProject(projects[0])}>neon-dash</button>
+                <button onClick={() => openGameProject(projects[1])}>street fighting</button>
               </div>
             </div>
             <p className="eyebrow">Data analyst · Web developer</p>
@@ -1536,7 +1546,11 @@ export default function App() {
           </div>
           <div className="project-list">
             {projects.map((item, index) => (
-              <article className="project-card" key={item.title}>
+              <article
+                id={item.gameTheme ? `project-${item.gameTheme}` : undefined}
+                className="project-card"
+                key={item.title}
+              >
                 <button
                   className="project-visual"
                   onClick={() => setProject(item)}

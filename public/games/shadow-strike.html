@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>STREET FIGHTER // AN EDITION — Aryasatya Naryama</title>
+    <title>STREET FIGHTING // AN EDITION — Aryasatya Naryama</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -769,6 +769,40 @@
         transform: scale(0.95);
       }
 
+      #btn-start-duel {
+        border: 1px solid rgba(255, 42, 95, 0.7);
+        box-shadow:
+          0 0 18px rgba(255, 42, 95, 0.32),
+          0 10px 28px rgba(56, 189, 248, 0.24);
+        animation: streetFightingStartFire 1.4s ease-in-out infinite alternate;
+      }
+
+      #btn-start-duel:hover,
+      #btn-start-duel:focus-visible {
+        box-shadow:
+          0 0 28px rgba(255, 42, 95, 0.58),
+          0 0 40px rgba(249, 115, 22, 0.24);
+      }
+
+      @keyframes streetFightingStartFire {
+        from {
+          box-shadow:
+            0 0 14px rgba(255, 42, 95, 0.26),
+            0 10px 28px rgba(56, 189, 248, 0.2);
+        }
+        to {
+          box-shadow:
+            0 0 26px rgba(255, 42, 95, 0.48),
+            0 0 36px rgba(249, 115, 22, 0.2);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        #btn-start-duel {
+          animation: none;
+        }
+      }
+
       .btn-dual-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1151,7 +1185,7 @@
 
           <div>
             <div class="edition-tag">AN EDITION // ARCADE DUEL</div>
-            <h1 class="game-title">STREET FIGHTER</h1>
+            <h1 class="game-title">STREET FIGHTING</h1>
           </div>
 
           <p class="game-subtitle">
@@ -1387,7 +1421,7 @@
       </div>
 
       <!-- Toast Notification -->
-      <div id="toast-box">Thanks for liking Shadow Strike!</div>
+      <div id="toast-box">Thanks for liking Street Fighting!</div>
     </main>
 
     <a class="portfolio-return-link" href="/#projects" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
@@ -1400,7 +1434,7 @@
     <script>
       /**
        * ============================================================================
-       * STREET FIGHTER // AN EDITION
+       * STREET FIGHTING // AN EDITION
        * Original Arcade Combat Engine, Vector Rigging, Audio & UI/UX Architecture
        * © 2026 ARYASATYA NARYAMA (AN). All Rights Reserved.
        * ============================================================================
@@ -2861,7 +2895,7 @@
         likeButton.setAttribute("aria-pressed", String(liked));
         likeButton.classList.toggle("is-liked", liked);
         likeLabel.textContent = liked ? "LIKED THIS GAME" : "LIKE THIS GAME";
-        showToast(liked ? "Thanks for liking Shadow Strike!" : "Your like was removed.");
+        showToast(liked ? "Thanks for liking Street Fighting!" : "Your like was removed.");
       });
 
       function showToast(msg) {
