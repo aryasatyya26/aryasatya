@@ -1596,7 +1596,7 @@ export default function App() {
             <p>Proof of thought, shaped into experiences.</p>
           </div>
           <div className="project-list">
-            {projects.map((item, index) => (
+            {projects.map((item) => (
               <article
                 id={item.gameTheme ? `project-${item.gameTheme}` : undefined}
                 className="project-card"
@@ -1617,7 +1617,6 @@ export default function App() {
                       decoding="async"
                     />
                   )}
-                  <span className="project-number">0{index + 1}</span>
                   <span className="project-open">
                     View case <Icon name="arrow" />
                   </span>

@@ -1101,7 +1101,7 @@
       .portfolio-return-link {
         position: fixed;
         z-index: 45;
-        top: 50%;
+        top: calc(env(safe-area-inset-top, 0px) + 10px);
         left: max(10px, calc((100vw - 520px) / 2 + 10px));
         display: grid;
         width: 40px;
@@ -1112,7 +1112,6 @@
         color: var(--cyan);
         background: rgba(8, 12, 20, 0.9);
         box-shadow: 0 0 16px rgba(56, 189, 248, 0.18);
-        transform: translateY(-50%);
         transition:
           transform 0.2s ease,
           box-shadow 0.2s ease;
@@ -1121,11 +1120,11 @@
       .portfolio-return-link:hover,
       .portfolio-return-link:focus-visible {
         box-shadow: 0 0 24px rgba(56, 189, 248, 0.4);
-        transform: translateY(-50%) scale(1.06);
+        transform: scale(1.06);
       }
 
       .portfolio-return-link:active {
-        transform: translateY(-50%) scale(0.94);
+        transform: scale(0.94);
       }
     </style>
   </head>
@@ -1533,7 +1532,7 @@
       <div id="toast-box">Thanks for liking Street Fighting!</div>
     </main>
 
-    <a class="portfolio-return-link" href="/#projects" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
+    <a class="portfolio-return-link" href="/#projects" target="_top" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M19 12H5"></path>
         <path d="m12 19-7-7 7-7"></path>
@@ -1541,11 +1540,6 @@
     </a>
 
     <script>
-      if (window.self !== window.top) {
-        const portfolioReturnLink = document.querySelector(".portfolio-return-link");
-        if (portfolioReturnLink) portfolioReturnLink.remove();
-      }
-
       /**
        * ============================================================================
        * STREET FIGHTING // AN EDITION
@@ -1753,28 +1747,28 @@
 
       const CHARACTERS = {
         arya: {
-          name: "ARYA", title: "Balanced Striker", style: "Muay Thai // Kickboxing",
+          name: "ARYA", title: "Balanced Striker", style: "Boxing // ",
           primary: "#38bdf8", accent: "#f59e0b", skin: "#d6a27c", hair: "#17151a",
           jacket: "#153b67", shirt: "#f8fafc", pants: "#2f63a1", shoes: "#f8fafc",
           speed: 86, power: 82, range: 78, special: "AN-WAVE",
           moveSpeed: 210, punchDamage: 9, kickDamage: 16, specialDamage: 24
         },
         raka: {
-          name: "RAKA", title: "Heavy Brawler", style: "Street Boxing // Slam",
+          name: "RAKA", title: "Heavy Brawler", style: "Kick Boxing // Wing Chun",
           primary: "#ef4444", accent: "#fb923c", skin: "#a96f51", hair: "#090a0c",
           jacket: "#17191f", shirt: "#4b5563", pants: "#25272b", shoes: "#111318",
           speed: 62, power: 96, range: 66, special: "CRIMSON BREAKER",
           moveSpeed: 165, punchDamage: 12, kickDamage: 19, specialDamage: 28
         },
         sora: {
-          name: "SORA", title: "Agile Acrobat", style: "Taekwondo // Jeet Kune Do",
+          name: "SORA", title: "Agile Acrobat", style: "Grappling // Sambo",
           primary: "#a855f7", accent: "#facc15", skin: "#d3a17e", hair: "#2b181b",
           jacket: "#7f1d1d", shirt: "#090b10", pants: "#aeb5bf", shoes: "#e9eef6",
           speed: 98, power: 68, range: 92, special: "PHANTOM SLAM",
           moveSpeed: 250, punchDamage: 8, kickDamage: 14, specialDamage: 21
         },
         damar: {
-          name: "DAMAR", title: "Tactical Counter", style: "Wing Chun // Grappling",
+          name: "DAMAR", title: "Tactical Counter", style: "Muaythai // Taekwondo",
           primary: "#10b981", accent: "#67e8f9", skin: "#be8060", hair: "#24211d",
           jacket: "#667144", shirt: "#171c22", pants: "#78a7ca", shoes: "#d4c5a3",
           speed: 78, power: 74, range: 88, special: "VORTEX PALM",
@@ -2125,9 +2119,9 @@
         const c = CHARACTERS[fighter.characterKey];
         if (type === "PUNCH") {
           return {
-            duration: c.name === "RAKA" ? 0.32 : c.name === "SORA" ? 0.32 : c.name === "DAMAR" ? 0.34 : 0.24,
-            activeStart: c.name === "SORA" ? 0.07 : c.name === "DAMAR" ? 0.08 : 0.07,
-            activeEnd: c.name === "RAKA" ? 0.21 : c.name === "SORA" ? 0.25 : c.name === "DAMAR" ? 0.27 : 0.16,
+            duration: c.name === "RAKA" ? 0.42 : c.name === "SORA" ? 0.32 : c.name === "DAMAR" ? 0.34 : 0.24,
+            activeStart: c.name === "RAKA" ? 0.1 : c.name === "SORA" ? 0.07 : c.name === "DAMAR" ? 0.08 : 0.07,
+            activeEnd: c.name === "RAKA" ? 0.3 : c.name === "SORA" ? 0.25 : c.name === "DAMAR" ? 0.27 : 0.16,
             range: c.name === "DAMAR" ? 82 : c.range * 0.82,
             damage: c.punchDamage,
             stun: c.name === "RAKA" ? 0.34 : 0.22,
@@ -2164,9 +2158,9 @@
         const c = CHARACTERS[fighter.characterKey];
         const profiles = {
           ARYA: { interval: 0.2, soundInterval: 0.1, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
-          RAKA: { interval: 0.64, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
+          RAKA: { interval: 0.48, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
           SORA: { interval: 3, range: 270, knockback: 360, stun: 0.72, callout: "PHANTOM SLAM!" },
-          DAMAR: { interval: 0.86, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // LEAP PUNCH!" },
+          DAMAR: { interval: 0.62, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // LEAP PUNCH!" },
         };
         const profile = profiles[c.name];
         const firstHitAt = profile.interval * 0.5;
