@@ -2909,8 +2909,8 @@
             y: shoulderY - 13,
           };
           const guardHand = isLead
-            ? { x: 34, y: shoulderY - 22 }
-            : { x: 24, y: shoulderY - 12 };
+            ? { x: 37, y: shoulderY - 18 }
+            : { x: 27, y: shoulderY - 8 };
           const punchHand = isLead
             ? c.name === "RAKA"
               ? { x: 39, y: shoulderY - 43 }
@@ -2979,7 +2979,7 @@
           }
 
           const elbow = {
-            x: (shoulder.x + hand.x) * 0.5 + (isLead ? -7 : 6),
+            x: (shoulder.x + hand.x) * 0.5 + (isLead ? -7 : -5),
             y: (shoulder.y + hand.y) * 0.5 + (punch && punchBlend > 0 ? 9 * (1 - punchBlend) : 6),
           };
           pctx.strokeStyle = c.jacket;
@@ -3008,18 +3008,14 @@
           pctx.translate(hand.x, hand.y);
           pctx.fillStyle = c.skin;
           pctx.beginPath();
-          pctx.ellipse(1, 0, 7.5, 5.6, -0.08, 0, Math.PI * 2);
-          pctx.fill();
-          pctx.fillStyle = "rgba(255,255,255,.12)";
-          pctx.beginPath();
-          pctx.ellipse(0, -2.6, 5.2, 2.1, -0.08, Math.PI, Math.PI * 2);
-          pctx.fill();
-          pctx.fillStyle = c.skin;
-          pctx.beginPath();
-          pctx.moveTo(2, 0);
-          pctx.quadraticCurveTo(6, -4, 7, -1);
-          pctx.quadraticCurveTo(7, 2, 4, 2.6);
-          pctx.quadraticCurveTo(2, 2, 2, 0);
+          pctx.moveTo(-8, 2);
+          pctx.quadraticCurveTo(-9, -1, -6, -4);
+          pctx.quadraticCurveTo(-4, -7, -2, -4);
+          pctx.quadraticCurveTo(0, -8, 2, -4);
+          pctx.quadraticCurveTo(5, -7, 7, -3);
+          pctx.quadraticCurveTo(10, 0, 6, 4);
+          pctx.quadraticCurveTo(0, 7, -6, 4);
+          pctx.closePath();
           pctx.fill();
           if (special && strike > 0.25) {
             pctx.shadowColor = c.accent;
