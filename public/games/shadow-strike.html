@@ -631,6 +631,158 @@
         pointer-events: none;
       }
 
+      #start-overlay {
+        justify-content: flex-start;
+        gap: 10px;
+        overflow-y: auto;
+        padding: 14px;
+      }
+
+      .select-preview {
+        position: relative;
+        height: 176px;
+        flex: 0 0 176px;
+        border: 1px solid rgba(56, 189, 248, 0.22);
+        border-radius: 18px;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 42%, rgba(56, 189, 248, 0.12), transparent 42%),
+          linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(5, 7, 11, 0.96));
+      }
+
+      #characterSelectCanvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .select-badge {
+        position: absolute;
+        top: 8px;
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: rgba(5, 7, 11, 0.78);
+        border: 1px solid var(--border-glass);
+      }
+
+      .select-badge.player { left: 8px; color: var(--cyan); }
+      .select-badge.cpu { right: 8px; color: var(--crimson); }
+
+      .select-title {
+        text-align: center;
+        font-family: var(--font-display);
+        font-size: 1.18rem;
+        font-style: italic;
+        letter-spacing: 0.08em;
+      }
+
+      .character-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 7px;
+      }
+
+      .character-card {
+        min-width: 0;
+        height: 68px;
+        border-radius: 12px;
+        border: 1px solid var(--border-glass);
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: 0.18s var(--spring-ease);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+      }
+
+      .character-card:active { transform: scale(0.94); }
+      .character-card.selected {
+        border-color: var(--cyan);
+        background: rgba(56, 189, 248, 0.12);
+        box-shadow: 0 0 16px rgba(56, 189, 248, 0.18);
+      }
+      .character-card.enemy-selected {
+        border-color: var(--crimson);
+        background: rgba(244, 63, 94, 0.12);
+      }
+
+      .character-card strong {
+        font-family: var(--font-display);
+        font-size: 0.78rem;
+      }
+
+      .character-card span {
+        font-family: var(--font-mono);
+        font-size: 0.48rem;
+        color: var(--text-secondary);
+      }
+
+      .fighter-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .detail-panel {
+        min-height: 96px;
+        border-radius: 14px;
+        border: 1px solid var(--border-glass);
+        background: rgba(255, 255, 255, 0.035);
+        padding: 9px 10px;
+      }
+
+      .detail-panel h3 {
+        font-family: var(--font-display);
+        font-size: 0.82rem;
+        margin-bottom: 6px;
+      }
+
+      .stat-row {
+        display: grid;
+        grid-template-columns: 42px 1fr 18px;
+        align-items: center;
+        gap: 5px;
+        font-family: var(--font-mono);
+        font-size: 0.48rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+      }
+
+      .stat-bar {
+        height: 4px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+      }
+
+      .stat-bar i {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--cyan);
+      }
+
+      .special-name {
+        color: var(--amber);
+        font-family: var(--font-mono);
+        font-size: 0.58rem;
+        font-weight: 800;
+        margin-top: 7px;
+      }
+
+      .opponent-tools {
+        display: grid;
+        grid-template-columns: 1fr 58px;
+        gap: 8px;
+      }
+
       .studio-pill {
         align-self: center;
         display: inline-flex;
@@ -1043,7 +1195,7 @@
           <!-- Player 1: Arya // AN-01 -->
           <div class="fighter-hud-col p1">
             <div class="fighter-meta">
-              <span style="color: var(--cyan)">ARYA // AN-01</span>
+              <span style="color: var(--cyan)">ARYA // P1</span>
               <div class="round-dots">
                 <span id="p1-dot-1" class="r-dot"></span>
                 <span id="p1-dot-2" class="r-dot"></span>
@@ -1064,10 +1216,10 @@
             <span id="hud-timer">60</span>
           </div>
 
-          <!-- Opponent: VIPER // CPU-X -->
+          <!-- Opponent: Selected AI Fighter -->
           <div class="fighter-hud-col p2">
             <div class="fighter-meta">
-              <span style="color: var(--crimson)">VIPER // CPU-X</span>
+              <span style="color: var(--crimson)">RAKA // CPU</span>
               <div class="round-dots">
                 <span id="p2-dot-1" class="r-dot"></span>
                 <span id="p2-dot-2" class="r-dot"></span>
@@ -1162,97 +1314,56 @@
           <svg width="16" height="16" viewBox="0 0 40 40" fill="none">
             <path d="M6 32L15 8H20L11 32H6Z" fill="#38BDF8" />
             <path d="M14 23H22L20 27H12L14 23Z" fill="#F8FAFC" />
-            <path
-              d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z"
-              fill="#F8FAFC"
-            />
+            <path d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z" fill="#F8FAFC" />
           </svg>
-          <span>ARYASATYA NARYAMA • COMBAT ENGINE</span>
+          <span>AN // CRAFTED BY ARYASATYA NARYAMA</span>
         </div>
 
-        <div class="hero-stack">
-          <div class="an-crest">
-            <svg width="42" height="42" viewBox="0 0 40 40" fill="none">
-              <path d="M6 32L15 8H20L11 32H6Z" fill="#38BDF8" />
-              <path d="M14 23H22L20 27H12L14 23Z" fill="#F8FAFC" />
-              <path
-                d="M21 32V8H25.5L32 22.5V8H36V32H31.5L25 17.5V32H21Z"
-                fill="#F8FAFC"
-              />
-              <circle cx="34" cy="6" r="2.5" fill="#F59E0B" />
-            </svg>
+        <div class="select-title">SELECT YOUR STREET FIGHTER <span style="display:block;font-size:.5rem;color:var(--text-secondary);margin-top:4px">Tap = pemain • tahan kartu = lawan AI</span></div>
+
+        <div class="select-preview">
+          <canvas id="characterSelectCanvas"></canvas>
+          <span class="select-badge player">PLAYER // P1</span>
+          <span class="select-badge cpu">AI // CPU</span>
+        </div>
+
+        <div class="character-grid" id="character-grid">
+          <button class="character-card selected" data-character="arya">
+            <strong>ARYA</strong><span>BALANCED</span>
+          </button>
+          <button class="character-card" data-character="raka">
+            <strong>RAKA</strong><span>HEAVY</span>
+          </button>
+          <button class="character-card" data-character="sora">
+            <strong>SORA</strong><span>AGILE</span>
+          </button>
+          <button class="character-card" data-character="damar">
+            <strong>DAMAR</strong><span>Tactical</span>
+          </button>
+        </div>
+
+        <div class="fighter-details">
+          <div class="detail-panel" id="player-details"></div>
+          <div class="detail-panel" id="enemy-details"></div>
+        </div>
+
+        <div class="opponent-tools">
+          <div class="fighter-details" style="grid-template-columns:1fr">
+            <button id="btn-random-opponent" class="btn-secondary-glass">🎲 ACAK LAWAN</button>
           </div>
-
-          <div>
-            <div class="edition-tag">AN EDITION // ARCADE DUEL</div>
-            <h1 class="game-title">STREET FIGHTING</h1>
-          </div>
-
-          <p class="game-subtitle">
-            Duel bela diri 1v1 <strong>Best-of-3 Rounds</strong>. Rangkai kombo
-            pukulan & tendangan untuk mengisi energi dan lepaskan gelombang
-            <strong>AN-WAVE</strong>!
-          </p>
-
-          <div class="versus-card">
-            <div class="fighter-card-item left">
-              <span
-                style="
-                  font-family: var(--font-mono);
-                  font-size: 0.6rem;
-                  color: var(--cyan);
-                "
-                >PLAYER 01</span
-              >
-              <strong
-                style="font-family: var(--font-display); font-size: 0.95rem"
-                >ARYA // AN-01</strong
-              >
-              <span style="font-size: 0.68rem; color: var(--text-secondary)"
-                >Boxing style (Sluger)</span
-              >
-            </div>
-            <div class="vs-badge">VS</div>
-            <div class="fighter-card-item right">
-              <span
-                style="
-                  font-family: var(--font-mono);
-                  font-size: 0.6rem;
-                  color: var(--crimson);
-                "
-                >PLAYER 02</span
-              >
-              <strong
-                style="font-family: var(--font-display); font-size: 0.95rem"
-                >VIPER</strong
-              >
-              <span style="font-size: 0.68rem; color: var(--text-secondary)"
-                >Mixed Martial Arts</span
-              >
-            </div>
+          <div class="btn-secondary-glass" style="cursor:default;text-align:center">
+            <strong id="start-wins-count" style="color:var(--amber)">0</strong>
+            <span style="display:block;font-size:.48rem">WINS</span>
           </div>
         </div>
 
         <div class="cta-group">
           <button id="btn-start-duel" class="btn-primary-fight">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            <span>MULAI PERTARUNGAN</span>
+            <span>START FIGHT</span>
           </button>
-          <div class="btn-dual-row">
-            <button id="btn-start-license" class="btn-secondary-glass">
-              <span>🛡️ SERTIFIKAT LISENSI AN</span>
-            </button>
-            <div class="btn-secondary-glass" style="cursor: default">
-              <span
-                >VICTORIES:
-                <strong id="start-wins-count" style="color: var(--amber)"
-                  >0</strong
-                ></span
-              >
-            </div>
-          </div>
+          <button id="btn-start-license" class="btn-secondary-glass">
+            <span>SERTIFIKAT LISENSI AN</span>
+          </button>
         </div>
       </div>
 
@@ -1612,6 +1723,40 @@
       const audio = new ANCombatAudio();
       const WINS_STORAGE_KEY = "shadow_strike_an_wins_v1";
 
+      const CHARACTERS = {
+        arya: {
+          name: "ARYA", title: "Balanced Striker", style: "Muay Thai // Kickboxing",
+          primary: "#38bdf8", accent: "#f59e0b", skin: "#d6a27c", hair: "#17151a",
+          jacket: "#153b67", shirt: "#f8fafc", pants: "#2f63a1", shoes: "#f8fafc",
+          speed: 86, power: 82, range: 78, special: "AN-WAVE",
+          moveSpeed: 210, punchDamage: 9, kickDamage: 16, specialDamage: 24
+        },
+        raka: {
+          name: "RAKA", title: "Heavy Brawler", style: "Street Boxing // Slam",
+          primary: "#ef4444", accent: "#fb923c", skin: "#a96f51", hair: "#090a0c",
+          jacket: "#17191f", shirt: "#4b5563", pants: "#25272b", shoes: "#111318",
+          speed: 62, power: 96, range: 66, special: "CRIMSON BREAKER",
+          moveSpeed: 165, punchDamage: 12, kickDamage: 19, specialDamage: 28
+        },
+        sora: {
+          name: "SORA", title: "Agile Acrobat", style: "Taekwondo // Jeet Kune Do",
+          primary: "#a855f7", accent: "#facc15", skin: "#d3a17e", hair: "#2b181b",
+          jacket: "#7f1d1d", shirt: "#090b10", pants: "#aeb5bf", shoes: "#e9eef6",
+          speed: 98, power: 68, range: 92, special: "PHANTOM FLASH",
+          moveSpeed: 250, punchDamage: 8, kickDamage: 14, specialDamage: 21
+        },
+        damar: {
+          name: "DAMAR", title: "Tactical Counter", style: "Wing Chun // Grappling",
+          primary: "#10b981", accent: "#67e8f9", skin: "#be8060", hair: "#24211d",
+          jacket: "#667144", shirt: "#171c22", pants: "#78a7ca", shoes: "#d4c5a3",
+          speed: 78, power: 74, range: 88, special: "VORTEX PALM",
+          moveSpeed: 190, punchDamage: 10, kickDamage: 15, specialDamage: 23
+        }
+      };
+
+      let selectedPlayerKey = "arya";
+      let selectedEnemyKey = "raka";
+
       let width = 0;
       let height = 0;
       let dpr = 1;
@@ -1647,10 +1792,12 @@
       };
 
       // Fighter Factory
-      function createFighter(isPlayer) {
+      function createFighter(isPlayer, characterKey = isPlayer ? selectedPlayerKey : selectedEnemyKey) {
+        const character = CHARACTERS[characterKey];
         return {
           isPlayer,
-          name: isPlayer ? "Arya" : "VIPER",
+          characterKey,
+          name: character.name,
           x: isPlayer ? 110 : 340,
           y: 0,
           vx: 0,
@@ -1669,8 +1816,8 @@
           squashY: 1,
           leanAngle: 0,
           animPhase: Math.random() * Math.PI * 2,
-          colorPrimary: isPlayer ? "#38bdf8" : "#f43f5e",
-          colorAccent: isPlayer ? "#f59e0b" : "#a855f7",
+          colorPrimary: character.primary,
+          colorAccent: character.accent,
           aiDecisionTimer: 0.35,
           aiDesiredAction: "IDLE",
         };
@@ -1786,8 +1933,8 @@
         match.hitStop = 0;
         match.timeScale = 1.0;
 
-        p1 = createFighter(true);
-        p2 = createFighter(false);
+        p1 = createFighter(true, selectedPlayerKey);
+        p2 = createFighter(false, selectedEnemyKey);
         p1.x = width * 0.26;
         p2.x = width * 0.74;
         p1.y = floorY;
@@ -1848,10 +1995,10 @@
 
         if (winner === "P1") {
           match.p1Wins++;
-          showAnnouncer("ARYA // AN-01", "K.O. VICTORY!", 1800);
+          showAnnouncer(`${CHARACTERS[selectedPlayerKey].name} // P1`, "K.O. VICTORY!", 1800);
         } else if (winner === "P2") {
           match.p2Wins++;
-          showAnnouncer("VIPER // CPU-X", "K.O. DEFEAT", 1800);
+          showAnnouncer(`${CHARACTERS[selectedEnemyKey].name} // CPU`, "K.O. DEFEAT", 1800);
         } else {
           showAnnouncer("TIME OVER", "DRAW ROUND", 1800);
         }
@@ -1885,11 +2032,11 @@
           ? "★ DOJO CHAMPION // AN VERIFIED ★"
           : "SIMULATION COMPLETE";
         document.getElementById("result-title").textContent = playerWon
-          ? "ARYA WINS!"
-          : "VIPER WINS";
+          ? `${CHARACTERS[selectedPlayerKey].name} WINS!`
+          : `${CHARACTERS[selectedEnemyKey].name} WINS`;
         document.getElementById("result-desc").textContent = playerWon
-          ? "Dominasi teknik bela diri & gelombang energi AN-WAVE berhasil menaklukkan arena!"
-          : "VIPER membaca celah pertahananmu. Gunakan Guard & AN-WAVE untuk membalikkan keadaan!";
+          ? `${CHARACTERS[selectedPlayerKey].name} menaklukkan arena dengan teknik ${CHARACTERS[selectedPlayerKey].style}!`
+          : `${CHARACTERS[selectedEnemyKey].name} membaca pertahananmu. Gunakan Guard & jurus spesial untuk membalikkan keadaan!`;
         document.getElementById("result-rounds").textContent =
           `${match.p1Wins} - ${match.p2Wins}`;
         document.getElementById("result-combo").textContent =
@@ -1932,6 +2079,44 @@
         },
       };
 
+      function getAttackSpec(fighter, type) {
+        const c = CHARACTERS[fighter.characterKey];
+        if (type === "PUNCH") {
+          return {
+            duration: c.name === "RAKA" ? 0.32 : c.name === "SORA" ? 0.18 : 0.24,
+            activeStart: c.name === "SORA" ? 0.04 : 0.07,
+            activeEnd: c.name === "RAKA" ? 0.21 : 0.16,
+            range: c.name === "DAMAR" ? 82 : c.range * 0.82,
+            damage: c.punchDamage,
+            stun: c.name === "RAKA" ? 0.34 : 0.22,
+            knockback: c.name === "RAKA" ? 210 : 140,
+            energyGain: 14
+          };
+        }
+        if (type === "KICK") {
+          return {
+            duration: c.name === "SORA" ? 0.44 : c.name === "RAKA" ? 0.46 : 0.38,
+            activeStart: c.name === "SORA" ? 0.12 : 0.12,
+            activeEnd: c.name === "SORA" ? 0.31 : 0.24,
+            range: c.name === "SORA" ? 112 : c.range,
+            damage: c.kickDamage,
+            stun: c.name === "RAKA" ? 0.44 : 0.34,
+            knockback: c.name === "DAMAR" ? 340 : c.name === "RAKA" ? 300 : 260,
+            energyGain: 20
+          };
+        }
+        return {
+          duration: c.name === "RAKA" ? 0.50 : c.name === "SORA" ? 0.32 : 0.42,
+          activeStart: 0.16,
+          activeEnd: c.name === "RAKA" ? 0.34 : 0.24,
+          range: c.name === "RAKA" ? 82 : c.name === "SORA" ? 130 : 60,
+          damage: c.specialDamage,
+          stun: c.name === "RAKA" ? 0.58 : 0.42,
+          knockback: c.name === "RAKA" ? 390 : 310,
+          energyCost: 50
+        };
+      }
+
       function triggerAttack(fighter, type) {
         if (match.phase !== "FIGHT") return;
         if (
@@ -1947,25 +2132,57 @@
           audio.playSpecialWave();
           fighter.squashX = 1.25;
           fighter.squashY = 0.82;
+          const c = CHARACTERS[fighter.characterKey];
+          const owner = fighter.isPlayer ? "P1" : "P2";
 
-          // Spawn glowing AN-WAVE energy projectile!
-          projectiles.push({
-            owner: fighter.isPlayer ? "P1" : "P2",
-            x: fighter.x + fighter.facing * 44,
-            y: fighter.y - 54,
-            vx: fighter.facing * 540,
-            radius: 24,
-            damage: 24,
-            color: fighter.colorPrimary,
-            life: 1.8,
-          });
+          if (c.name === "ARYA") {
+            projectiles.push({
+              owner, x: fighter.x + fighter.facing * 44, y: fighter.y - 54,
+              vx: fighter.facing * 540, radius: 24, damage: c.specialDamage,
+              color: "#38bdf8", life: 1.8
+            });
+            spawnCallout(fighter.x, fighter.y - 108, "AN-WAVE!", "#38bdf8");
+          } else if (c.name === "RAKA") {
+            fighter.vx = fighter.facing * 80;
+            spawnANShockwave(fighter.x + fighter.facing * 38, fighter.y - 34, "#ef4444", 115);
+            projectiles.push({
+              owner,
+              x: fighter.x + fighter.facing * 42,
+              y: fighter.y - 28,
+              vx: fighter.facing * 430,
+              radius: 38,
+              damage: c.specialDamage,
+              color: "#ef4444",
+              life: 0.72
+            });
+            spawnCallout(fighter.x, fighter.y - 108, "CRIMSON BREAKER!", "#ef4444");
+          } else if (c.name === "SORA") {
+            fighter.vx = fighter.facing * 620;
+            projectiles.push({
+              owner, x: fighter.x + fighter.facing * 48, y: fighter.y - 58,
+              vx: fighter.facing * 760, radius: 18, damage: c.specialDamage,
+              color: "#a855f7", life: 0.7
+            });
+            spawnCallout(fighter.x, fighter.y - 108, "PHANTOM FLASH!", "#facc15");
+          } else {
+            [-10, 18].forEach((offset) => projectiles.push({
+              owner,
+              x: fighter.x + fighter.facing * (44 + offset),
+              y: fighter.y - (54 + Math.abs(offset)),
+              vx: fighter.facing * 620,
+              radius: 15,
+              damage: c.specialDamage,
+              color: "#10b981",
+              life: 1.4
+            }));
+            spawnCallout(fighter.x, fighter.y - 108, "VORTEX PALM!", "#67e8f9");
+          }
           spawnANShockwave(
             fighter.x + fighter.facing * 35,
             fighter.y - 54,
-            fighter.colorPrimary,
+            c.primary,
             80,
           );
-          spawnCallout(fighter.x, fighter.y - 108, "AN-WAVE!", "#f59e0b");
         } else {
           audio.playWhiff(type === "KICK");
           fighter.vx = fighter.facing * (type === "KICK" ? 145 : 85);
@@ -1973,7 +2190,7 @@
           fighter.squashY = 0.86;
         }
 
-        const spec = ATTACK_SPECS[type];
+        const spec = getAttackSpec(fighter, type);
         fighter.state = "ATTACK";
         fighter.attackType = type;
         fighter.stateTimer = 0;
@@ -2029,7 +2246,9 @@
           }
 
           // Tactile Hit-Stop Freeze Frame & Camera Shake
-          match.hitStop = damage >= 15 ? 0.055 : 0.032;
+          match.hitStop =
+            attacker.characterKey === "raka" ? (damage >= 15 ? 0.085 : 0.048)
+            : damage >= 15 ? 0.055 : 0.032;
           triggerShake(damage >= 15 ? 0.22 : 0.12, damage >= 15 ? 10 : 5);
           audio.playHit(damage >= 15);
 
@@ -2119,7 +2338,7 @@
         callouts.push({ x, y, text, color, life: 1.0 });
       }
 
-      // --- 7. ADAPTIVE AI OPPONENT CONTROLLER ('VIPER // CPU-X') ---
+      // --- 7. ADAPTIVE AI OPPONENT CONTROLLER ---
       function updateAI(dt) {
         if (match.phase !== "FIGHT") return;
         if (
@@ -2174,10 +2393,10 @@
           p2.aiDesiredAction = "IDLE";
         } else if (p2.aiDesiredAction === "APPROACH") {
           p2.state = "WALK";
-          p2.vx = p2.facing * 185;
+          p2.vx = p2.facing * CHARACTERS[p2.characterKey].moveSpeed;
         } else if (p2.aiDesiredAction === "RETREAT") {
           p2.state = "WALK";
-          p2.vx = -p2.facing * 150;
+          p2.vx = -p2.facing * CHARACTERS[p2.characterKey].moveSpeed * 0.72;
         } else {
           p2.state = "IDLE";
           p2.vx = 0;
@@ -2224,10 +2443,10 @@
             p1.vx = 0;
           } else if (input.left && !input.right) {
             p1.state = "WALK";
-            p1.vx = -225;
+            p1.vx = -CHARACTERS[p1.characterKey].moveSpeed;
           } else if (input.right && !input.left) {
             p1.state = "WALK";
-            p1.vx = 225;
+            p1.vx = CHARACTERS[p1.characterKey].moveSpeed;
           } else {
             p1.state = "IDLE";
             p1.vx = 0;
@@ -2285,7 +2504,7 @@
           // State timers
           if (f.state === "ATTACK") {
             f.stateTimer += dt;
-            const spec = ATTACK_SPECS[f.attackType];
+            const spec = getAttackSpec(f, f.attackType);
             if (
               f.attackType !== "SPECIAL" &&
               !f.hasDealtHit &&
@@ -2472,6 +2691,163 @@
         }
       }
 
+      function drawCharacterPreview(characterKey, side = "p1") {
+        const preview = document.getElementById("characterSelectCanvas");
+        if (!preview) return;
+        const rect = preview.getBoundingClientRect();
+        preview.width = Math.max(1, rect.width * window.devicePixelRatio);
+        preview.height = Math.max(1, rect.height * window.devicePixelRatio);
+        const pctx = preview.getContext("2d");
+        pctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+        pctx.clearRect(0, 0, rect.width, rect.height);
+
+        const keys = [selectedPlayerKey, selectedEnemyKey];
+        keys.forEach((key, index) => {
+          const c = CHARACTERS[key];
+          const x = rect.width * (index === 0 ? 0.36 : 0.64);
+          const t = performance.now() * 0.002;
+          pctx.save();
+          pctx.translate(x, rect.height * 0.86);
+          pctx.scale(index === 0 ? 0.82 : -0.82, 0.82);
+          pctx.translate(0, Math.sin(t + index) * 2);
+          drawHumanBody(pctx, c, t + index, true);
+          pctx.restore();
+        });
+
+        requestAnimationFrame(() => drawCharacterPreview(characterKey));
+      }
+
+      function drawHumanBody(pctx, c, t, preview = false, fighter = null) {
+        const ground = 0;
+        const breathe = Math.sin(t * 2.2) * 2;
+        const backLeg = c.name === "RAKA" ? -14 : c.name === "SORA" ? -9 : -12;
+        const frontLeg = c.name === "SORA" ? 12 : 8;
+        pctx.lineCap = "round";
+        pctx.lineJoin = "round";
+
+        pctx.fillStyle = "rgba(0,0,0,.38)";
+        pctx.beginPath();
+        pctx.ellipse(0, ground + 3, 34, 7, 0, 0, Math.PI * 2);
+        pctx.fill();
+
+        // Jeans and sneakers
+        pctx.strokeStyle = c.pants;
+        pctx.lineWidth = c.name === "RAKA" ? 18 : 15;
+        pctx.beginPath();
+        pctx.moveTo(-7, -43); pctx.lineTo(backLeg, -18); pctx.lineTo(backLeg - 3, -5);
+        pctx.moveTo(7, -43); pctx.lineTo(frontLeg, -18); pctx.lineTo(frontLeg + 3, -5);
+        if (fighter && fighter.state === "ATTACK" && fighter.attackType === "KICK") {
+          if (c.name === "ARYA") {
+            pctx.moveTo(7, -43); pctx.lineTo(42, -36); pctx.lineTo(66, -56);
+          } else if (c.name === "RAKA") {
+            pctx.moveTo(7, -43); pctx.lineTo(22, -26); pctx.lineTo(46, -21);
+          } else if (c.name === "SORA") {
+            pctx.moveTo(7, -43); pctx.lineTo(52, -65); pctx.lineTo(68, -46);
+          } else {
+            pctx.moveTo(7, -43); pctx.lineTo(48, -38); pctx.lineTo(72, -38);
+          }
+        }
+        pctx.stroke();
+        pctx.strokeStyle = c.shoes;
+        pctx.lineWidth = 8;
+        pctx.beginPath();
+        pctx.moveTo(backLeg - 7, -4); pctx.lineTo(backLeg + 8, -4);
+        pctx.moveTo(frontLeg - 5, -4); pctx.lineTo(frontLeg + 12, -4);
+        pctx.stroke();
+
+        // Knees and hip joints
+        pctx.fillStyle = c.skin;
+        [[backLeg, -20], [frontLeg, -20], [0, -43]].forEach(([x, y]) => {
+          pctx.beginPath(); pctx.arc(x, y, 4.5, 0, Math.PI * 2); pctx.fill();
+        });
+
+        // Torso and open jacket
+        const shoulderY = -79 + breathe;
+        pctx.fillStyle = c.jacket;
+        pctx.beginPath();
+        pctx.moveTo(-20, -48); pctx.quadraticCurveTo(-23, shoulderY - 4, -17, shoulderY - 12);
+        pctx.lineTo(17, shoulderY - 12); pctx.quadraticCurveTo(23, shoulderY - 4, 20, -48);
+        pctx.closePath(); pctx.fill();
+        pctx.strokeStyle = "rgba(255,255,255,.16)";
+        pctx.lineWidth = 1.5;
+        pctx.stroke();
+        pctx.fillStyle = c.shirt;
+        pctx.beginPath();
+        pctx.moveTo(-7, -47); pctx.lineTo(-10, shoulderY - 12); pctx.lineTo(10, shoulderY - 12);
+        pctx.lineTo(7, -47); pctx.closePath(); pctx.fill();
+
+        // Neck and head
+        pctx.fillStyle = c.skin;
+        pctx.fillRect(-5, shoulderY - 18, 10, 12);
+        pctx.beginPath(); pctx.arc(0, shoulderY - 27, 12.5, 0, Math.PI * 2); pctx.fill();
+        pctx.fillStyle = c.hair;
+        pctx.beginPath();
+        if (c.name === "SORA") {
+          pctx.arc(0, shoulderY - 30, 13.5, Math.PI, Math.PI * 2);
+          pctx.lineTo(12, shoulderY - 20); pctx.lineTo(5, shoulderY - 27);
+        } else if (c.name === "RAKA") {
+          pctx.arc(0, shoulderY - 31, 13, Math.PI * 0.9, Math.PI * 2.1);
+        } else if (c.name === "DAMAR") {
+          pctx.moveTo(-12, shoulderY - 31); pctx.quadraticCurveTo(0, shoulderY - 44, 12, shoulderY - 31);
+          pctx.lineTo(8, shoulderY - 37); pctx.lineTo(-11, shoulderY - 36);
+        } else {
+          pctx.arc(0, shoulderY - 31, 13, Math.PI, Math.PI * 2);
+        }
+        pctx.closePath(); pctx.fill();
+
+        // Face expression
+        pctx.fillStyle = "#0f172a";
+        pctx.beginPath(); pctx.arc(-4, shoulderY - 28, 1.1, 0, Math.PI * 2); pctx.arc(4, shoulderY - 28, 1.1, 0, Math.PI * 2); pctx.fill();
+        pctx.strokeStyle = c.skin;
+        pctx.lineWidth = 1;
+        pctx.beginPath(); pctx.arc(0, shoulderY - 23, 4, 0.1, Math.PI - 0.1); pctx.stroke();
+
+        // Arms, elbows and open palms
+        pctx.strokeStyle = c.skin;
+        pctx.lineWidth = c.name === "RAKA" ? 11 : 9;
+        pctx.beginPath();
+        if (fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH") {
+          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-22, shoulderY + 8); pctx.lineTo(-30, shoulderY + 2);
+          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(38, shoulderY - 8); pctx.lineTo(58, shoulderY - 11);
+        } else if (fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL") {
+          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-4, shoulderY - 18); pctx.lineTo(34, shoulderY - 12);
+          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(8, shoulderY - 16); pctx.lineTo(42, shoulderY - 8);
+          pctx.shadowColor = c.primary; pctx.shadowBlur = 16;
+        } else if (fighter && fighter.state === "BLOCK") {
+          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-10, shoulderY - 26); pctx.lineTo(14, shoulderY - 34);
+          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(20, shoulderY - 24); pctx.lineTo(-6, shoulderY - 32);
+        } else {
+          pctx.moveTo(-16, shoulderY - 6); pctx.lineTo(-25, shoulderY + 10); pctx.lineTo(-34, shoulderY + 2);
+          pctx.moveTo(16, shoulderY - 6); pctx.lineTo(25, shoulderY + 6); pctx.lineTo(34, shoulderY - 8);
+        }
+        pctx.stroke();
+        pctx.shadowBlur = 0;
+        pctx.fillStyle = c.skin;
+        pctx.beginPath(); pctx.arc(-34, shoulderY + 2, 5, 0, Math.PI * 2); pctx.arc(34, shoulderY - 8, 5, 0, Math.PI * 2); pctx.fill();
+
+        // Open-palm fingers
+        if (fighter && fighter.state === "ATTACK" && fighter.attackType === "PUNCH") {
+          pctx.fillStyle = c.skin;
+          pctx.beginPath(); pctx.arc(58, shoulderY - 11, 7, 0, Math.PI * 2); pctx.fill();
+        } else if (fighter && fighter.state === "ATTACK" && fighter.attackType === "SPECIAL") {
+          pctx.fillStyle = c.accent;
+          pctx.shadowColor = c.accent; pctx.shadowBlur = 18;
+          pctx.beginPath(); pctx.arc(38, shoulderY - 12, 8, 0, Math.PI * 2); pctx.fill();
+          pctx.shadowBlur = 0;
+        } else {
+          pctx.strokeStyle = c.skin;
+          pctx.lineWidth = 2;
+          [-34, 34].forEach((hx) => {
+            for (let i = -2; i <= 2; i++) {
+              pctx.beginPath();
+              pctx.moveTo(hx, shoulderY + (hx < 0 ? 2 : -8));
+              pctx.lineTo(hx + i * 2.1, shoulderY + (hx < 0 ? 12 : -18) + Math.abs(i) * 1.5);
+              pctx.stroke();
+            }
+          });
+        }
+      }
+
       function drawFighter(f) {
         ctx.save();
         ctx.translate(f.x, f.y);
@@ -2493,6 +2869,10 @@
           ctx.rotate(-Math.PI * 0.44);
           ctx.translate(22, -12);
         }
+
+        drawHumanBody(ctx, CHARACTERS[f.characterKey], f.animPhase, false, f);
+        ctx.restore();
+        return;
 
         const breathe = Math.sin(f.animPhase) * 2.5;
         const walkBob =
@@ -2799,6 +3179,69 @@
         triggerAttack(p1, "SPECIAL");
       });
 
+      function statMarkup(character) {
+        return `
+          <h3>${character.name} // ${character.title}</h3>
+          ${[
+            ["SPD", character.speed],
+            ["PWR", character.power],
+            ["RNG", character.range],
+          ].map(([label, value]) => `
+            <div class="stat-row"><span>${label}</span><div class="stat-bar"><i style="width:${value}%"></i></div><strong>${value}</strong></div>
+          `).join("")}
+          <div class="special-name">SPECIAL // ${character.special}</div>
+        `;
+      }
+
+      function updateCharacterSelection() {
+        document.querySelectorAll(".character-card").forEach((card) => {
+          const key = card.dataset.character;
+          card.classList.toggle("selected", key === selectedPlayerKey);
+          card.classList.toggle("enemy-selected", key === selectedEnemyKey);
+        });
+        document.getElementById("player-details").innerHTML = statMarkup(CHARACTERS[selectedPlayerKey]);
+        document.getElementById("enemy-details").innerHTML = statMarkup(CHARACTERS[selectedEnemyKey]);
+        document.querySelector("#fight-hud .p1 .fighter-meta span").textContent =
+          `${CHARACTERS[selectedPlayerKey].name} // P1`;
+        document.querySelector("#fight-hud .p2 .fighter-meta span").textContent =
+          `${CHARACTERS[selectedEnemyKey].name} // CPU`;
+        ctrlSpecial.querySelector("span").textContent =
+          `⚡ ${CHARACTERS[selectedPlayerKey].special} SPECIAL`;
+      }
+
+      document.querySelectorAll(".character-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          if (card.dataset.longPressEnemy === "true") {
+            card.dataset.longPressEnemy = "false";
+            return;
+          }
+          selectedPlayerKey = card.dataset.character;
+          updateCharacterSelection();
+        });
+        let holdTimer = null;
+        card.addEventListener("pointerdown", () => {
+          holdTimer = setTimeout(() => {
+            selectedEnemyKey = card.dataset.character;
+            card.dataset.longPressEnemy = "true";
+            updateCharacterSelection();
+            showToast(`${CHARACTERS[selectedEnemyKey].name} dipilih sebagai lawan AI`);
+          }, 520);
+        });
+        card.addEventListener("pointerup", () => clearTimeout(holdTimer));
+        card.addEventListener("pointerleave", () => clearTimeout(holdTimer));
+        card.addEventListener("contextmenu", (event) => {
+          event.preventDefault();
+          selectedEnemyKey = card.dataset.character;
+          updateCharacterSelection();
+        });
+      });
+
+      document.getElementById("btn-random-opponent").addEventListener("click", () => {
+        const keys = Object.keys(CHARACTERS).filter((key) => key !== selectedEnemyKey);
+        selectedEnemyKey = keys[Math.floor(Math.random() * keys.length)];
+        updateCharacterSelection();
+      });
+
       // Desktop Keyboard Support
       window.addEventListener("keydown", (e) => {
         const k = e.key.toLowerCase();
@@ -2922,6 +3365,8 @@
 
       window.onload = () => {
         resizeCanvas();
+        updateCharacterSelection();
+        drawCharacterPreview(selectedPlayerKey);
         requestAnimationFrame(loop);
       };
     </script>
