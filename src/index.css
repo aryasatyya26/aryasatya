@@ -3946,9 +3946,20 @@ html.page-scrolled .music-player {
 
 @media (min-width: 981px) {
   .site-header .monogram {
-    position: absolute;
-    top: 12px;
-    left: 18px;
+    position: relative;
+    top: auto;
+    left: auto;
+    flex: 0 0 auto;
+    margin-right: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .site-header .monogram::before {
+    border: 0;
   }
 }
 
