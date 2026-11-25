@@ -965,10 +965,10 @@
       <!-- Arcade Duel HUD -->
       <header id="fight-hud">
         <div class="hud-bars-row">
-          <!-- Player 1: KAI // AN-01 -->
+          <!-- Player 1: Arya // AN-01 -->
           <div class="fighter-hud-col p1">
             <div class="fighter-meta">
-              <span style="color: var(--cyan)">KAI // AN-01</span>
+              <span style="color: var(--cyan)">ARYA // AN-01</span>
               <div class="round-dots">
                 <span id="p1-dot-1" class="r-dot"></span>
                 <span id="p1-dot-2" class="r-dot"></span>
@@ -1131,10 +1131,10 @@
               >
               <strong
                 style="font-family: var(--font-display); font-size: 0.95rem"
-                >KAI // AN-01</strong
+                >ARYA // AN-01</strong
               >
               <span style="font-size: 0.68rem; color: var(--text-secondary)"
-                >Kinetic Striker</span
+                >Boxing style (Sluger)</span
               >
             </div>
             <div class="vs-badge">VS</div>
@@ -1145,14 +1145,14 @@
                   font-size: 0.6rem;
                   color: var(--crimson);
                 "
-                >AI OPPONENT</span
+                >PLAYER 02</span
               >
               <strong
                 style="font-family: var(--font-display); font-size: 0.95rem"
-                >VIPER // CPU-X</strong
+                >VIPER</strong
               >
               <span style="font-size: 0.68rem; color: var(--text-secondary)"
-                >Adaptive Rival</span
+                >Mixed Martial Arts</span
               >
             </div>
           </div>
@@ -1190,7 +1190,7 @@
         <div class="hero-stack">
           <div id="result-sub" class="edition-tag">ARENA CHAMPION</div>
           <h2 id="result-title" class="game-title" style="font-size: 2.3rem">
-            KAI WINS!
+            ARYA WINS!
           </h2>
           <p id="result-desc" class="game-subtitle">
             Kemenangan mutlak di Night Rooftop Dojo dengan teknik kombo presisi.
@@ -1558,7 +1558,7 @@
       function createFighter(isPlayer) {
         return {
           isPlayer,
-          name: isPlayer ? "KAI" : "VIPER",
+          name: isPlayer ? "Arya" : "VIPER",
           x: isPlayer ? 110 : 340,
           y: 0,
           vx: 0,
@@ -1756,7 +1756,7 @@
 
         if (winner === "P1") {
           match.p1Wins++;
-          showAnnouncer("KAI // AN-01", "K.O. VICTORY!", 1800);
+          showAnnouncer("ARYA // AN-01", "K.O. VICTORY!", 1800);
         } else if (winner === "P2") {
           match.p2Wins++;
           showAnnouncer("VIPER // CPU-X", "K.O. DEFEAT", 1800);
@@ -1793,7 +1793,7 @@
           ? "★ DOJO CHAMPION // AN VERIFIED ★"
           : "SIMULATION COMPLETE";
         document.getElementById("result-title").textContent = playerWon
-          ? "KAI WINS!"
+          ? "ARYA WINS!"
           : "VIPER WINS";
         document.getElementById("result-desc").textContent = playerWon
           ? "Dominasi teknik bela diri & gelombang energi AN-WAVE berhasil menaklukkan arena!"
