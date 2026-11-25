@@ -2498,7 +2498,7 @@
           }
 
           // Arena boundaries
-          const padX = 38;
+          const padX = 60;
           f.x = Math.max(padX, Math.min(width - padX, f.x));
 
           // State timers
@@ -2548,8 +2548,8 @@
         ) {
           const overlap = (minSep - Math.abs(diffX)) * 0.5;
           const sign = diffX >= 0 ? 1 : -1;
-          p1.x = Math.max(38, p1.x - sign * overlap);
-          p2.x = Math.min(width - 38, p2.x + sign * overlap);
+          p1.x = Math.max(60, p1.x - sign * overlap);
+          p2.x = Math.min(width - 60, p2.x + sign * overlap);
         }
 
         // Update AN-WAVE Projectiles
@@ -2704,7 +2704,7 @@
         const keys = [selectedPlayerKey, selectedEnemyKey];
         keys.forEach((key, index) => {
           const c = CHARACTERS[key];
-          const x = rect.width * (index === 0 ? 0.36 : 0.64);
+          const x = rect.width * (index === 0 ? 0.3 : 0.7);
           const t = performance.now() * 0.002;
           pctx.save();
           pctx.translate(x, rect.height * 0.86);
@@ -2741,10 +2741,10 @@
 
         if (kick) {
           const kickPose = {
-            ARYA: { kneeX: 43, kneeY: -39, ankleX: 69, ankleY: -53 },
-            RAKA: { kneeX: 42, kneeY: -19, ankleX: 68, ankleY: -9 },
-            SORA: { kneeX: 47, kneeY: -51, ankleX: 79, ankleY: -73 },
-            DAMAR: { kneeX: 42, kneeY: -27, ankleX: 82, ankleY: -34 },
+            ARYA: { kneeX: 40, kneeY: -28, ankleX: 76, ankleY: -18 },
+            RAKA: { kneeX: 40, kneeY: -21, ankleX: 73, ankleY: -8 },
+            SORA: { kneeX: 46, kneeY: -31, ankleX: 82, ankleY: -17 },
+            DAMAR: { kneeX: 39, kneeY: -25, ankleX: 79, ankleY: -14 },
           }[c.name];
           frontKnee = {
             x: 22 + (kickPose.kneeX - 22) * strike,
@@ -2787,10 +2787,10 @@
             pctx.moveTo(24, -2);
             pctx.quadraticCurveTo(50, -9, 82, -2);
           } else if (c.name === "SORA") {
-            pctx.arc(30, -40, 54, -1.42, -0.3);
+            pctx.arc(25, -19, 50, -0.42, 0.08);
             pctx.stroke();
             pctx.beginPath();
-            pctx.arc(30, -40, 44, -1.32, -0.38);
+            pctx.arc(25, -19, 42, -0.34, 0.02);
           } else {
             pctx.moveTo(22, -29);
             pctx.lineTo(82, -34);
@@ -2830,30 +2830,48 @@
           pctx.fill();
 
           pctx.save();
-          pctx.translate(ankle.x, ankle.y);
-          const footAngle = kick && isFront
-            ? Math.atan2(ankle.y - knee.y, ankle.x - knee.x) * 0.45
-            : isFront ? -0.05 : Math.PI + 0.12;
+          pctx.translate(ankle.x, ankle.y + 1.5);
+          const isKickingLeg = kick && isFront;
+          const kickFootAngle = Math.atan2(
+            ankle.y - knee.y,
+            ankle.x - knee.x,
+          ) * 0.2;
+          const footAngle = isKickingLeg
+            ? Math.max(-0.1, Math.min(0.1, kickFootAngle))
+            : isFront ? -0.03 : Math.PI + 0.03;
           pctx.rotate(footAngle);
           pctx.fillStyle = c.shoes;
           pctx.beginPath();
           pctx.moveTo(-6, -4);
-          pctx.quadraticCurveTo(1, -8, 12, -4);
-          pctx.quadraticCurveTo(18, -1, 16, 2);
-          pctx.lineTo(-6, 2);
+          pctx.quadraticCurveTo(0, -7, 6, -4);
+          pctx.lineTo(14, -2);
+          pctx.quadraticCurveTo(19, 1, 15, 4);
+          pctx.lineTo(-6, 4);
           pctx.closePath();
           pctx.fill();
           pctx.strokeStyle = c.name === "ARYA" ? "#ef4444" : "rgba(255,255,255,.32)";
           pctx.lineWidth = 1.5;
           pctx.beginPath();
-          pctx.moveTo(-3, 1);
-          pctx.lineTo(13, 1);
+          pctx.moveTo(-4, 3);
+          pctx.lineTo(13, 3);
           pctx.stroke();
           pctx.restore();
         };
 
-        drawLeg(backHip, backKnee, backAnkle, false);
-        drawLeg(frontHip, frontKnee, frontAnkle, true);
+        if (kick) {
+          drawLeg(backHip, backKnee, backAnkle, false);
+          drawLeg(frontHip, frontKnee, frontAnkle, true);
+        } else {
+          drawLeg(backHip, backKnee, backAnkle, false);
+          drawLeg(frontHip, frontKnee, frontAnkle, true);
+        }
+
+        pctx.save();
+        if (kick) {
+          pctx.translate(-strike * 2.5, hipY);
+          pctx.rotate(-strike * 0.07);
+          pctx.translate(0, -hipY);
+        }
 
         // Hips, jacket and shirt follow the same small breathing/bounce motion.
         pctx.fillStyle = c.jacket;
@@ -2909,30 +2927,22 @@
             y: shoulderY - 13,
           };
           const guardHand = isLead
-            ? { x: 37, y: shoulderY - 13 }
-            : { x: 27, y: shoulderY - 9 };
+            ? { x: 47, y: shoulderY - 15 }
+            : { x: 21, y: shoulderY - 15 };
           const punchHand = isLead
             ? c.name === "RAKA"
-              ? { x: 39, y: shoulderY - 43 }
-              : { x: 58, y: shoulderY - (c.name === "SORA" ? 12 : 18) }
-            : c.name === "ARYA" || c.name === "DAMAR"
-              ? { x: 54, y: shoulderY - 17 }
-              : { x: 24, y: shoulderY - 12 };
-          let punchBlend = strike;
-          if (punch && c.name === "SORA" && isLead) {
-            punchBlend = Math.max(0, Math.sin(progress * Math.PI * 2));
-          } else if (punch && c.name === "DAMAR") {
-            punchBlend = Math.max(0, Math.sin(progress * Math.PI * 3));
-          } else if (punch && c.name === "ARYA") {
-            punchBlend = isLead
-              ? Math.max(0, Math.sin(progress * Math.PI * 2))
-              : Math.max(0, Math.sin((progress - 0.5) * Math.PI * 2));
-          }
+              ? { x: 43, y: shoulderY - 35 }
+              : { x: 63, y: shoulderY - 16 }
+            : { x: c.name === "SORA" ? 67 : 64, y: shoulderY - 10 };
+          const punchCycles = c.name === "SORA" || c.name === "DAMAR" ? 2 : 1;
+          const punchPhase =
+            progress * Math.PI * 2 * punchCycles + (isLead ? 0 : Math.PI);
+          const punchBlend = punch ? Math.max(0, Math.sin(punchPhase)) : strike;
           const specialHand = isLead
             ? { x: 38, y: shoulderY - 16 }
             : { x: 28, y: shoulderY - 10 };
           let hand = { ...guardHand };
-          if (punch && (isLead || c.name === "ARYA" || c.name === "DAMAR")) {
+          if (punch) {
             hand.x += (punchHand.x - hand.x) * punchBlend;
             hand.y += (punchHand.y - hand.y) * punchBlend;
           } else if (special) {
@@ -2945,8 +2955,7 @@
             hand.y += Math.sin(t * 1.7 + (isLead ? 0 : Math.PI)) * 2;
           }
 
-          if (punch && punchBlend > 0.18 &&
-            (isLead || c.name === "ARYA" || c.name === "DAMAR")) {
+          if (punch && punchBlend > 0.18) {
             pctx.save();
             pctx.globalAlpha = Math.min(0.85, punchBlend);
             pctx.strokeStyle = c.name === "ARYA" ? "#38bdf8"
@@ -3006,9 +3015,10 @@
 
           pctx.save();
           pctx.translate(hand.x, hand.y);
+          pctx.rotate(-0.12);
           pctx.fillStyle = c.skin;
           pctx.beginPath();
-          pctx.ellipse(1.5, 0, 9.5, 5.8, 0, 0, Math.PI * 2);
+          pctx.ellipse(0, 0, 6.4, 5.1, 0, 0, Math.PI * 2);
           pctx.fill();
           if (special && strike > 0.25) {
             pctx.shadowColor = c.accent;
@@ -3023,8 +3033,9 @@
           pctx.restore();
         };
 
-        drawArm(false);
         drawArm(true);
+        drawArm(false);
+        pctx.restore();
       }
 
       function drawFighter(f) {
