@@ -3955,19 +3955,22 @@ html.page-scrolled .music-player {
 @media (max-width: 680px) {
   .site-header {
     top: 52px;
-    left: 50%;
+    left: 10px;
+    right: 10px;
     display: block;
     width: min(380px, calc(100% - 20px));
+    margin-inline: auto;
     padding: 0;
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
     backdrop-filter: none;
+    transform: none;
   }
 
   html.page-scrolled .site-header {
-      top: 6px;
+    top: 6px;
     border-color: transparent;
     background: transparent;
     box-shadow: none;
@@ -4028,7 +4031,8 @@ html.page-scrolled .music-player {
     transition:
       background-color 0.35s ease,
       border-color 0.35s ease,
-      box-shadow 0.35s ease;
+      box-shadow 0.35s ease,
+      transform 0.35s ease;
   }
 
   html.page-scrolled .site-header nav {
@@ -4037,6 +4041,7 @@ html.page-scrolled .music-player {
     box-shadow:
       0 7px 22px rgba(0, 0, 0, 0.18),
       inset 0 0 12px rgba(196, 154, 86, 0.045);
+    transform: translateY(46px);
   }
 
   .site-header nav::before {
