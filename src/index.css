@@ -109,6 +109,14 @@
   pointer-events: none;
 }
 
+html.page-scrolling .world .cloud,
+html.page-scrolling .world .fog,
+html.page-scrolling .mobile-clouds .cloud,
+html.page-scrolling .mobile-clouds .fog,
+html.page-scrolling .horizon-cloud {
+  animation-play-state: paused;
+}
+
 .app::after {
   content: "";
   position: fixed;
@@ -1273,17 +1281,22 @@
   backdrop-filter: blur(16px);
   transform: translateX(-50%);
   transition:
-    top 0.35s ease,
     background-color 0.35s ease,
     border-color 0.35s ease,
     box-shadow 0.35s ease;
 }
 
 html.page-scrolled .site-header {
-  top: 6px;
   border-color: rgba(221, 230, 231, 0.1);
   background: rgba(6, 11, 16, 0.28);
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18);
+}
+
+html.page-scrolling .site-header nav::before,
+html.page-scrolling .site-header nav::after,
+html.page-scrolling .site-header nav button.active::after,
+html.page-scrolling .site-header .monogram::before {
+  animation-play-state: paused;
 }
 
 .monogram {
@@ -4033,13 +4046,6 @@ body.game-open {
     transform: none;
   }
 
-  html.page-scrolled .site-header {
-    top: 6px;
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-  }
-
   .site-header .monogram {
     position: fixed;
     top: 6px;
@@ -4095,8 +4101,7 @@ body.game-open {
     transition:
       background-color 0.35s ease,
       border-color 0.35s ease,
-      box-shadow 0.35s ease,
-      transform 0.35s ease;
+      box-shadow 0.35s ease;
   }
 
   html.page-scrolled .site-header nav {
@@ -4105,7 +4110,6 @@ body.game-open {
     box-shadow:
       0 7px 22px rgba(0, 0, 0, 0.18),
       inset 0 0 12px rgba(196, 154, 86, 0.045);
-    transform: translateY(46px);
   }
 
   .site-header nav::before {

@@ -1166,7 +1166,10 @@ export default function App() {
 
     const updateScroll = () => {
       scrollFrame = 0;
-      document.documentElement.classList.toggle("page-scrolled", window.scrollY > 24);
+      const root = document.documentElement;
+      if (window.scrollY > 32) root.classList.add("page-scrolled");
+      else if (window.scrollY < 16) root.classList.remove("page-scrolled");
+      root.classList.add("page-scrolling");
       const total = document.documentElement.scrollHeight - window.innerHeight;
       const progress = total > 0 ? window.scrollY / total : 0;
       const scrollDelta = window.scrollY - lastFlockScrollY;
@@ -1181,7 +1184,10 @@ export default function App() {
       );
       window.clearTimeout(flockResetTimer);
       flockResetTimer = window.setTimeout(
-        () => document.documentElement.style.setProperty("--flock-scroll-y", "0px"),
+        () => {
+          root.style.setProperty("--flock-scroll-y", "0px");
+          root.classList.remove("page-scrolling");
+        },
         180,
       );
     };
@@ -1271,7 +1277,7 @@ export default function App() {
       cancelAnimationFrame(scrollFrame);
       cancelAnimationFrame(pointerFrame);
       window.clearTimeout(flockResetTimer);
-      document.documentElement.classList.remove("page-scrolled");
+      document.documentElement.classList.remove("page-scrolled", "page-scrolling");
       if (navigationScrollTimeoutRef.current !== null) {
         window.clearTimeout(navigationScrollTimeoutRef.current);
       }
