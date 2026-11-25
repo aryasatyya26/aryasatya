@@ -1556,11 +1556,15 @@
        * ============================================================================
        */
 
-      // --- 1. PROCEDURAL MARTIAL ARTS WEB AUDIO SYNTHESIZER ---
+      // --- 1. WEB AUDIO MIXER ---
       class ANCombatAudio {
         constructor() {
           this.ctx = null;
           this.muted = false;
+          this.punchBufferPromise = null;
+          this.punchBus = null;
+          this.strikeCounters = { PUNCH: 0, KICK: 0, SPECIAL: 0 };
+          this.punchUrl = new URL("../punch.mp3", window.location.href);
         }
 
         init() {
@@ -1568,8 +1572,26 @@
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             this.ctx = new AudioCtx();
           }
+          if (!this.punchBus) {
+            const compressor = this.ctx.createDynamicsCompressor();
+            compressor.threshold.value = -6;
+            compressor.knee.value = 0;
+            compressor.ratio.value = 3;
+            compressor.attack.value = 0.003;
+            compressor.release.value = 0.15;
+            const outputGain = this.ctx.createGain();
+            outputGain.gain.value = 1.35;
+            compressor.connect(outputGain);
+            outputGain.connect(this.ctx.destination);
+            this.punchBus = compressor;
+          }
           if (this.ctx.state === "suspended") {
             this.ctx.resume();
+          }
+          if (!this.punchBufferPromise) {
+            this.loadPunchBuffer().catch((error) => {
+              console.error("Unable to load public/punch.mp3:", error);
+            });
           }
         }
 
@@ -1578,46 +1600,50 @@
           return this.muted;
         }
 
-        playWhiff(isHeavy = false) {
-          if (this.muted || !this.ctx) return;
-          try {
-            const now = this.ctx.currentTime;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = "triangle";
-            osc.frequency.setValueAtTime(isHeavy ? 190 : 280, now);
-            osc.frequency.exponentialRampToValueAtTime(75, now + 0.11);
-            gain.gain.setValueAtTime(0.11, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now);
-            osc.stop(now + 0.12);
-          } catch (e) {}
+        loadPunchBuffer() {
+          if (!this.punchBufferPromise) {
+            this.punchBufferPromise = fetch(this.punchUrl)
+              .then((response) => {
+                if (!response.ok) {
+                  throw new Error(`Failed to load punch.mp3 (${response.status})`);
+                }
+                return response.arrayBuffer();
+              })
+              .then((audioData) => this.ctx.decodeAudioData(audioData));
+          }
+          return this.punchBufferPromise;
         }
 
-        playHit(isHeavy = false) {
+        playStrike(type) {
           if (this.muted || !this.ctx) return;
-          try {
-            const now = this.ctx.currentTime;
-            const osc = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc.type = isHeavy ? "sawtooth" : "square";
-            osc.frequency.setValueAtTime(isHeavy ? 150 : 210, now);
-            osc.frequency.exponentialRampToValueAtTime(
-              38,
-              now + (isHeavy ? 0.22 : 0.14),
-            );
-            gain.gain.setValueAtTime(isHeavy ? 0.26 : 0.18, now);
-            gain.gain.exponentialRampToValueAtTime(
-              0.001,
-              now + (isHeavy ? 0.23 : 0.15),
-            );
-            osc.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now);
-            osc.stop(now + 0.24);
-          } catch (e) {}
+          const segments = [
+            { start: 0.12, end: 0.73 },
+            { start: 0.78, end: 1.15 },
+          ];
+          const segment = segments[this.strikeCounters[type] % segments.length];
+          this.strikeCounters[type] += 1;
+          this.loadPunchBuffer()
+            .then((buffer) => {
+              if (this.muted || !this.ctx) return;
+              const source = this.ctx.createBufferSource();
+              const boost = this.ctx.createGain();
+              boost.gain.value = 1.25;
+              source.buffer = buffer;
+              source.connect(boost);
+              boost.connect(this.punchBus);
+              source.onended = () => {
+                source.disconnect();
+                boost.disconnect();
+              };
+              source.start(
+                this.ctx.currentTime,
+                segment.start,
+                segment.end - segment.start,
+              );
+            })
+            .catch((error) => {
+              console.error("Unable to play public/punch.mp3:", error);
+            });
         }
 
         playBlock() {
@@ -1635,31 +1661,6 @@
             gain.connect(this.ctx.destination);
             osc.start(now);
             osc.stop(now + 0.1);
-          } catch (e) {}
-        }
-
-        playSpecialWave() {
-          if (this.muted || !this.ctx) return;
-          try {
-            const now = this.ctx.currentTime;
-            const osc1 = this.ctx.createOscillator();
-            const osc2 = this.ctx.createOscillator();
-            const gain = this.ctx.createGain();
-            osc1.type = "sawtooth";
-            osc2.type = "sine";
-            osc1.frequency.setValueAtTime(240, now);
-            osc1.frequency.exponentialRampToValueAtTime(760, now + 0.28);
-            osc2.frequency.setValueAtTime(480, now);
-            osc2.frequency.exponentialRampToValueAtTime(1120, now + 0.28);
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
-            osc1.connect(gain);
-            osc2.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc1.start(now);
-            osc2.start(now);
-            osc1.stop(now + 0.31);
-            osc2.stop(now + 0.31);
           } catch (e) {}
         }
 
@@ -1810,6 +1811,8 @@
           stateTimer: 0,
           stateDuration: 0,
           specialNextHitAt: 0,
+          specialNextSoundAt: 0,
+          attackSoundIndex: 0,
           hasDealtHit: false,
           comboCount: 0,
           comboResetTimer: 0,
@@ -2122,17 +2125,20 @@
       function getSpecialProfile(fighter) {
         const c = CHARACTERS[fighter.characterKey];
         const profiles = {
-          ARYA: { interval: 0.32, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
+          ARYA: { interval: 0.32, soundInterval: 0.16, range: 88, knockback: 48, stun: 0.12, callout: "AN-WAVE // RAPID STRIKES!" },
           RAKA: { interval: 0.64, range: 132, knockback: 105, stun: 0.2, callout: "CRIMSON BREAKER // LEAP KICKS!" },
           SORA: { interval: 3, range: 250, knockback: 420, stun: 0.3, callout: "PHANTOM FLASH // LONG REACH!" },
           DAMAR: { interval: 0.4, range: 104, knockback: 58, stun: 0.12, callout: "VORTEX PALM // KICK FLURRY!" },
         };
         const profile = profiles[c.name];
         const firstHitAt = profile.interval * 0.5;
+        const soundInterval = profile.soundInterval || profile.interval;
         const hitCount = Math.floor((3 - firstHitAt) / profile.interval) + 1;
         return {
           ...profile,
           firstHitAt,
+          firstSoundAt: c.name === "ARYA" ? 0.04 : firstHitAt,
+          soundInterval,
           damagePerHit: c.specialDamage / hitCount,
         };
       }
@@ -2149,10 +2155,10 @@
         if (type === "SPECIAL") {
           if (fighter.energy < 50) return;
           fighter.energy -= 50;
-          audio.playSpecialWave();
           const c = CHARACTERS[fighter.characterKey];
           const profile = getSpecialProfile(fighter);
           fighter.specialNextHitAt = profile.firstHitAt;
+          fighter.specialNextSoundAt = profile.firstSoundAt;
           if (c.name === "RAKA") fighter.vx = fighter.facing * 105;
           spawnCallout(fighter.x, fighter.y - 108, profile.callout, c.primary);
           spawnANShockwave(
@@ -2162,7 +2168,6 @@
             80,
           );
         } else {
-          audio.playWhiff(type === "KICK");
           fighter.vx = fighter.facing * (type === "KICK" ? 145 : 85);
           fighter.squashX = 1.18;
           fighter.squashY = 0.86;
@@ -2173,6 +2178,7 @@
         fighter.attackType = type;
         fighter.stateTimer = 0;
         fighter.stateDuration = spec.duration;
+        fighter.attackSoundIndex = 0;
         fighter.hasDealtHit = false;
       }
 
@@ -2232,8 +2238,6 @@
             isSpecial ? 0.16 : damage >= 15 ? 0.22 : 0.12,
             isSpecial ? 9 : damage >= 15 ? 10 : 5,
           );
-          audio.playHit(isSpecial || damage >= 15);
-
           const hitX = (attacker.x + defender.x) * 0.5;
           const hitY = defender.y - 56;
           spawnParticles(
@@ -2503,6 +2507,13 @@
             if (f.attackType === "SPECIAL") {
               const profile = getSpecialProfile(f);
               while (
+                f.stateTimer >= f.specialNextSoundAt &&
+                f.specialNextSoundAt <= f.stateDuration
+              ) {
+                audio.playStrike("SPECIAL");
+                f.specialNextSoundAt += profile.soundInterval;
+              }
+              while (
                 f.stateTimer >= f.specialNextHitAt &&
                 f.specialNextHitAt <= f.stateDuration &&
                 match.phase === "FIGHT"
@@ -2522,24 +2533,44 @@
                 }
                 f.specialNextHitAt += profile.interval;
               }
-            } else if (
-              !f.hasDealtHit &&
-              f.stateTimer >= spec.activeStart &&
-              f.stateTimer <= spec.activeEnd
-            ) {
-              const target = f.isPlayer ? p2 : p1;
-              const dist = Math.abs(target.x - f.x);
-              const inFront = (target.x - f.x) * f.facing >= -12;
-              if (dist <= spec.range && inFront) {
-                f.hasDealtHit = true;
-                applyStrikeHit(
-                  f,
-                  target,
-                  spec.damage,
-                  spec.knockback,
-                  spec.stun,
-                  false,
-                );
+            } else {
+              const isRapidPunch = f.attackType === "PUNCH";
+              const soundTimes = isRapidPunch
+                ? [
+                    spec.duration * 0.08,
+                    spec.duration *
+                      (f.characterKey === "sora" || f.characterKey === "damar"
+                        ? 0.3
+                        : 0.58),
+                  ]
+                : [spec.activeStart];
+              while (
+                f.attackSoundIndex < soundTimes.length &&
+                f.stateTimer >= soundTimes[f.attackSoundIndex]
+              ) {
+                audio.playStrike(f.attackType);
+                f.attackSoundIndex += 1;
+              }
+
+              if (
+                !f.hasDealtHit &&
+                f.stateTimer >= spec.activeStart &&
+                f.stateTimer <= spec.activeEnd
+              ) {
+                const target = f.isPlayer ? p2 : p1;
+                const dist = Math.abs(target.x - f.x);
+                const inFront = (target.x - f.x) * f.facing >= -12;
+                if (dist <= spec.range && inFront) {
+                  f.hasDealtHit = true;
+                  applyStrikeHit(
+                    f,
+                    target,
+                    spec.damage,
+                    spec.knockback,
+                    spec.stun,
+                    false,
+                  );
+                }
               }
             }
             if (f.stateTimer >= f.stateDuration) {
