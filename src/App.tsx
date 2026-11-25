@@ -21,7 +21,7 @@ const projects: Project[] = [
     description:
       "A three-lane reflex challenge set in an industrial cyber world. Dodge hazards, read the rhythm, and push your run as far as you can.",
     technologies: ["HTML5 Canvas", "Web Audio API", "TypeScript"],
-    role: "Game design & development",
+    role: "Endless Runner",
     gameUrl: "/games/neon-dash.html",
     gameTheme: "neon",
   },
@@ -31,7 +31,7 @@ const projects: Project[] = [
     description:
       "An arcade fighting game inspired by classic versus fighters, with punchy hit-stop, responsive controls, and a smooth interface.",
     technologies: ["HTML5 Canvas", "Physics Engine", "Web Audio API"],
-    role: "Game design & development",
+    role: "Fighting 1v1",
     gameUrl: "/games/shadow-strike.html",
     gameTheme: "shadow",
   },
@@ -776,8 +776,10 @@ function ProjectModal({
               <strong>{project.role}</strong>
             </div>
             <div>
-              <span>Technology</span>
-              <strong>{project.technologies.join(" · ")}</strong>
+              <span>{project.gameUrl ? "Developer" : "Technology"}</span>
+              <strong>
+                {project.gameUrl ? "Aryasatya Naryama" : project.technologies.join(" · ")}
+              </strong>
             </div>
           </div>
           {!project.gameUrl && (
@@ -787,7 +789,7 @@ function ProjectModal({
           )}
           {project.gameUrl ? (
             <a href={project.gameUrl} className="game-start-button">
-              start games arya <Icon name="arrow" size={14} />
+              Start Arya's Game <Icon name="arrow" size={14} />
             </a>
           ) : project.live ? (
             <a href={project.live} target="_blank" rel="noreferrer" className="text-link">
@@ -1411,7 +1413,7 @@ export default function App() {
             </div>
           </div>
           <div className="hero-game-launcher">
-            <p>start Arya Games!</p>
+            <p>Start Arya's Games</p>
             <button onClick={() => openGameProject(projects[0])}>neon-dash.</button>
             <button onClick={() => openGameProject(projects[1])}>shadow-strike</button>
           </div>
