@@ -627,9 +627,8 @@
 
         <!-- Bottom Subtle Lane Indicators -->
         <div id="touch-hints">
-            <span>◄ TAP KIRI</span>
-            <span>TAP TENGAH</span>
-            <span>TAP KANAN ►</span>
+            <span>◄ GESER KIRI</span>
+            <span>GESER KANAN ►</span>
         </div>
 
         <!-- START SCREEN OVERLAY -->
@@ -670,7 +669,7 @@
                     <span>MULAI PROTOKOL</span>
                 </button>
                 <div class="dev-footer">
-                    KONTROL: TAP JALUR / GESER (SWIPE) / PANAH KEYBOARD
+                    KONTROL: GESER (SWIPE) / PANAH KEYBOARD
                 </div>
             </div>
         </section>
@@ -1051,47 +1050,53 @@
             setLane(player.lane + delta);
         }
 
-        // Touch Handling: Supports BOTH instant tap on lane AND left/right swipe
+        // Touch controls respond to horizontal swipes; taps do not change lanes.
         let touchStartX = 0;
         let touchStartY = 0;
-        let touchMoved = false;
+        let touchStartLane = 1;
+        let activeTouchId = null;
 
         shell.addEventListener('touchstart', (e) => {
             if (state.status !== 'PLAYING') return;
             if (e.target.closest('button')) return;
-            const touch = e.touches[0];
+            if (e.touches.length !== 1) {
+                activeTouchId = null;
+                return;
+            }
+            const touch = e.changedTouches[0];
+            activeTouchId = touch.identifier;
             touchStartX = touch.clientX;
             touchStartY = touch.clientY;
-            touchMoved = false;
+            touchStartLane = player.lane;
         }, { passive: true });
 
         shell.addEventListener('touchmove', (e) => {
-            if (state.status !== 'PLAYING' || touchMoved) return;
-            const touch = e.touches[0];
+            if (state.status !== 'PLAYING' || activeTouchId === null) return;
+            const touch = Array.from(e.touches).find((item) => item.identifier === activeTouchId);
+            if (!touch) return;
             const dx = touch.clientX - touchStartX;
             const dy = touch.clientY - touchStartY;
 
-            // Detect horizontal swipe
-            if (Math.abs(dx) > 26 && Math.abs(dx) > Math.abs(dy)) {
-                moveLane(dx > 0 ? 1 : -1);
-                touchMoved = true;
-            }
+            if (Math.abs(dx) <= Math.abs(dy)) return;
+            const rect = shell.getBoundingClientRect();
+            const distancePerLane = Math.max(32, (rect.width / LANE_COUNT) * 0.55);
+            const laneDelta = Math.trunc(dx / distancePerLane);
+            setLane(touchStartLane + laneDelta);
         }, { passive: true });
 
         shell.addEventListener('touchend', (e) => {
-            if (state.status !== 'PLAYING') return;
-            if (e.target.closest('button')) return;
-            // If user tapped without swiping, move directly to the tapped lane
-            if (!touchMoved) {
-                const rect = shell.getBoundingClientRect();
-                const relX = touchStartX - rect.left;
-                const tappedLane = Math.floor((relX / rect.width) * LANE_COUNT);
-                setLane(tappedLane);
+            if (Array.from(e.changedTouches).some((touch) => touch.identifier === activeTouchId)) {
+                activeTouchId = null;
             }
         });
 
-        // Mouse Click support on Canvas for Desktop testing
-        canvas.addEventListener('mousedown', (e) => {
+        shell.addEventListener('touchcancel', () => {
+            activeTouchId = null;
+        });
+
+        // Mouse input remains available for desktop testing.
+        canvas.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse') return;
             if (state.status !== 'PLAYING') return;
             const rect = shell.getBoundingClientRect();
             const relX = e.clientX - rect.left;
