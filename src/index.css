@@ -4509,6 +4509,13 @@ html.page-scrolled .music-player {
   }
 }
 
+@media (min-width: 681px) and (max-width: 760px) {
+  .hero-game-launcher {
+    top: clamp(170px, 17vh, 250px);
+    left: clamp(24px, 5vw, 36px);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
