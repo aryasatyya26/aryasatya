@@ -2909,8 +2909,8 @@
             y: shoulderY - 13,
           };
           const guardHand = isLead
-            ? { x: 37, y: shoulderY - 18 }
-            : { x: 27, y: shoulderY - 8 };
+            ? { x: 37, y: shoulderY - 13 }
+            : { x: 27, y: shoulderY - 9 };
           const punchHand = isLead
             ? c.name === "RAKA"
               ? { x: 39, y: shoulderY - 43 }
@@ -2929,8 +2929,8 @@
               : Math.max(0, Math.sin((progress - 0.5) * Math.PI * 2));
           }
           const specialHand = isLead
-            ? { x: 38, y: shoulderY - 31 }
-            : { x: 28, y: shoulderY - 24 };
+            ? { x: 38, y: shoulderY - 16 }
+            : { x: 28, y: shoulderY - 10 };
           let hand = { ...guardHand };
           if (punch && (isLead || c.name === "ARYA" || c.name === "DAMAR")) {
             hand.x += (punchHand.x - hand.x) * punchBlend;
@@ -2940,7 +2940,7 @@
             hand.y += (specialHand.y - hand.y) * strike;
           } else if (fighter && fighter.state === "BLOCK") {
             hand.x += (isLead ? 6 : 12);
-            hand.y -= 5;
+            hand.y -= 2;
           } else if (walking) {
             hand.y += Math.sin(t * 1.7 + (isLead ? 0 : Math.PI)) * 2;
           }
@@ -2980,7 +2980,7 @@
 
           const elbow = {
             x: (shoulder.x + hand.x) * 0.5 + (isLead ? -7 : -5),
-            y: (shoulder.y + hand.y) * 0.5 + (punch && punchBlend > 0 ? 9 * (1 - punchBlend) : 6),
+            y: (shoulder.y + hand.y) * 0.5 + 2,
           };
           pctx.strokeStyle = c.jacket;
           pctx.lineWidth = c.name === "RAKA" ? 12 : 10;
@@ -3008,14 +3008,7 @@
           pctx.translate(hand.x, hand.y);
           pctx.fillStyle = c.skin;
           pctx.beginPath();
-          pctx.moveTo(-8, 2);
-          pctx.quadraticCurveTo(-9, -1, -6, -4);
-          pctx.quadraticCurveTo(-4, -7, -2, -4);
-          pctx.quadraticCurveTo(0, -8, 2, -4);
-          pctx.quadraticCurveTo(5, -7, 7, -3);
-          pctx.quadraticCurveTo(10, 0, 6, 4);
-          pctx.quadraticCurveTo(0, 7, -6, 4);
-          pctx.closePath();
+          pctx.ellipse(1.5, 0, 9.5, 5.8, 0, 0, Math.PI * 2);
           pctx.fill();
           if (special && strike > 0.25) {
             pctx.shadowColor = c.accent;
