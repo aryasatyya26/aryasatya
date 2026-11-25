@@ -1514,6 +1514,8 @@ section {
 
 .hero-greeting-stage {
   position: relative;
+  --hero-greeting-offset: clamp(-125px, -15vh, -90px);
+  --hero-greeting-size: clamp(3.2rem, 8.4vw, 8rem);
 }
 
 .hero-greeting {
@@ -1522,12 +1524,12 @@ section {
   max-width: 100%;
   position: relative;
   z-index: 4;
-  top: clamp(-125px, -15vh, -90px);
+  top: var(--hero-greeting-offset);
   left: clamp(130px, 18vw, 270px);
   margin-bottom: clamp(18px, 2.2vw, 30px);
   color: var(--amber);
   font-family: "Italiana", serif;
-  font-size: clamp(3.2rem, 8.4vw, 8rem);
+  font-size: var(--hero-greeting-size);
   line-height: 0.9;
   letter-spacing: -0.045em;
   text-shadow:
@@ -1688,11 +1690,27 @@ section {
 .hero-game-launcher {
   position: absolute;
   z-index: 5;
-  top: clamp(250px, 34vh, 360px);
-  left: clamp(24px, 5vw, 76px);
+  top: calc(var(--hero-greeting-offset) + var(--hero-greeting-size));
+  left: 0;
   display: grid;
   width: min(185px, 38vw);
   gap: 9px;
+}
+
+@media (min-width: 1200px) and (max-height: 760px) {
+  .hero-game-launcher {
+    top: calc(var(--hero-greeting-offset) + var(--hero-greeting-size) - 8px);
+  }
+}
+
+@media (max-width: 680px) and (max-height: 650px) {
+  .hero-coordinates {
+    display: none;
+  }
+
+  .hero-game-launcher {
+    top: calc(var(--hero-greeting-offset) + var(--hero-greeting-size) + 2px);
+  }
 }
 
 .hero-game-launcher p {
@@ -4247,22 +4265,24 @@ html.page-scrolled .music-player {
     --hero-portrait-height: clamp(195px, 53.66vw, 342px);
   }
 
+  .hero-greeting-stage {
+    --hero-greeting-offset: clamp(-160px, -19vh, -100px);
+    --hero-greeting-size: clamp(2.5rem, 12vw, 3.8rem);
+  }
+
   .hero h1 {
     font-size: clamp(3.6rem, 19vw, 6.8rem);
     line-height: 0.74;
   }
 
   .hero-greeting {
-    top: clamp(-160px, -19vh, -100px);
     left: clamp(68px, 22vw, 100px);
     margin-bottom: 12px;
-    font-size: clamp(2.5rem, 12vw, 3.8rem);
     transform: rotate(-4deg);
   }
 
   .hero-game-launcher {
-    top: calc(12% + var(--hero-portrait-height) + 8px);
-    left: 20px;
+    left: 0;
     width: min(150px, 43vw);
     gap: 5px;
   }
@@ -4506,13 +4526,6 @@ html.page-scrolled .music-player {
 
   .modal-copy {
     padding: 32px 24px;
-  }
-}
-
-@media (min-width: 681px) and (max-width: 760px) {
-  .hero-game-launcher {
-    top: clamp(170px, 17vh, 250px);
-    left: clamp(24px, 5vw, 36px);
   }
 }
 

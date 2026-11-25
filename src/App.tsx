@@ -1391,6 +1391,11 @@ export default function App() {
           <div className="hero-content reveal">
             <div className="hero-greeting-stage">
               <p className="hero-greeting">Haii</p>
+              <div className="hero-game-launcher">
+                <p>Start Arya's Games</p>
+                <button onClick={() => openGameProject(projects[0])}>neon-dash.</button>
+                <button onClick={() => openGameProject(projects[1])}>shadow-strike</button>
+              </div>
             </div>
             <p className="eyebrow">Data analyst · Web developer</p>
             <h1>
@@ -1411,11 +1416,6 @@ export default function App() {
                 </button>
               </div>
             </div>
-          </div>
-          <div className="hero-game-launcher">
-            <p>Start Arya's Games</p>
-            <button onClick={() => openGameProject(projects[0])}>neon-dash.</button>
-            <button onClick={() => openGameProject(projects[1])}>shadow-strike</button>
           </div>
           <div className="hero-portrait">
             <img
