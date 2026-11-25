@@ -1273,12 +1273,14 @@
   backdrop-filter: blur(16px);
   transform: translateX(-50%);
   transition:
+    top 0.35s ease,
     background-color 0.35s ease,
     border-color 0.35s ease,
     box-shadow 0.35s ease;
 }
 
 html.page-scrolled .site-header {
+  top: 6px;
   border-color: rgba(221, 230, 231, 0.1);
   background: rgba(6, 11, 16, 0.36);
   box-shadow: 0 10px 34px rgba(0, 0, 0, 0.18);
@@ -1309,21 +1311,21 @@ html.page-scrolled .site-header {
   content: "";
   position: absolute;
   z-index: -1;
-  inset: -4px -6px;
+  inset: -7px -10px;
   border-radius: inherit;
-  border: 1px solid rgba(245, 103, 73, 0.44);
-  background:
-    radial-gradient(ellipse at 18% 0%, rgba(255, 216, 137, 0.14), transparent 58%),
-    radial-gradient(ellipse at 86% 100%, rgba(211, 47, 42, 0.16), transparent 64%);
-  box-shadow:
-    0 0 12px rgba(239, 76, 52, 0.2),
-    inset 0 0 12px rgba(255, 194, 111, 0.06);
-  opacity: 0.86;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 219, 126, 0.56) 0%,
+    rgba(245, 128, 57, 0.38) 34%,
+    rgba(195, 59, 44, 0.28) 62%,
+    transparent 84%
+  );
+  filter: blur(7px);
+  opacity: 0.72;
+  transform: scale(0.92);
   pointer-events: none;
   animation: navFireGlow 1.8s ease-in-out infinite;
-  transition:
-    border-color 0.35s ease,
-    box-shadow 0.35s ease;
+  transition: opacity 0.16s ease, transform 0.2s ease;
 }
 
 .monogram:hover,
@@ -1334,12 +1336,8 @@ html.page-scrolled .site-header {
 .monogram:hover::before,
 .monogram:focus-visible::before,
 .monogram:active::before {
-  border-color: rgba(255, 214, 128, 0.72);
-  box-shadow:
-    0 0 16px rgba(239, 76, 52, 0.32),
-    0 0 22px rgba(255, 200, 104, 0.18),
-    inset 0 0 14px rgba(255, 194, 111, 0.1);
-  animation-duration: 1.6s;
+  opacity: 1;
+  transform: scale(1.06);
 }
 
 .monogram-symbol {
@@ -3952,6 +3950,7 @@ html.page-scrolled .music-player {
   }
 
   html.page-scrolled .site-header {
+      top: 6px;
     border-color: transparent;
     background: transparent;
     box-shadow: none;
