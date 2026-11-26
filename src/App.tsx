@@ -11,10 +11,20 @@ type Project = {
   role: string;
   live?: string;
   gameUrl?: string;
-  gameTheme?: "serene" | "neon" | "shadow" | "cat";
+  gameTheme?: "knowledge" | "serene" | "neon" | "shadow" | "cat";
 };
 
 const projects: Project[] = [
+  {
+    title: "Knowledge Odyssey",
+    label: "Fantasy learning adventure",
+    description:
+      "Explore six knowledge realms, challenge wise guardians, and solve ancient puzzles in a story-rich learning adventure.",
+    technologies: ["React", "Tailwind CSS", "IndexedDB"],
+    role: "Educational Adventure Game",
+    gameUrl: "/knowledge-odyssey.html",
+    gameTheme: "knowledge",
+  },
   {
     title: "Serene Waters",
     label: "Cozy fishing adventure",
@@ -850,6 +860,7 @@ function GameOverlay({
   const isStreetFightingGame = gamePath.endsWith("/games/shadow-strike.html");
   const isMyLittleCatGame = gamePath.endsWith("/games/my-little-cat.html");
   const isSereneWatersGame = gamePath.endsWith("/games/serene-waters.html");
+  const isKnowledgeOdysseyGame = gamePath.endsWith("/knowledge-odyssey.html");
   const gameFrameRef = useRef<HTMLIFrameElement>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -881,6 +892,7 @@ function GameOverlay({
     isStreetFightingGame && "game-overlay-fighter",
     isMyLittleCatGame && "game-overlay-cat",
     isSereneWatersGame && "game-overlay-serene",
+    isKnowledgeOdysseyGame && "game-overlay-knowledge",
   ]
     .filter(Boolean)
     .join(" ");
@@ -913,12 +925,95 @@ function GameArtwork({ project }: { project: Project }) {
   const isNeon = project.gameTheme === "neon";
   const isSerene = project.gameTheme === "serene";
   const isCat = project.gameTheme === "cat";
+  const isKnowledge = project.gameTheme === "knowledge";
 
   return (
     <div className={`game-artwork game-artwork-${project.gameTheme}`} aria-hidden="true">
       <span className="game-art-topline">
-        ARYA GAMES // {isSerene ? "VOYAGE 001" : isNeon ? "RUN 001" : isCat ? "ROOM 004" : "ARENA 002"}
+        ARYA GAMES //{" "}
+        {isKnowledge
+          ? "ODYSSEY 001"
+          : isSerene
+            ? "VOYAGE 001"
+            : isNeon
+              ? "RUN 001"
+              : isCat
+                ? "ROOM 004"
+                : "ARENA 002"}
       </span>
+      {isKnowledge && (
+        <svg
+          className="wizard-learning-art"
+          viewBox="0 0 800 500"
+          preserveAspectRatio="xMidYMid slice"
+          focusable="false"
+        >
+          <circle cx="552" cy="106" r="2.5" fill="#f3d987" />
+          <circle cx="730" cy="136" r="3" fill="#f3d987" opacity=".8" />
+          <circle cx="493" cy="211" r="2" fill="#d5b9ff" />
+          <circle cx="696" cy="78" r="2" fill="#d5b9ff" />
+          <text x="520" y="164" fill="#f0d98f" fontSize="27" opacity=".72">
+            A
+          </text>
+          <text x="729" y="274" fill="#d5b9ff" fontSize="24" opacity=".8">
+            Σ
+          </text>
+          <path d="M420 430h340v70H420z" fill="#292142" />
+          <path d="m450 431 118-29 113 29-112 31z" fill="#c59b57" />
+          <path d="m450 431 119 27v45l-119-26z" fill="#e8d8ae" />
+          <path d="m569 458 112-27v46l-112 26z" fill="#f5e8c8" />
+          <path
+            d="m472 438 94 21m-94-8 94 21m18-21 77-19m-77 32 77-19"
+            stroke="#997b50"
+            strokeWidth="2"
+            opacity=".65"
+          />
+          <path d="M602 276 669 313 698 424l-42 30H548l-41-30 30-111z" fill="#493479" />
+          <path d="m602 276 24 0 49 150H529l49-150z" fill="#7355b6" />
+          <path d="m592 293 10 20 11-20 27 133h-75z" fill="#e4bd70" />
+          <path
+            d="M550 310 503 361l-31-18 55-70m111 37 45 45 26-21-58-66"
+            fill="none"
+            stroke="#7355b6"
+            strokeWidth="24"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <circle cx="478" cy="344" r="13" fill="#efc49a" />
+          <circle cx="739" cy="323" r="13" fill="#efc49a" />
+          <path d="m737 320 45-102" stroke="#d7bd77" strokeWidth="5" strokeLinecap="round" />
+          <path d="m781 204 5 13 13 4-13 5-5 13-5-13-13-5 13-4z" fill="#f8e394" />
+          <ellipse cx="604" cy="242" rx="49" ry="54" fill="#efc49a" />
+          <path
+            d="m558 211 40-90 37 48 48 38q-79-27-125 2z"
+            fill="#39235f"
+            stroke="#c7a6fa"
+            strokeWidth="4"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M550 213q52-25 108 0l17 15q-66-12-139 8z"
+            fill="#4c3278"
+            stroke="#c7a6fa"
+            strokeWidth="4"
+            strokeLinejoin="round"
+          />
+          <path d="M585 240h2m36 0h2" stroke="#38294a" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M595 256q10 8 20 0"
+            fill="none"
+            stroke="#9e5e55"
+            strokeWidth="3"
+            strokeLinecap="round"
+          />
+          <path d="M570 267q33 28 67 0l-11 38q-22 24-45 0z" fill="#f5e7d2" />
+          <path d="m600 271 8 12 8-12-8 42z" fill="#d7bd77" />
+          <path d="M583 424h25v38h-25zm36 0h25v38h-25z" fill="#28203a" />
+          <path d="M576 462h35m-1 0h37" stroke="#d8b27b" strokeWidth="9" strokeLinecap="round" />
+          <circle cx="462" cy="286" r="7" fill="#f5df8d" opacity=".8" />
+          <circle cx="715" cy="176" r="6" fill="#d5b9ff" opacity=".8" />
+        </svg>
+      )}
       {isSerene && (
         <svg
           className="serene-landscape"
@@ -1012,16 +1107,24 @@ function GameArtwork({ project }: { project: Project }) {
       )}
       <div className="game-art-center">
         <span>
-          {isSerene
-            ? "SAIL // DISCOVER // RESTORE"
-            : isNeon
-              ? "RUN // SURVIVE"
-              : isCat
-                ? "CARE // PLAY // REST"
-                : "FIGHT // ADAPT"}
+          {isKnowledge
+            ? "LEARN // EXPLORE // DISCOVER"
+            : isSerene
+              ? "SAIL // DISCOVER // RESTORE"
+              : isNeon
+                ? "RUN // SURVIVE"
+                : isCat
+                  ? "CARE // PLAY // REST"
+                  : "FIGHT // ADAPT"}
         </span>
         <strong>
-          {isSerene ? (
+          {isKnowledge ? (
+            <>
+              KNOWLEDGE
+              <br />
+              ODYSSEY
+            </>
+          ) : isSerene ? (
             <>
               SERENE
               <br />
@@ -1048,24 +1151,28 @@ function GameArtwork({ project }: { project: Project }) {
           )}
         </strong>
         <i>
-          {isSerene
-            ? "A QUIETER KIND OF ADVENTURE."
-            : isNeon
-              ? "THREE LANES. ONE CHANCE."
-              : isCat
-                ? "MOCHI'S ROOM IS YOURS TO EXPLORE."
-                : "ENTER THE ARENA."}
+          {isKnowledge
+            ? "A WORLD BUILT FROM QUESTIONS."
+            : isSerene
+              ? "A QUIETER KIND OF ADVENTURE."
+              : isNeon
+                ? "THREE LANES. ONE CHANCE."
+                : isCat
+                  ? "MOCHI'S ROOM IS YOURS TO EXPLORE."
+                  : "ENTER THE ARENA."}
         </i>
       </div>
       <span className="game-art-bottom">
-        {isSerene
-          ? "NATURE AWAITS"
-          : isNeon
-            ? "PROTOCOL ACTIVE"
-            : isCat
-              ? "MOCHI'S ROOM"
-              : "SYSTEM ARMED"}{" "}
-        <b>{isCat ? "MEET MOCHI ↗" : "PLAY NOW ↗"}</b>
+        {isKnowledge
+          ? "SIX REALMS OF KNOWLEDGE"
+          : isSerene
+            ? "NATURE AWAITS"
+            : isNeon
+              ? "PROTOCOL ACTIVE"
+              : isCat
+                ? "MOCHI'S ROOM"
+                : "SYSTEM ARMED"}{" "}
+        <b>{isKnowledge ? "BEGIN THE QUEST ↗" : isCat ? "MEET MOCHI ↗" : "PLAY NOW ↗"}</b>
       </span>
     </div>
   );
@@ -1665,10 +1772,29 @@ export default function App() {
               <p className="hero-greeting">Haii</p>
               <div className="hero-game-launcher">
                 <p>Start Arya's Games</p>
-                <button onClick={() => openGameProject(projects[1])}>neon-dash</button>
-                <button onClick={() => openGameProject(projects[2])}>street fighting</button>
-                <button data-game="serene" onClick={() => openGameProject(projects[0])}>
-                  serene waters
+                <button
+                  data-game="knowledge"
+                  onClick={() => openGameProject(projects[0])}
+                >
+                  <span>Knowledge Odyssey</span>
+                  <span className="launcher-star" aria-hidden="true">
+                    ✦
+                  </span>
+                </button>
+                <button
+                  data-game="shadow"
+                  onClick={() => openGameProject(projects[3])}
+                >
+                  <span>street fighting</span>
+                  <span className="launcher-star" aria-hidden="true">
+                    ✦
+                  </span>
+                </button>
+                <button data-game="serene" onClick={() => openGameProject(projects[1])}>
+                  <span>serene waters</span>
+                  <span className="launcher-star" aria-hidden="true">
+                    ✦
+                  </span>
                 </button>
               </div>
             </div>
