@@ -2953,6 +2953,10 @@ body.game-open {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.game-overlay-fighter .game-overlay-close {
+  display: none;
+}
+
 .game-overlay-close:hover,
 .game-overlay-close:focus-visible {
   box-shadow: 0 0 24px rgba(0, 240, 255, 0.38);

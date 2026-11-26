@@ -824,6 +824,10 @@ function GameOverlay({
   url: string;
   onClose: () => void;
 }) {
+  const isStreetFightingGame = new URL(url, window.location.href).pathname.endsWith(
+    "/games/shadow-strike.html",
+  );
+
   useEffect(() => {
     document.body.classList.add("game-open");
     document.documentElement.classList.add("game-playing");
@@ -834,7 +838,12 @@ function GameOverlay({
   }, []);
 
   return (
-    <div className="game-overlay" role="dialog" aria-modal="true" aria-label="Game player">
+    <div
+      className={`game-overlay${isStreetFightingGame ? " game-overlay-fighter" : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Game player"
+    >
       <button
         className="game-overlay-close"
         onClick={onClose}
