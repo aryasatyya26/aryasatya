@@ -1523,7 +1523,7 @@
         this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 140);
         this.camera.position.set(0, 5.9, 8.0);
 
-        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'default' });
         this.renderer.setPixelRatio(this.getPixelRatio());
         this.renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || window.innerHeight);
         this.renderer.shadowMap.enabled = true;
@@ -2988,6 +2988,7 @@
        ========================================================================== */
     const clock = new THREE.Clock();
     let autoTick = 0;
+    let animationFrame = 0;
 
     setInterval(() => {
       if (!PetState.started || document.hidden) return;
@@ -3010,11 +3011,8 @@
     }, 3600);
 
     function mainLoop() {
-      requestAnimationFrame(mainLoop);
-      if (document.hidden) {
-        clock.getDelta();
-        return;
-      }
+      animationFrame = 0;
+      if (document.hidden) return;
       const dt = Math.min(clock.getDelta(), 0.05);
       const t = clock.getElapsedTime();
 
@@ -3204,14 +3202,27 @@
       WorldEngine.controls.update();
       WorldEngine.clampCamera();
       WorldEngine.renderer.render(WorldEngine.scene, WorldEngine.camera);
+      animationFrame = requestAnimationFrame(mainLoop);
     }
+
+    const syncVisibility = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+        clock.getDelta();
+      } else if (!animationFrame) {
+        clock.getDelta();
+        animationFrame = requestAnimationFrame(mainLoop);
+      }
+    };
+    document.addEventListener('visibilitychange', syncVisibility);
 
     // Bootstrap
     WorldEngine.init();
     CatRig.build();
     MiniGames.init();
     CatActions.bindPointerEvents();
-    mainLoop();
+    syncVisibility();
 
     document.getElementById('btn-launch').addEventListener('click', () => {
       AudioFX.init();

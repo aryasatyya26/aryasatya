@@ -1106,11 +1106,14 @@
         display: grid;
         width: 40px;
         height: 40px;
+        padding: 0;
         place-items: center;
         border: 1px solid rgba(56, 189, 248, 0.34);
         border-radius: 12px;
         color: var(--cyan);
         background: rgba(8, 12, 20, 0.9);
+        appearance: none;
+        cursor: pointer;
         box-shadow: 0 0 16px rgba(56, 189, 248, 0.18);
         transition:
           top 0.2s ease,
@@ -1556,12 +1559,12 @@
       <div id="toast-box">Thanks for liking Street Fighting!</div>
     </main>
 
-    <a class="portfolio-return-link" href="/#projects" target="_top" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
+    <button type="button" id="btn-return-portfolio" class="portfolio-return-link" aria-label="Kembali ke project portofolio" title="Kembali ke project portofolio">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M19 12H5"></path>
         <path d="m12 19-7-7 7-7"></path>
       </svg>
-    </a>
+    </button>
 
     <script>
       /**
@@ -4109,6 +4112,24 @@
         .getElementById("btn-confirm-license")
         .addEventListener("click", closeLicense);
 
+      document
+        .getElementById("btn-return-portfolio")
+        .addEventListener("click", () => {
+          if (window.parent !== window) {
+            window.parent.postMessage(
+              { type: "portfolio:return-from-game" },
+              window.location.origin,
+            );
+            return;
+          }
+
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            window.location.assign("/#projects");
+          }
+        });
+
       likeButton.addEventListener("click", () => {
         const liked = likeButton.getAttribute("aria-pressed") !== "true";
         likeButton.setAttribute("aria-pressed", String(liked));
@@ -4124,21 +4145,37 @@
       }
 
       // --- 11. 60FPS MAIN LOOP ---
+      let animationFrame = 0;
+
       function loop(timestamp) {
+        animationFrame = 0;
+        if (document.hidden) return;
+
         if (!match.lastTime) match.lastTime = timestamp;
         const rawDt = Math.min(0.05, (timestamp - match.lastTime) / 1000);
         match.lastTime = timestamp;
 
         update(rawDt);
         draw();
-        requestAnimationFrame(loop);
+        animationFrame = requestAnimationFrame(loop);
       }
 
+      function syncVisibility() {
+        if (document.hidden) {
+          cancelAnimationFrame(animationFrame);
+          animationFrame = 0;
+          match.lastTime = 0;
+        } else if (!animationFrame) {
+          animationFrame = requestAnimationFrame(loop);
+        }
+      }
+
+      document.addEventListener("visibilitychange", syncVisibility);
       window.onload = () => {
         resizeCanvas();
         updateCharacterSelection();
         drawCharacterPreview(selectedPlayerKey);
-        requestAnimationFrame(loop);
+        syncVisibility();
       };
     </script>
   </body>

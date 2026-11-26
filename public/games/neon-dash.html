@@ -1535,19 +1535,35 @@
         }
 
         // --- 9. ANIMATION BOOTSTRAP ---
+        let animationFrame = 0;
+
         function gameLoop(timestamp) {
+            animationFrame = 0;
+            if (document.hidden) return;
+
             if (!state.lastTime) state.lastTime = timestamp;
             const dt = Math.min(0.05, (timestamp - state.lastTime) / 1000); // Cap dt to prevent jumps
             state.lastTime = timestamp;
 
             update(dt);
             draw();
-            requestAnimationFrame(gameLoop);
+            animationFrame = requestAnimationFrame(gameLoop);
         }
 
+        function syncVisibility() {
+            if (document.hidden) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = 0;
+                state.lastTime = 0;
+            } else if (!animationFrame) {
+                animationFrame = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        document.addEventListener('visibilitychange', syncVisibility);
         window.onload = () => {
             resizeCanvas();
-            requestAnimationFrame(gameLoop);
+            syncVisibility();
         };
     </script>
 </body>

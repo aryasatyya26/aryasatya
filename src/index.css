@@ -4828,3 +4828,14 @@ html.page-hidden *::before,
 html.page-hidden *::after {
   animation-play-state: paused !important;
 }
+
+section:not(.animations-active),
+section:not(.animations-active) * {
+  animation-play-state: paused;
+}
+
+html.game-playing .background-scene *,
+html.game-playing .app > :not(.game-overlay),
+html.game-playing .app > :not(.game-overlay) * {
+  animation-play-state: paused;
+}

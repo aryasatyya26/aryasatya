@@ -1071,11 +1071,12 @@ function GameArtwork({ project }: { project: Project }) {
   );
 }
 
-function PerformanceHud() {
+function PerformanceHud({ enabled }: { enabled: boolean }) {
   const [fps, setFps] = useState<number | null>(null);
 
   useEffect(() => {
     if (
+      !enabled ||
       window.matchMedia("(pointer: coarse), (max-width: 680px)").matches
     ) {
       return;
@@ -1115,7 +1116,7 @@ function PerformanceHud() {
       document.removeEventListener("visibilitychange", syncVisibility);
       window.cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [enabled]);
 
   return (
     <output
@@ -1444,6 +1445,13 @@ export default function App() {
       },
       { rootMargin: "-35% 0px -50%", threshold: 0.01 },
     );
+    const sectionAnimationObserver = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((entry) => {
+          entry.target.classList.toggle("animations-active", entry.isIntersecting);
+        }),
+      { rootMargin: "100px 0px", threshold: 0 },
+    );
     const revealObserver = new IntersectionObserver(
       (entries) =>
         entries.forEach((entry) => {
@@ -1453,7 +1461,10 @@ export default function App() {
         }),
       { rootMargin: "-10% 0px -15%", threshold: 0.01 },
     );
-    document.querySelectorAll("section[id]").forEach((section) => sectionObserver.observe(section));
+    document.querySelectorAll("section[id]").forEach((section) => {
+      sectionObserver.observe(section);
+      sectionAnimationObserver.observe(section);
+    });
     document.querySelectorAll<HTMLElement>(".reveal").forEach((element, index) => {
       element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
       revealObserver.observe(element);
@@ -1463,6 +1474,7 @@ export default function App() {
     onScroll();
     return () => {
       sectionObserver.disconnect();
+      sectionAnimationObserver.disconnect();
       revealObserver.disconnect();
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("pointermove", onPointer);
@@ -1584,7 +1596,7 @@ export default function App() {
     >
       <AtmosphericBackground entered={entered} />
       <BirdCursor />
-      <PerformanceHud />
+      <PerformanceHud enabled={!playingGameUrl} />
       {introVisible && (
         <div className={entryTransition ? "intro-leaving" : ""}>
           <Intro onEnter={enter} onSkip={enter} />
