@@ -184,11 +184,12 @@
       max-width: 360px;
       padding: 0.65rem;
       border-width: 2px;
-      background: rgba(16, 36, 54, 0.78);
+      border-color: rgba(74, 124, 155, 0.8);
+      background: rgba(16, 36, 54, 0.66);
       box-shadow:
         inset 0 0 0 1px rgba(137, 196, 225, 0.18),
         0 6px 18px rgba(0, 0, 0, 0.4);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(3px);
     }
 
     @media (min-width: 641px) and (max-width: 1400px) {
@@ -217,13 +218,27 @@
       }
 
       #hud-quest-tracker {
-        max-width: 132px;
+        position: absolute;
+        top: 56px;
+        right: 23px;
+        width: min(132px, 34vw);
+        max-width: none;
+        margin: 0;
+        z-index: 21;
+      }
+
+      #hud-layer > div:nth-child(2) {
+        margin-top: -36px;
+      }
+
+      #hud-boat-status {
+        padding-block: 0.1875rem;
       }
 
       #fishing-hud.pixel-panel {
-        width: min(88vw, 330px);
+        width: min(82vw, 300px);
         max-width: none;
-        padding: 0.55rem;
+        padding: 0.45rem;
       }
     }
 
@@ -411,7 +426,7 @@
     <!-- Second Row: Active Quest Mini Tracker & Boat Status -->
     <div class="flex flex-wrap justify-start items-start gap-2 mt-1.5">
       <!-- Boat Status Pill -->
-      <div class="pointer-events-auto pixel-panel px-2.5 py-1.5 flex items-center gap-3 font-vt text-base">
+      <div id="hud-boat-status" class="pointer-events-auto pixel-panel px-2.5 py-1.5 flex items-center gap-3 font-vt text-base">
         <span id="hud-boat-name" class="text-sky-300">Wooden Boat</span>
         <span class="text-slate-300">🛡️ <span id="hud-hull">100</span>%</span>
         <span id="hud-fuel-wrap" class="text-amber-300 hidden">⛽ <span id="hud-fuel">100</span>%</span>
@@ -438,7 +453,7 @@
       <!-- =========================================================
            FISHING INTERACTIVE PANEL (CAST / WAITING / BITE / REELING)
       ========================================================= -->
-      <div id="fishing-hud" class="pointer-events-auto hidden w-full pixel-panel p-3 sm:p-4 space-y-2.5 mb-1">
+      <div id="fishing-hud" class="pointer-events-auto hidden w-full pixel-panel p-3 sm:p-4 space-y-1.5 mb-1">
         <div class="flex items-center justify-between">
           <div>
             <span id="fish-state-label" class="font-pixel text-[10px] sm:text-xs text-sky-300">READY TO CAST</span>
@@ -501,7 +516,7 @@
         </div>
 
         <!-- Primary Fishing Action Button (Works for Mouse, Touch, and mirrors Spacebar) -->
-        <button id="btn-fish-primary" class="w-full pixel-btn pixel-btn-gold py-3 font-pixel text-xs sm:text-sm">
+        <button id="btn-fish-primary" class="w-full pixel-btn pixel-btn-gold py-2.5 font-pixel text-xs sm:text-sm">
           HOLD / TAP TO CAST [SPACE]
         </button>
       </div>
