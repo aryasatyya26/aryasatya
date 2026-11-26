@@ -59,6 +59,7 @@
       width: 100%;
       height: 100%;
       z-index: 1;
+      touch-action: none;
     }
 
     canvas {
@@ -291,11 +292,6 @@
       border-radius: 4px;
     }
 
-    /* Virtual Joystick */
-    #joystick-zone {
-      touch-action: none;
-    }
-
     @keyframes bobFloat {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
@@ -359,7 +355,7 @@
       </div>
 
       <p class="text-[11px] text-slate-400">
-        Desktop: WASD/Arrows to Sail • Space to Fish • E to Interact | Mobile: Touch Joystick & Action Buttons
+        Desktop: WASD/Arrows to Sail • Space to Fish • E to Interact | Mobile: Swipe to Sail & Touch Actions
       </p>
     </div>
   </div>
@@ -523,11 +519,9 @@
 
     <!-- Bottom Bar: Adaptive Mobile Touch Controls & Desktop Action Hint -->
     <div class="flex items-end justify-between gap-2 pb-1">
-      <!-- Left: Mobile Virtual Joystick -->
-      <div id="mobile-joystick-container" class="pointer-events-auto hidden">
-        <div id="joystick-zone" class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-slate-900/65 border-2 border-sky-400/50 backdrop-blur-xs flex items-center justify-center shadow-lg">
-          <div id="joystick-knob" class="w-12 h-12 rounded-full bg-sky-400/80 border-2 border-white shadow-md pointer-events-none transition-transform duration-75"></div>
-        </div>
+      <!-- Left: Mobile swipe steering hint -->
+      <div id="mobile-steer-hint" class="pointer-events-none hidden pixel-panel px-3 py-2 font-vt text-base text-sky-200">
+        ↔ Geser layar untuk mengarahkan perahu
       </div>
 
       <!-- Center: Desktop Quick Action Hint Bar with Distinct Mulai Mancing Button -->
@@ -701,7 +695,7 @@
    *  6. Centralized GameState & Economy/Inventory/Quest Managers
    *  7. Interactive 8-Step Fishing Engine
    *  8. Phaser 3 World Scene (6 Regions, Water Shaders/Ripples, Boat Physics, Day/Night/Weather)
-   *  9. Adaptive UI Controller (Desktop + Mobile Touch Joystick/Buttons)
+   *  9. Adaptive UI Controller (Desktop + Mobile Swipe/Buttons)
    * 10. Automated Diagnostic & Self-Test Suite
    * ============================================================================
    */
@@ -2535,10 +2529,10 @@
         if (this.cursors.up.isDown || this.keys.W.isDown) inputY -= 1;
         if (this.cursors.down.isDown || this.keys.S.isDown) inputY += 1;
 
-        // Combine Virtual Touch Joystick input
-        if (Math.hypot(UI.joystickVec.x, UI.joystickVec.y) > 0.12) {
-          inputX = UI.joystickVec.x;
-          inputY = UI.joystickVec.y;
+        // Combine touch swipe steering input
+        if (Math.hypot(UI.swipeVec.x, UI.swipeVec.y) > 0.04) {
+          inputX = UI.swipeVec.x;
+          inputY = UI.swipeVec.y;
         }
       }
 
@@ -2762,14 +2756,15 @@
     currentDrawerTab: 'inventory',
     guideSubTab: 'steps',
     inventoryFilter: 'All',
-    joystickVec: { x: 0, y: 0 },
+    swipeVec: { x: 0, y: 0 },
+    touchControlsEnabled: false,
     pendingCatch: null,
 
     init() {
       this.bindMainMenuEvents();
       this.bindHudEvents();
       this.bindFishingControls();
-      this.bindTouchJoystick();
+      this.bindSwipeControls();
       this.applyControlModeLayout();
       window.addEventListener('resize', () => this.applyControlModeLayout());
     },
@@ -2778,73 +2773,80 @@
       const mode = GameState.data?.settings?.controlMode || 'auto';
       const useTouch = mode === 'mobile' || (mode === 'auto' && Utils.isTouchDevice());
 
-      const joy = document.getElementById('mobile-joystick-container');
+      const steerHint = document.getElementById('mobile-steer-hint');
       const act = document.getElementById('mobile-actions-container');
       const desk = document.getElementById('desktop-action-bar');
+      this.touchControlsEnabled = useTouch;
 
       if (useTouch) {
-        if (joy) joy.classList.remove('hidden');
+        if (steerHint) steerHint.classList.remove('hidden');
         if (act) act.classList.remove('hidden');
         if (desk) desk.classList.add('hidden');
       } else {
-        if (joy) joy.classList.add('hidden');
+        if (steerHint) steerHint.classList.add('hidden');
         if (act) act.classList.add('hidden');
         if (desk) desk.classList.remove('hidden');
       }
     },
 
-    bindTouchJoystick() {
-      const zone = document.getElementById('joystick-zone');
-      const knob = document.getElementById('joystick-knob');
-      if (!zone || !knob) return;
-      let activeId = null;
+    bindSwipeControls() {
+      const controlSurface = document.getElementById('game-container');
+      if (!controlSurface) return;
 
-      const updateStick = (clientX, clientY) => {
-        const rect = zone.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const maxR = rect.width * 0.36;
-        let dx = clientX - cx;
-        let dy = clientY - cy;
-        const dist = Math.hypot(dx, dy);
-        if (dist > maxR) {
-          dx = (dx / dist) * maxR;
-          dy = (dy / dist) * maxR;
+      let activePointerId = null;
+      let startX = 0;
+      let startY = 0;
+      const maxDrag = 96;
+      const deadZone = 8;
+
+      const updateSwipe = (clientX, clientY) => {
+        const dx = clientX - startX;
+        const dy = clientY - startY;
+        const distance = Math.hypot(dx, dy);
+        if (distance <= deadZone) {
+          this.swipeVec.x = 0;
+          this.swipeVec.y = 0;
+          return;
         }
-        knob.style.transform = `translate(${dx}px, ${dy}px)`;
-        this.joystickVec.x = dx / maxR;
-        this.joystickVec.y = dy / maxR;
+
+        const strength = Math.min(1, (distance - deadZone) / (maxDrag - deadZone));
+        this.swipeVec.x = (dx / distance) * strength;
+        this.swipeVec.y = (dy / distance) * strength;
       };
 
-      const resetStick = () => {
-        activeId = null;
-        knob.style.transform = 'translate(0px, 0px)';
-        this.joystickVec.x = 0;
-        this.joystickVec.y = 0;
+      const resetSwipe = () => {
+        activePointerId = null;
+        this.swipeVec.x = 0;
+        this.swipeVec.y = 0;
       };
 
-      zone.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        const t = e.changedTouches[0];
-        activeId = t.identifier;
-        updateStick(t.clientX, t.clientY);
-      }, { passive: false });
+      controlSurface.addEventListener('pointerdown', (event) => {
+        if (
+          !this.touchControlsEnabled ||
+          event.pointerType === 'mouse' ||
+          FishingSystem.state !== 'IDLE' ||
+          this.isAnyModalOpen()
+        ) return;
 
-      zone.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        for (const t of e.changedTouches) {
-          if (t.identifier === activeId) {
-            updateStick(t.clientX, t.clientY);
-          }
-        }
-      }, { passive: false });
+        activePointerId = event.pointerId;
+        startX = event.clientX;
+        startY = event.clientY;
+        this.swipeVec.x = 0;
+        this.swipeVec.y = 0;
+        controlSurface.setPointerCapture(event.pointerId);
+      });
 
-      zone.addEventListener('touchend', (e) => {
-        for (const t of e.changedTouches) {
-          if (t.identifier === activeId) resetStick();
+      controlSurface.addEventListener('pointermove', (event) => {
+        if (event.pointerId === activePointerId) {
+          updateSwipe(event.clientX, event.clientY);
         }
       });
-      zone.addEventListener('touchcancel', resetStick);
+
+      controlSurface.addEventListener('pointerup', (event) => {
+        if (event.pointerId === activePointerId) resetSwipe();
+      });
+      controlSurface.addEventListener('pointercancel', resetSwipe);
+      window.addEventListener('blur', resetSwipe);
 
       // Mobile Action Buttons
       const btnTouchFish = document.getElementById('btn-touch-fish');
@@ -4114,7 +4116,7 @@
               <select id="select-control-mode" class="bg-slate-800 border border-slate-600 rounded px-2.5 py-1 text-base text-white">
                 <option value="auto" ${s.controlMode === 'auto' ? 'selected' : ''}>Auto-Detect Device</option>
                 <option value="desktop" ${s.controlMode === 'desktop' ? 'selected' : ''}>Desktop (Keyboard + Mouse)</option>
-                <option value="mobile" ${s.controlMode === 'mobile' ? 'selected' : ''}>Mobile (Virtual Joystick + Touch)</option>
+                <option value="mobile" ${s.controlMode === 'mobile' ? 'selected' : ''}>Mobile (Swipe + Touch Actions)</option>
               </select>
             </div>
           </div>
