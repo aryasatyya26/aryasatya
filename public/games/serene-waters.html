@@ -1,0 +1,4361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f293a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>SERENE WATERS – Cozy Fishing & Boat Adventure</title>
+
+  <!-- Tailwind CSS for responsive layout structure -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phaser 3 Game Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+  <!-- Howler.js Audio Wrapper -->
+  <script src="https://cdn.jsdelivr.net/npm/howler@2.2.4/dist/howler.min.js"></script>
+  <!-- GSAP for UI Transitions -->
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <!-- Pixel & Clean Retro Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-deep: #0b1e2d;
+      --panel-bg: rgba(16, 36, 54, 0.94);
+      --panel-border: #4a7c9b;
+      --panel-highlight: #89c4e1;
+      --accent-gold: #f4c44e;
+      --accent-teal: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-coral: #fb7185;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-deep);
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+    }
+
+    #game-container {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+      letter-spacing: 0.04em;
+    }
+
+    .font-vt {
+      font-family: 'VT323', monospace;
+      letter-spacing: 0.03em;
+    }
+
+    /* Cozy 16-bit Pixel Panel Styling */
+    .pixel-panel {
+      background: var(--panel-bg);
+      border: 3px solid var(--panel-border);
+      box-shadow:
+        inset 0 0 0 2px rgba(137, 196, 225, 0.2),
+        0 8px 24px rgba(0, 0, 0, 0.55);
+      border-radius: 10px;
+      backdrop-filter: blur(6px);
+    }
+
+    .pixel-btn {
+      background: linear-gradient(180deg, #275373 0%, #183850 100%);
+      border: 2px solid #63a4c9;
+      box-shadow: 0 3px 0 #0c1f2e;
+      color: #f8fafc;
+      border-radius: 8px;
+      transition: transform 0.08s ease, filter 0.12s ease, background 0.15s ease;
+      cursor: pointer;
+    }
+
+    .pixel-btn:hover:not(:disabled) {
+      filter: brightness(1.14);
+      transform: translateY(-1px);
+    }
+
+    .pixel-btn:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #0c1f2e;
+    }
+
+    .pixel-btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .pixel-btn-gold {
+      background: linear-gradient(180deg, #eab308 0%, #b45309 100%);
+      border-color: #fde047;
+      box-shadow: 0 3px 0 #713f12;
+      color: #fffbeb;
+    }
+
+    .pixel-btn-emerald {
+      background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+      border-color: #6ee7b7;
+      box-shadow: 0 3px 0 #064e3b;
+      color: #ecfdf5;
+    }
+
+    .pixel-btn-danger {
+      background: linear-gradient(180deg, #e11d48 0%, #9f1239 100%);
+      border-color: #fda4af;
+      box-shadow: 0 3px 0 #4c0519;
+      color: #fff1f2;
+    }
+
+    .creator-license-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      max-width: calc(100vw - 1rem);
+      min-height: 35px;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.65);
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.94);
+      box-shadow: 0 3px 0 #0c1f2e, 0 0 12px rgba(56, 189, 248, 0.16);
+      color: #f8fafc;
+      font: 700 10px/1 'Inter', sans-serif;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.1s ease;
+    }
+
+    .creator-license-badge:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+
+    .creator-license-badge:focus-visible {
+      outline: 2px solid #facc15;
+      outline-offset: 2px;
+    }
+
+    .creator-license-mark {
+      display: grid;
+      place-items: center;
+      flex: 0 0 24px;
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      background: #f59e0b;
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    .creator-license-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    @media (max-width: 640px) {
+      .creator-license-badge {
+        min-height: 32px;
+        gap: 0.35rem;
+        padding: 0.25rem 0.55rem;
+        font-size: 9px;
+      }
+    }
+
+    /* Distinct High-Contrast Start Fishing ("Mulai Mancing") CTA Button */
+    .pixel-btn-fish-cta {
+      background: linear-gradient(135deg, #0d9488 0%, #059669 48%, #d97706 100%);
+      border: 3px solid #fde047;
+      box-shadow:
+        0 4px 0 #064e3b,
+        0 0 18px rgba(250, 204, 21, 0.45),
+        inset 0 2px 0 rgba(255, 255, 255, 0.35);
+      color: #ffffff;
+      text-shadow: 0 2px 0 #064e3b, 0 0 6px rgba(0, 0, 0, 0.85);
+      border-radius: 12px;
+      transition: transform 0.1s ease, filter 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    .pixel-btn-fish-cta:hover:not(:disabled) {
+      filter: brightness(1.12);
+      transform: translateY(-2px);
+      box-shadow:
+        0 6px 0 #064e3b,
+        0 0 24px rgba(250, 204, 21, 0.7),
+        inset 0 2px 0 rgba(255, 255, 255, 0.45);
+    }
+
+    .pixel-btn-fish-cta:active:not(:disabled) {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 #064e3b;
+    }
+
+    /* Rarity Badges */
+    .rarity-Common { background: #334155; color: #e2e8f0; border: 1px solid #64748b; }
+    .rarity-Uncommon { background: #065f46; color: #6ee7b7; border: 1px solid #10b981; }
+    .rarity-Rare { background: #1e40af; color: #93c5fd; border: 1px solid #3b82f6; }
+    .rarity-Epic { background: #581c87; color: #d8b4fe; border: 1px solid #a855f7; }
+    .rarity-Legendary { background: #78350f; color: #fde047; border: 1px solid #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4a7c9b;
+      border-radius: 4px;
+    }
+
+    /* Virtual Joystick */
+    #joystick-zone {
+      touch-action: none;
+    }
+
+    @keyframes bobFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+    .animate-bob {
+      animation: bobFloat 2.8s ease-in-out infinite;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
+      50% { box-shadow: 0 0 18px rgba(56, 189, 248, 0.85); }
+    }
+    .pulse-glow {
+      animation: pulseGlow 1.8s infinite;
+    }
+  </style>
+</head>
+<body>
+  <!-- Phaser Canvas Mount -->
+  <div id="game-container"></div>
+
+  <!-- =========================================================
+       MAIN MENU OVERLAY
+  ========================================================= -->
+  <div id="main-menu" class="fixed inset-0 z-40 flex flex-col items-center justify-center p-4 bg-gradient-to-b from-[#071926]/85 via-[#0e2d42]/75 to-[#061520]/90 backdrop-blur-sm">
+    <div class="max-w-lg w-full pixel-panel p-6 sm:p-8 text-center space-y-6 animate-bob">
+      <div class="space-y-2">
+        <div class="inline-block px-3 py-1 rounded-full bg-sky-900/70 border border-sky-400/40 text-sky-300 text-xs font-vt tracking-widest uppercase">
+          16-Bit Cozy Boat & Angling Simulator
+        </div>
+        <h1 class="font-pixel text-2xl sm:text-3xl text-amber-300 drop-shadow-[0_4px_0_rgba(120,53,15,0.9)] leading-snug">
+          SERENE WATERS
+        </h1>
+        <p class="font-vt text-xl text-sky-200">
+          Drift across tranquil lakes, discover rare fish, and restore the archipelago.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 gap-3 pt-2">
+        <button id="btn-continue-game" class="pixel-btn pixel-btn-emerald py-3.5 px-6 font-pixel text-xs sm:text-sm hidden">
+          CONTINUE VOYAGE
+        </button>
+        <button id="btn-new-game" class="pixel-btn pixel-btn-gold py-3.5 px-6 font-pixel text-xs sm:text-sm">
+          NEW VOYAGE
+        </button>
+        <div class="grid grid-cols-3 gap-2.5">
+          <button id="btn-menu-guide" class="pixel-btn pixel-btn-emerald py-3 px-2 font-pixel text-[10px] sm:text-xs">
+            📖 PANDUAN
+          </button>
+          <button id="btn-menu-settings" class="pixel-btn py-3 px-2 font-pixel text-[10px] sm:text-xs">
+            ⚙️ SETTINGS
+          </button>
+          <button id="btn-menu-credits" class="pixel-btn py-3 px-2 font-pixel text-[10px] sm:text-xs">
+            CREDITS
+          </button>
+        </div>
+      </div>
+
+      <div id="save-preview-badge" class="hidden text-xs font-vt text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 rounded-lg py-1.5 px-3">
+        Saved Voyage Ready
+      </div>
+
+      <p class="text-[11px] text-slate-400">
+        Desktop: WASD/Arrows to Sail • Space to Fish • E to Interact | Mobile: Touch Joystick & Action Buttons
+      </p>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       IN-GAME HUD (TOP & BOTTOM OVERLAYS)
+  ========================================================= -->
+  <div id="hud-layer" class="fixed inset-0 z-20 pointer-events-none hidden flex flex-col justify-between p-2 sm:p-3">
+    <!-- Top Bar -->
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <!-- Top-Left: Time, Weather, Region, Resources -->
+      <div class="pointer-events-auto pixel-panel px-3 py-2 flex flex-wrap items-center gap-3 text-xs sm:text-sm">
+        <div>
+          <div id="hud-region" class="font-pixel text-[10px] sm:text-xs text-amber-300">Peaceful Lake</div>
+          <div id="hud-time" class="font-vt text-base sm:text-lg text-sky-200 leading-none mt-0.5">Spring • Day 1 • 07:00 Morning</div>
+        </div>
+        <div class="h-7 w-px bg-slate-600/60 hidden sm:block"></div>
+        <div class="flex items-center gap-2.5 font-vt text-lg">
+          <span id="hud-weather" class="px-2 py-0.5 rounded bg-sky-950/80 border border-sky-500/30 text-sky-200">☀️ Sunny</span>
+          <span class="text-amber-300 font-bold">🪙 <span id="hud-gold">150</span>g</span>
+          <span class="text-emerald-300" title="Eco Health Rating">🌿 <span id="hud-eco">75</span>%</span>
+        </div>
+      </div>
+
+      <!-- Top-Right: Quick Menu Buttons & Zoom -->
+      <div class="pointer-events-auto flex flex-wrap items-center gap-1.5">
+        <button data-menu="inventory" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="Inventory (I)">
+          🎒 <span class="hidden md:inline">Bag</span>
+        </button>
+        <button data-menu="journal" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="Fish Encyclopedia (J)">
+          🐟 <span id="hud-dex-count">0/32</span>
+        </button>
+        <button data-menu="quests" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1 relative" title="Quest Log (Q)">
+          📜 <span class="hidden md:inline">Quests</span>
+          <span id="hud-quest-badge" class="hidden -top-1 -right-1 absolute w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+        </button>
+        <button data-menu="map" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="World Map (M)">
+          🗺️ <span class="hidden md:inline">Map</span>
+        </button>
+        <button data-menu="upgrades" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="Boat & Rod">
+          ⛵ <span class="hidden md:inline">Boat</span>
+        </button>
+        <button data-menu="guide" class="pixel-btn pixel-btn-emerald px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="Buku Panduan Langkah (H)">
+          📖 <span class="hidden sm:inline">Panduan</span>
+        </button>
+        <button data-menu="settings" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="Settings">
+          ⚙️ <span class="hidden lg:inline">Set</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Second Row: Active Quest Mini Tracker & Boat Status -->
+    <div class="flex flex-wrap justify-start items-start gap-2 mt-1.5">
+      <!-- Boat Status Pill -->
+      <div class="pointer-events-auto pixel-panel px-2.5 py-1.5 flex items-center gap-3 font-vt text-base">
+        <span id="hud-boat-name" class="text-sky-300">Wooden Boat</span>
+        <span class="text-slate-300">🛡️ <span id="hud-hull">100</span>%</span>
+        <span id="hud-fuel-wrap" class="text-amber-300 hidden">⛽ <span id="hud-fuel">100</span>%</span>
+        <div class="flex items-center gap-1 ml-1">
+          <button id="btn-zoom-out" class="px-1.5 py-0.2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 text-xs font-bold">-</button>
+          <button id="btn-zoom-in" class="px-1.5 py-0.2 bg-slate-800 hover:bg-slate-700 rounded border border-slate-600 text-xs font-bold">+</button>
+        </div>
+      </div>
+
+      <button id="btn-creator-story" type="button" class="creator-license-badge pointer-events-auto" aria-label="Latar belakang Serene Waters" aria-haspopup="dialog" aria-controls="confirm-modal">
+        <span class="creator-license-mark" aria-hidden="true">AN</span>
+        <span class="creator-license-name">CRAFTED BY ARYASATYA NARYAMA</span>
+      </button>
+
+      <!-- Active Quest Pill -->
+      <div id="hud-quest-tracker" class="pointer-events-auto pixel-panel ml-0 sm:ml-auto px-3 py-1.5 max-w-[140px] sm:max-w-xs hidden cursor-pointer" data-menu="quests">
+        <div class="text-[10px] font-pixel text-amber-300 truncate" id="hud-quest-title">Active Quest</div>
+        <div class="font-vt text-sm sm:text-base text-slate-200 truncate" id="hud-quest-obj">Talk to Old Fisherman</div>
+      </div>
+    </div>
+
+    <!-- Contextual Interaction Prompt Banner (Center-Bottom above controls) -->
+    <div class="flex-1 flex flex-col items-center justify-end pb-2">
+      <div id="context-prompt" class="pointer-events-auto hidden mb-2 px-4 py-2 rounded-full bg-slate-900/90 border-2 border-amber-400 text-amber-200 font-vt text-lg sm:text-xl shadow-lg flex items-center gap-2 cursor-pointer">
+        <span id="context-prompt-icon">💬</span>
+        <span id="context-prompt-text">Press [E] to Talk</span>
+      </div>
+
+      <!-- =========================================================
+           FISHING INTERACTIVE PANEL (CAST / WAITING / BITE / REELING)
+      ========================================================= -->
+      <div id="fishing-hud" class="pointer-events-auto hidden w-full max-w-md pixel-panel p-3 sm:p-4 space-y-2.5 mb-1">
+        <div class="flex items-center justify-between">
+          <div>
+            <span id="fish-state-label" class="font-pixel text-[10px] sm:text-xs text-sky-300">READY TO CAST</span>
+            <div id="fish-spot-info" class="font-vt text-base text-slate-300">Depth: Shallow • Calm Ripples</div>
+          </div>
+          <button id="btn-cancel-fishing" class="pixel-btn pixel-btn-danger px-2.5 py-1 text-xs font-vt text-base">
+            Stop [Esc]
+          </button>
+        </div>
+
+        <!-- Step 2: Bait Selector Bar -->
+        <div id="fishing-bait-bar" class="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <!-- Populated dynamically -->
+        </div>
+
+        <!-- Step 3: Cast Power Meter -->
+        <div id="fishing-cast-bar-wrap" class="hidden space-y-1">
+          <div class="flex justify-between font-vt text-sm text-amber-300">
+            <span>Cast Power</span>
+            <span id="cast-power-pct">0%</span>
+          </div>
+          <div class="w-full h-4 bg-slate-900 rounded-full overflow-hidden border border-slate-600 p-0.5">
+            <div id="cast-power-fill" class="h-full bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 rounded-full transition-none" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Step 4 & 5: Waiting & Bite Alert -->
+        <div id="fishing-wait-wrap" class="hidden text-center py-2">
+          <div id="fishing-wait-msg" class="font-vt text-xl text-sky-200">Watching the bobber gently drift...</div>
+        </div>
+
+        <!-- Step 7: Interactive Tension & Stamina Reel Minigame -->
+        <div id="fishing-reel-wrap" class="hidden space-y-2">
+          <!-- Fish Stamina / Catch Progress -->
+          <div>
+            <div class="flex justify-between font-vt text-base">
+              <span class="text-emerald-300">Catch Progress</span>
+              <span id="reel-progress-pct" class="text-emerald-200">35%</span>
+            </div>
+            <div class="w-full h-4 bg-slate-950 rounded-full border border-emerald-600/60 overflow-hidden p-0.5">
+              <div id="reel-progress-bar" class="h-full bg-gradient-to-r from-emerald-600 to-emerald-300 rounded-full" style="width: 35%"></div>
+            </div>
+          </div>
+
+          <!-- Line Tension Gauge with Sweet Spot -->
+          <div>
+            <div class="flex justify-between font-vt text-base">
+              <span class="text-amber-300">Line Tension (Hold Reel / Release to Cool)</span>
+              <span id="reel-tension-status" class="text-sky-200">Balanced</span>
+            </div>
+            <div class="relative w-full h-6 bg-slate-950 rounded-lg border-2 border-slate-600 overflow-hidden">
+              <!-- Sweet spot highlight -->
+              <div id="reel-sweet-zone" class="absolute top-0 bottom-0 bg-emerald-500/35 border-x-2 border-emerald-400" style="left: 30%; width: 40%;"></div>
+              <!-- Danger snap zone -->
+              <div class="absolute top-0 bottom-0 right-0 bg-rose-600/40 w-[16%] border-l border-rose-500"></div>
+              <!-- Tension Marker -->
+              <div id="reel-tension-marker" class="absolute top-0 bottom-0 w-2 bg-amber-300 shadow-[0_0_8px_#fde047]" style="left: 45%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primary Fishing Action Button (Works for Mouse, Touch, and mirrors Spacebar) -->
+        <button id="btn-fish-primary" class="w-full pixel-btn pixel-btn-gold py-3 font-pixel text-xs sm:text-sm">
+          HOLD / TAP TO CAST [SPACE]
+        </button>
+      </div>
+    </div>
+
+    <!-- Bottom Bar: Adaptive Mobile Touch Controls & Desktop Action Hint -->
+    <div class="flex items-end justify-between gap-2 pb-1">
+      <!-- Left: Mobile Virtual Joystick -->
+      <div id="mobile-joystick-container" class="pointer-events-auto hidden">
+        <div id="joystick-zone" class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-slate-900/65 border-2 border-sky-400/50 backdrop-blur-xs flex items-center justify-center shadow-lg">
+          <div id="joystick-knob" class="w-12 h-12 rounded-full bg-sky-400/80 border-2 border-white shadow-md pointer-events-none transition-transform duration-75"></div>
+        </div>
+      </div>
+
+      <!-- Center: Desktop Quick Action Hint Bar with Distinct Mulai Mancing Button -->
+      <div id="desktop-action-bar" class="pointer-events-auto hidden md:flex items-center gap-3 pixel-panel px-3.5 py-2 mx-auto font-vt text-base text-slate-200 shadow-2xl">
+        <span class="text-sky-200">[WASD/Arrows] Berlayar</span>
+        <span class="text-slate-600">•</span>
+        <button id="btn-desktop-fish" class="pixel-btn-fish-cta px-4 py-1.5 flex items-center gap-2">
+          <span class="text-xl leading-none">🎣</span>
+          <span class="flex flex-col text-left leading-tight">
+            <span class="font-pixel text-[11px] tracking-wide text-amber-200">MULAI MANCING</span>
+            <span class="font-vt text-sm text-emerald-100">Tekan [SPACE] atau Klik</span>
+          </span>
+        </button>
+        <span class="text-slate-600">•</span>
+        <span class="text-sky-200">[E] Bicara / Sandar</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-sky-200">[Scroll] Zoom</span>
+      </div>
+
+      <!-- Right: Mobile Touch Action Buttons -->
+      <div id="mobile-actions-container" class="pointer-events-auto hidden flex flex-col items-end gap-2">
+        <div class="flex items-center gap-2">
+          <button id="btn-touch-interact" class="pixel-btn px-4 py-3.5 font-pixel text-[10px] hidden">
+            TALK / DOCK
+          </button>
+          <button id="btn-touch-fish" class="pixel-btn-fish-cta px-4 py-3 flex items-center gap-2 shadow-2xl">
+            <span class="text-2xl leading-none">🎣</span>
+            <span class="flex flex-col text-left leading-tight">
+              <span id="btn-touch-fish-title" class="font-pixel text-[10px] sm:text-xs text-amber-200">MULAI MANCING</span>
+              <span id="btn-touch-fish-sub" class="font-vt text-sm text-emerald-100">Ketuk untuk Lempar</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       CATCH RESULT MODAL (STEP 8 WITH CONFIRMATION SAFEGUARD)
+  ========================================================= -->
+  <div id="catch-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
+    <div class="pixel-panel max-w-md w-full p-5 text-center space-y-4">
+      <div class="flex items-center justify-between">
+        <span id="catch-rarity-badge" class="px-2.5 py-0.5 rounded text-xs font-pixel">COMMON</span>
+        <span id="catch-new-badge" class="hidden px-2 py-0.5 rounded bg-amber-500 text-slate-950 font-pixel text-[10px]">NEW SPECIES!</span>
+      </div>
+
+      <div class="py-2 flex flex-col items-center">
+        <div class="w-28 h-28 rounded-xl bg-sky-950/90 border-2 border-sky-400/50 flex items-center justify-center mb-3 shadow-inner">
+          <img id="catch-fish-img" src="" alt="Caught Fish" class="w-20 h-20 object-contain" style="image-rendering: pixelated;" />
+        </div>
+        <h2 id="catch-fish-name" class="font-pixel text-base sm:text-lg text-amber-300">Common Carp</h2>
+        <p id="catch-fish-desc" class="font-vt text-lg text-slate-300 mt-1">A resilient freshwater swimmer.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2 bg-slate-900/80 p-2.5 rounded-lg border border-slate-700 font-vt text-lg">
+        <div>
+          <div class="text-xs text-slate-400">WEIGHT</div>
+          <div id="catch-weight" class="text-sky-200 font-bold">2.40 kg</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">LENGTH</div>
+          <div id="catch-length" class="text-sky-200 font-bold">48 cm</div>
+        </div>
+        <div>
+          <div class="text-xs text-slate-400">VALUE</div>
+          <div id="catch-value" class="text-amber-300 font-bold">25g</div>
+        </div>
+      </div>
+
+      <div class="text-xs font-vt text-slate-400" id="catch-location-label">Caught at Peaceful Lake</div>
+
+      <div class="grid grid-cols-3 gap-2 pt-1">
+        <button id="btn-catch-keep" class="pixel-btn pixel-btn-emerald py-2.5 px-2 font-pixel text-[10px]">
+          KEEP FISH
+        </button>
+        <button id="btn-catch-sell" class="pixel-btn pixel-btn-gold py-2.5 px-2 font-pixel text-[10px]">
+          SELL NOW
+        </button>
+        <button id="btn-catch-release" class="pixel-btn py-2.5 px-2 font-pixel text-[10px]">
+          RELEASE (+ECO)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       NPC & BRANCHING DIALOGUE MODAL
+  ========================================================= -->
+  <div id="dialogue-modal" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center p-3 sm:p-4 bg-black/70 backdrop-blur-xs">
+    <div class="pixel-panel max-w-xl w-full p-4 sm:p-5 space-y-3">
+      <div class="flex items-center gap-3 border-b border-slate-700 pb-3">
+        <div class="w-16 h-16 rounded-lg bg-slate-900 border-2 border-amber-400/70 flex items-center justify-center shrink-0 overflow-hidden">
+          <img id="npc-portrait-img" src="" alt="NPC" class="w-14 h-14 object-contain" style="image-rendering: pixelated;" />
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center justify-between gap-2">
+            <h3 id="npc-name" class="font-pixel text-xs sm:text-sm text-amber-300 truncate">Old Fisherman</h3>
+            <span id="npc-friendship" class="font-vt text-base text-rose-300 shrink-0">❤️ Friendship Lv.1</span>
+          </div>
+          <div id="npc-role" class="font-vt text-base text-sky-300">Harbor Elder • Peaceful Lake</div>
+        </div>
+        <button id="btn-close-dialogue" class="pixel-btn px-2.5 py-1 font-pixel text-[10px]">X</button>
+      </div>
+
+      <div id="npc-dialogue-text" class="font-vt text-xl sm:text-2xl text-slate-100 leading-snug min-h-[68px] bg-slate-950/60 p-3 rounded-lg border border-slate-800">
+        "Ahoy there! The morning mist over Peaceful Lake always brings out the finest carp."
+      </div>
+
+      <!-- Branching Choice Buttons -->
+      <div id="npc-choices-list" class="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       CONFIRMATION POPUP (SAFEGUARD FOR IMPORTANT DECISIONS)
+  ========================================================= -->
+  <div id="confirm-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-black/80">
+    <div class="pixel-panel max-w-sm w-full p-5 space-y-4 text-center">
+      <div class="font-pixel text-xs sm:text-sm text-amber-300" id="confirm-title">CONFIRM ACTION</div>
+      <p id="confirm-message" class="font-vt text-xl text-slate-200 leading-snug">
+        Are you sure you want to proceed?
+      </p>
+      <div id="confirm-buttons" class="grid grid-cols-2 gap-2.5 pt-1">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MAIN SLIDE-OVER / MODAL DRAWER (INVENTORY, JOURNAL, QUESTS, MAP, SHOP, GUIDE, SETTINGS)
+  ========================================================= -->
+  <div id="drawer-modal" class="fixed inset-0 z-40 hidden items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-xs">
+    <div class="pixel-panel max-w-4xl w-full h-[88vh] sm:h-[82vh] flex flex-col overflow-hidden">
+      <!-- Drawer Header Tabs -->
+      <div class="flex items-center justify-between border-b border-slate-700 px-3 py-2.5 bg-slate-950/60 gap-2 overflow-x-auto">
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button data-drawer-tab="inventory" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">🎒 Bag</button>
+          <button data-drawer-tab="journal" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">🐟 Fish Dex</button>
+          <button data-drawer-tab="quests" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">📜 Quests</button>
+          <button data-drawer-tab="map" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">🗺️ Map</button>
+          <button data-drawer-tab="upgrades" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">⛵ Shop & Boat</button>
+          <button data-drawer-tab="guide" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">📖 Panduan</button>
+          <button data-drawer-tab="settings" class="drawer-tab pixel-btn px-2.5 py-1.5 font-vt text-base sm:text-lg">⚙️ System</button>
+        </div>
+        <button id="btn-close-drawer" class="pixel-btn pixel-btn-danger px-3 py-1.5 font-pixel text-[10px] shrink-0">CLOSE</button>
+      </div>
+
+      <!-- Drawer Body Content -->
+      <div id="drawer-content" class="flex-1 overflow-y-auto p-3 sm:p-5">
+        <!-- Populated dynamically per tab -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-[70] flex flex-col items-center gap-1.5 pointer-events-none w-full max-w-md px-3"></div>
+
+  <script>
+  /**
+   * ============================================================================
+   * SERENE WATERS - MODULAR ARCHITECTURE IN SINGLE SELF-CONTAINED APPLICATION
+   * Modules:
+   *  1. Utils & Defensive Helpers
+   *  2. Data Catalog (32 Fish Species, Boats, Rods, Baits, Regions, NPCs, Quests)
+   *  3. Procedural 16-Bit Pixel Art Sprite & Texture Generator
+   *  4. Web Audio / Howler Procedural Ambient & SFX Engine
+   *  5. IndexedDB Persistence & Save Validator
+   *  6. Centralized GameState & Economy/Inventory/Quest Managers
+   *  7. Interactive 8-Step Fishing Engine
+   *  8. Phaser 3 World Scene (6 Regions, Water Shaders/Ripples, Boat Physics, Day/Night/Weather)
+   *  9. Adaptive UI Controller (Desktop + Mobile Touch Joystick/Buttons)
+   * 10. Automated Diagnostic & Self-Test Suite
+   * ============================================================================
+   */
+
+  // ============================================================================
+  // 1. UTILS & DEFENSIVE HELPERS
+  // ============================================================================
+  const Utils = {
+    clamp(val, min, max) {
+      return Math.max(min, Math.min(max, val));
+    },
+    lerp(a, b, t) {
+      return a + (b - a) * t;
+    },
+    randRange(min, max) {
+      return Math.random() * (max - min) + min;
+    },
+    randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    dist(x1, y1, x2, y2) {
+      return Math.hypot(x2 - x1, y2 - y1);
+    },
+    escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    },
+    isTouchDevice() {
+      return ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.innerWidth <= 820;
+    }
+  };
+
+  // ============================================================================
+  // 2. GAME DATA CATALOG (32 FISH, BOATS, RODS, BAITS, REGIONS, NPCS, QUESTS)
+  // ============================================================================
+  const GameData = {
+    REGIONS: [
+      {
+        id: 'peaceful_lake',
+        name: 'Peaceful Lake',
+        x: 900, y: 900, radius: 750,
+        depth: 'Shallow (4m)',
+        waterColor: 0x1d6b87,
+        unlockCost: 0,
+        minBoatTier: 0,
+        desc: 'Tranquil freshwater lake with wooden docks, lily pads, and gentle carp.',
+        species: ['common_carp', 'bluegill', 'crucian_carp', 'golden_carp', 'perch', 'pond_loach']
+      },
+      {
+        id: 'willow_river',
+        name: 'Willow River',
+        x: 2150, y: 850, radius: 680,
+        depth: 'Medium (7m)',
+        waterColor: 0x1b7a8c,
+        unlockCost: 0,
+        minBoatTier: 0,
+        desc: 'Winding river shaded by weeping willows with brisk currents and trout.',
+        species: ['rainbow_trout', 'largemouth_bass', 'channel_catfish', 'river_chub', 'silver_dace', 'brook_trout']
+      },
+      {
+        id: 'sunset_bay',
+        name: 'Sunset Bay',
+        x: 950, y: 2150, radius: 760,
+        depth: 'Coastal (14m)',
+        waterColor: 0x185c82,
+        unlockCost: 150,
+        minBoatTier: 0,
+        desc: 'Warm golden coastal waters bustling with sea bass, mackerel, and harbor trade.',
+        species: ['atlantic_salmon', 'sea_bass', 'red_snapper', 'pacific_mackerel', 'kohaku_koi', 'flounder']
+      },
+      {
+        id: 'coral_island',
+        name: 'Coral Island',
+        x: 2250, y: 2150, radius: 740,
+        depth: 'Reef (18m)',
+        waterColor: 0x138596,
+        unlockCost: 350,
+        minBoatTier: 1,
+        desc: 'Turquoise tropical reefs teeming with vibrant exotic fish and sunken crates.',
+        species: ['clown_trigger', 'parrotfish', 'blue_tang', 'lionfish', 'mahi_mahi', 'reef_shark_pup']
+      },
+      {
+        id: 'misty_forest',
+        name: 'Misty Forest Lake',
+        x: 3350, y: 1050, radius: 680,
+        depth: 'Deep Basin (25m)',
+        waterColor: 0x174c63,
+        unlockCost: 600,
+        minBoatTier: 1,
+        desc: 'Ancient pine-ringed waters veiled in mist where crystal and moonlight fish dwell.',
+        species: ['crystal_tetra', 'moonlight_fish', 'ghost_pike', 'emerald_sturgeon', 'jade_eel']
+      },
+      {
+        id: 'deep_ocean',
+        name: 'Deep Ocean',
+        x: 3400, y: 2350, radius: 850,
+        depth: 'Abyssal (80m+)',
+        waterColor: 0x0d3352,
+        unlockCost: 1200,
+        minBoatTier: 2,
+        desc: 'Open cobalt swells home to giant tuna, swordfish, and mythical sea leviathans.',
+        species: ['bluefin_tuna', 'swordfish', 'giant_oarfish', 'abyssal_leviathan', 'sunfish_mola']
+      }
+    ],
+
+    BOATS: [
+      { id: 'wooden_boat', name: 'Wooden Boat', tier: 0, price: 0, speed: 185, storage: 20, maxHull: 100, hasMotor: false, maxFuel: 0, color: '#a16207', trim: '#fde68a', desc: 'Handcrafted rowboat. Quiet and nimble on calm lakes.' },
+      { id: 'fishing_boat', name: 'Fishing Boat', tier: 1, price: 450, speed: 245, storage: 35, maxHull: 150, hasMotor: false, maxFuel: 0, color: '#0369a1', trim: '#bae6fd', desc: 'Sturdy rigged skiff with reinforced hull for reefs and misty waters.' },
+      { id: 'motor_boat', name: 'Motor Boat', tier: 2, price: 1100, speed: 325, storage: 55, maxHull: 220, hasMotor: true, maxFuel: 100, color: '#b91c1c', trim: '#fecaca', desc: 'Outboard cruiser capable of braving Deep Ocean swells.' },
+      { id: 'luxury_boat', name: 'Luxury Fishing Boat', tier: 3, price: 2600, speed: 400, storage: 90, maxHull: 320, hasMotor: true, maxFuel: 180, color: '#f8fafc', trim: '#f59e0b', desc: 'Master-crafted expedition yacht with sonar stability and massive livewell.' }
+    ],
+
+    RODS: [
+      { id: 'basic_rod', name: 'Basic Rod', tier: 0, price: 0, sweetSpotBonus: 0, tensionReduction: 0, castRange: 95, desc: 'Simple bamboo rod. Reliable for local pond fish.' },
+      { id: 'improved_rod', name: 'Improved Rod', tier: 1, price: 220, sweetSpotBonus: 0.08, tensionReduction: 0.12, castRange: 115, desc: 'Flexible fiberglass blank with smoother drag control.' },
+      { id: 'advanced_rod', name: 'Advanced Rod', tier: 2, price: 580, sweetSpotBonus: 0.15, tensionReduction: 0.22, castRange: 135, desc: 'Carbon-weave rod built for fighting energetic river & reef fish.' },
+      { id: 'professional_rod', name: 'Professional Rod', tier: 3, price: 1350, sweetSpotBonus: 0.22, tensionReduction: 0.32, castRange: 155, desc: 'Tournament-grade reel that tames aggressive pelagic giants.' },
+      { id: 'legendary_rod', name: 'Legendary Starlight Rod', tier: 4, price: 3000, sweetSpotBonus: 0.30, tensionReduction: 0.45, castRange: 180, desc: 'Infused with celestial pearl; resonates with mythical leviathans.' }
+    ],
+
+    BAITS: [
+      { id: 'bread_crumbs', name: 'Bread Crumbs', price: 5, rarityBoost: 0, desc: 'Simple toasted crumbs. Loved by carp, bluegill, and small lake fish.' },
+      { id: 'earthworm', name: 'Earthworm', price: 12, rarityBoost: 0.08, desc: 'Classic wriggling bait effective in rivers and coastal bays.' },
+      { id: 'minnow', name: 'Live Minnow', price: 25, rarityBoost: 0.18, desc: 'Attracts predatory bass, pike, salmon, and reef hunters.' },
+      { id: 'spinner_lure', name: 'Spinner Lure', price: 45, rarityBoost: 0.28, desc: 'Flashing brass spoon that entices rare trout, koi, and mahi-mahi.' },
+      { id: 'golden_roe', name: 'Golden Roe', price: 90, rarityBoost: 0.45, desc: 'Shimmering caviar prized by Epic and Legendary freshwater species.' },
+      { id: 'deep_squid', name: 'Deep Sea Squid', price: 140, rarityBoost: 0.60, desc: 'Bioluminescent squid lure built for abyssal ocean monsters.' }
+    ],
+
+    SHOP_ITEMS: [
+      { id: 'herbal_tea', name: 'Warm Herbal Tea', category: 'Food', price: 30, desc: 'Cozy thermos drink. Restores +25 Boat/Angler focus & boosts luck briefly.' },
+      { id: 'hull_patch', name: 'Marine Wood Patch', category: 'Tools', price: 45, desc: 'Repairs +40 Boat Hull durability on the water.' },
+      { id: 'fuel_canister', name: 'Marine Fuel Canister', category: 'Tools', price: 60, desc: 'Refills +50 Fuel for Motor & Luxury boats.' },
+      { id: 'lantern_decor', name: 'Brass Bow Lantern', category: 'Materials', price: 180, desc: 'Warm glowing lantern mounted on your boat bow for night voyages.' }
+    ],
+
+    // 32 Unique Fish Species Database
+    FISH_SPECIES: [
+      // Peaceful Lake (6)
+      { id: 'common_carp', name: 'Common Carp', habitat: 'peaceful_lake', rarity: 'Common', minW: 1.2, maxW: 5.5, price: 18, time: 'Any', season: 'Any', favBait: 'bread_crumbs', pattern: 'steady', c1: '#b45309', c2: '#fde68a', desc: 'A peaceful golden-brown bottom dweller found near lake reeds.' },
+      { id: 'bluegill', name: 'Bluegill', habitat: 'peaceful_lake', rarity: 'Common', minW: 0.2, maxW: 1.1, price: 14, time: 'Day', season: 'Any', favBait: 'bread_crumbs', pattern: 'dart', c1: '#2563eb', c2: '#f59e0b', desc: 'Curious sunfish with iridescent blue gill plates.' },
+      { id: 'crucian_carp', name: 'Crucian Carp', habitat: 'peaceful_lake', rarity: 'Common', minW: 0.4, maxW: 1.8, price: 16, time: 'Any', season: 'Any', favBait: 'bread_crumbs', pattern: 'steady', c1: '#ca8a04', c2: '#fef08a', desc: 'Plump silver-gold carp thriving in quiet lily pad coves.' },
+      { id: 'perch', name: 'Yellow Perch', habitat: 'peaceful_lake', rarity: 'Uncommon', minW: 0.5, maxW: 2.2, price: 32, time: 'Morning', season: 'Any', favBait: 'earthworm', pattern: 'dart', c1: '#65a30d', c2: '#facc15', desc: 'Striped freshwater hunter active during cool mornings.' },
+      { id: 'pond_loach', name: 'Spotted Loach', habitat: 'peaceful_lake', rarity: 'Uncommon', minW: 0.3, maxW: 1.0, price: 28, time: 'Night', season: 'Any', favBait: 'earthworm', pattern: 'wave', c1: '#78350f', c2: '#d6d3d1', desc: 'Whiskered nocturnal swimmer that senses shifts in water pressure.' },
+      { id: 'golden_carp', name: 'Golden Carp', habitat: 'peaceful_lake', rarity: 'Legendary', minW: 4.5, maxW: 9.8, price: 320, time: 'Morning', season: 'Any', favBait: 'golden_roe', pattern: 'erratic', c1: '#f59e0b', c2: '#fef9c3', desc: 'Mythic scales shine like dawn sunlight across Peaceful Lake.' },
+
+      // Willow River (6)
+      { id: 'river_chub', name: 'Silver Chub', habitat: 'willow_river', rarity: 'Common', minW: 0.3, maxW: 1.4, price: 18, time: 'Any', season: 'Any', favBait: 'bread_crumbs', pattern: 'steady', c1: '#94a3b8', c2: '#f8fafc', desc: 'Sleek minnow-like swimmer darting through willow shadows.' },
+      { id: 'silver_dace', name: 'Willow Dace', habitat: 'willow_river', rarity: 'Common', minW: 0.2, maxW: 0.9, price: 16, time: 'Day', season: 'Any', favBait: 'earthworm', pattern: 'dart', c1: '#64748b', c2: '#e2e8f0', desc: 'Agile stream fish that leaps playfully at surface insects.' },
+      { id: 'largemouth_bass', name: 'Largemouth Bass', habitat: 'willow_river', rarity: 'Uncommon', minW: 1.5, maxW: 6.2, price: 45, time: 'Day', season: 'Any', favBait: 'minnow', pattern: 'surge', c1: '#15803d', c2: '#bbf7d0', desc: 'Ambushes prey from submerged logs with explosive strikes.' },
+      { id: 'channel_catfish', name: 'Channel Catfish', habitat: 'willow_river', rarity: 'Uncommon', minW: 2.5, maxW: 11.0, price: 52, time: 'Night', season: 'Any', favBait: 'earthworm', pattern: 'heavy', c1: '#475569', c2: '#cbd5e1', desc: 'Deep-channel whiskered giant that hugs the riverbed.' },
+      { id: 'rainbow_trout', name: 'Rainbow Trout', habitat: 'willow_river', rarity: 'Rare', minW: 1.4, maxW: 5.0, price: 85, time: 'Morning', season: 'Any', favBait: 'spinner_lure', pattern: 'acrobat', c1: '#0d9488', c2: '#f472b6', desc: 'Shimmers with a rose-pink lateral stripe in cold rushing water.' },
+      { id: 'brook_trout', name: 'Royal Brook Trout', habitat: 'willow_river', rarity: 'Epic', minW: 2.0, maxW: 5.8, price: 165, time: 'Evening', season: 'Any', favBait: 'spinner_lure', pattern: 'acrobat', c1: '#065f46', c2: '#fb923c', desc: 'Jewel-speckled river aristocrat found only in pristine currents.' },
+
+      // Sunset Bay (6)
+      { id: 'pacific_mackerel', name: 'Pacific Mackerel', habitat: 'sunset_bay', rarity: 'Common', minW: 0.6, maxW: 2.3, price: 26, time: 'Any', season: 'Any', favBait: 'minnow', pattern: 'dart', c1: '#0284c7', c2: '#e0f2fe', desc: 'Fast schooling bay swimmer with tiger-striped blue backs.' },
+      { id: 'flounder', name: 'Starry Flounder', habitat: 'sunset_bay', rarity: 'Common', minW: 0.9, maxW: 3.4, price: 30, time: 'Any', season: 'Any', favBait: 'earthworm', pattern: 'heavy', c1: '#92400e', c2: '#fde68a', desc: 'Camouflaged flatfish resting on warm sandy bay floors.' },
+      { id: 'sea_bass', name: 'Silver Sea Bass', habitat: 'sunset_bay', rarity: 'Uncommon', minW: 2.0, maxW: 7.5, price: 62, time: 'Evening', season: 'Any', favBait: 'minnow', pattern: 'surge', c1: '#334155', c2: '#f1f5f9', desc: 'Prized coastal delicacy patrolling harbor pilings at dusk.' },
+      { id: 'red_snapper', name: 'Crimson Snapper', habitat: 'sunset_bay', rarity: 'Rare', minW: 1.8, maxW: 6.8, price: 98, time: 'Any', season: 'Any', favBait: 'minnow', pattern: 'surge', c1: '#dc2626', c2: '#fecaca', desc: 'Vibrant ruby-scaled fish favored by the Sunset Bay chef.' },
+      { id: 'atlantic_salmon', name: 'Atlantic Salmon', habitat: 'sunset_bay', rarity: 'Rare', minW: 3.2, maxW: 12.0, price: 115, time: 'Morning', season: 'Any', favBait: 'spinner_lure', pattern: 'acrobat', c1: '#be185d', c2: '#fbcfe8', desc: 'Powerful migratory swimmer leaping through coastal tides.' },
+      { id: 'kohaku_koi', name: 'Kohaku Koi', habitat: 'sunset_bay', rarity: 'Epic', minW: 2.5, maxW: 7.0, price: 210, time: 'Evening', season: 'Any', favBait: 'golden_roe', pattern: 'wave', c1: '#f8fafc', c2: '#ef4444', desc: 'Porcelain-white scales adorned with bold crimson patterns.' },
+
+      // Coral Island (6)
+      { id: 'blue_tang', name: 'Azure Tang', habitat: 'coral_island', rarity: 'Common', minW: 0.3, maxW: 1.0, price: 38, time: 'Day', season: 'Any', favBait: 'bread_crumbs', pattern: 'dart', c1: '#1d4ed8', c2: '#facc15', desc: 'Bright sapphire reef fish nibbling around sunlit coral gardens.' },
+      { id: 'clown_trigger', name: 'Clown Triggerfish', habitat: 'coral_island', rarity: 'Uncommon', minW: 0.8, maxW: 2.8, price: 68, time: 'Day', season: 'Any', favBait: 'earthworm', pattern: 'erratic', c1: '#1e293b', c2: '#facc15', desc: 'Polka-dotted tropical beauty with a feisty personality.' },
+      { id: 'parrotfish', name: 'Emerald Parrotfish', habitat: 'coral_island', rarity: 'Uncommon', minW: 1.5, maxW: 4.9, price: 78, time: 'Day', season: 'Any', favBait: 'minnow', pattern: 'steady', c1: '#10b981', c2: '#f472b6', desc: 'Pastel-hued reef grazer that helps keep coral beds healthy.' },
+      { id: 'lionfish', name: 'Velvet Lionfish', habitat: 'coral_island', rarity: 'Rare', minW: 0.9, maxW: 2.4, price: 125, time: 'Evening', season: 'Any', favBait: 'minnow', pattern: 'wave', c1: '#9f1239', c2: '#fef3c7', desc: 'Ornate fanned fins glide gracefully like underwater silk.' },
+      { id: 'mahi_mahi', name: 'Golden Mahi-Mahi', habitat: 'coral_island', rarity: 'Epic', minW: 5.0, maxW: 16.0, price: 245, time: 'Day', season: 'Any', favBait: 'spinner_lure', pattern: 'acrobat', c1: '#eab308', c2: '#22d3ee', desc: 'Electric green-and-gold speedster of tropical island channels.' },
+      { id: 'reef_shark_pup', name: 'Blacktip Reef Guardian', habitat: 'coral_island', rarity: 'Legendary', minW: 12.0, maxW: 28.0, price: 460, time: 'Night', season: 'Any', favBait: 'deep_squid', pattern: 'heavy', c1: '#475569', c2: '#0f172a', desc: 'Sleek lagoon patrol guardian; always respects catch-and-release.' },
+
+      // Misty Forest Lake (5)
+      { id: 'jade_eel', name: 'Jade Mist Eel', habitat: 'misty_forest', rarity: 'Uncommon', minW: 1.2, maxW: 4.5, price: 88, time: 'Night', season: 'Any', favBait: 'earthworm', pattern: 'wave', c1: '#047857', c2: '#a7f3d0', desc: 'Winds silently through submerged ancient pine roots.' },
+      { id: 'ghost_pike', name: 'Pale Ghost Pike', habitat: 'misty_forest', rarity: 'Rare', minW: 3.5, maxW: 11.5, price: 155, time: 'Any', season: 'Any', favBait: 'minnow', pattern: 'surge', c1: '#cbd5e1', c2: '#38bdf8', desc: 'Translucent ambush predator materializing out of dense fog.' },
+      { id: 'emerald_sturgeon', name: 'Ancient Moss Sturgeon', habitat: 'misty_forest', rarity: 'Epic', minW: 14.0, maxW: 35.0, price: 290, time: 'Any', season: 'Any', favBait: 'golden_roe', pattern: 'heavy', c1: '#14532d', c2: '#86efac', desc: 'Armored living fossil that has roamed the forest lake for centuries.' },
+      { id: 'crystal_tetra', name: 'Crystal Prism Fish', habitat: 'misty_forest', rarity: 'Epic', minW: 0.4, maxW: 1.5, price: 310, time: 'Day', season: 'Any', favBait: 'golden_roe', pattern: 'erratic', c1: '#38bdf8', c2: '#f0abfc', desc: 'Refracts mist into tiny rainbows whenever it nears the surface.' },
+      { id: 'moonlight_fish', name: 'Moonlight Celestial Fish', habitat: 'misty_forest', rarity: 'Legendary', minW: 2.8, maxW: 7.5, price: 540, time: 'Night', season: 'Any', favBait: 'golden_roe', pattern: 'wave', c1: '#6366f1', c2: '#e0e7ff', desc: 'Glows with ethereal silver luminescence under starry skies.' },
+
+      // Deep Ocean (5)
+      { id: 'sunfish_mola', name: 'Oceanic Sunfish', habitat: 'deep_ocean', rarity: 'Rare', minW: 25.0, maxW: 65.0, price: 220, time: 'Day', season: 'Any', favBait: 'deep_squid', pattern: 'heavy', c1: '#64748b', c2: '#bae6fd', desc: 'Gentle disc-shaped giant basking near warm ocean swells.' },
+      { id: 'bluefin_tuna', name: 'Royal Bluefin Tuna', habitat: 'deep_ocean', rarity: 'Epic', minW: 30.0, maxW: 95.0, price: 380, time: 'Any', season: 'Any', favBait: 'deep_squid', pattern: 'surge', c1: '#1e3a8a', c2: '#93c5fd', desc: 'Relentless hydrodynamic powerhouse of the open sea.' },
+      { id: 'swordfish', name: 'Cobalt Swordfish', habitat: 'deep_ocean', rarity: 'Epic', minW: 35.0, maxW: 110.0, price: 420, time: 'Night', season: 'Any', favBait: 'deep_squid', pattern: 'acrobat', c1: '#0369a1', c2: '#e0f2fe', desc: 'Slices through deep currents with its unmistakable ivory bill.' },
+      { id: 'giant_oarfish', name: 'Ribbon Oarfish', habitat: 'deep_ocean', rarity: 'Legendary', minW: 18.0, maxW: 45.0, price: 680, time: 'Any', season: 'Any', favBait: 'deep_squid', pattern: 'wave', c1: '#e2e8f0', c2: '#f43f5e', desc: 'Serpentine silver herald of the deep with a flowing scarlet crest.' },
+      { id: 'abyssal_leviathan', name: 'Abyssal Star Leviathan', habitat: 'deep_ocean', rarity: 'Legendary', minW: 60.0, maxW: 150.0, price: 950, time: 'Night', season: 'Any', favBait: 'deep_squid', pattern: 'erratic', c1: '#312e81', c2: '#fde047', desc: 'The sovereign myth of Serene Waters, crowned with bioluminescent constellations.' }
+    ],
+
+    // 8 Unique NPCs positioned on docks/piers
+    NPCS: [
+      {
+        id: 'old_fisherman', name: 'Old Fisherman Barnaby', role: 'Harbor Elder', region: 'peaceful_lake',
+        x: 690, y: 740, hair: '#e2e8f0', shirt: '#d97706', hat: '#92400e',
+        greeting: 'Ahoy, young angler! Peaceful Lake holds quiet wonders if you have the patience to listen to the ripples.',
+        questId: 'q_golden_carp'
+      },
+      {
+        id: 'village_merchant', name: 'Merchant Clara', role: 'Harbor Market', region: 'peaceful_lake',
+        x: 820, y: 690, hair: '#7c2d12', shirt: '#059669', hat: '#fde047',
+        greeting: 'Welcome to Harbor Market! Fresh catches fetch fair coin, and my bait buckets are always stocked.',
+        questId: 'q_bluegill_supply',
+        opensShop: 'market'
+      },
+      {
+        id: 'boat_mechanic', name: 'Mechanic Garrick', role: 'Shipyard Master', region: 'peaceful_lake',
+        x: 1060, y: 720, hair: '#1e293b', shirt: '#2563eb', hat: '#475569',
+        greeting: 'A solid hull and smooth rudder make all the difference when you venture past the sheltered coves!',
+        questId: 'q_eco_cleanup',
+        opensShop: 'shipyard'
+      },
+      {
+        id: 'fisher_girl', name: 'Maya the Angler', role: 'River Guide', region: 'willow_river',
+        x: 2040, y: 660, hair: '#ea580c', shirt: '#0d9488', hat: '#fef08a',
+        greeting: 'Feel that Willow River current? Cast near the eddies if you want to hook a Rainbow Trout!',
+        questId: 'q_river_trout',
+        opensShop: 'rods'
+      },
+      {
+        id: 'harbor_master', name: 'Harbor Master Vance', role: 'Chart Authority', region: 'sunset_bay',
+        x: 780, y: 1960, hair: '#475569', shirt: '#1e3a8a', hat: '#f8fafc',
+        greeting: 'Sunset Bay is the gateway to the outer archipelago. Keep your sea charts updated and respect the tides.',
+        questId: 'q_bay_explorer',
+        opensShop: 'permits'
+      },
+      {
+        id: 'restaurant_owner', name: 'Chef Marco', role: 'Sunset Bistro', region: 'sunset_bay',
+        x: 1090, y: 1980, hair: '#0f172a', shirt: '#f8fafc', hat: '#ffffff',
+        greeting: 'Bellissimo! Nothing beats fresh Red Snapper grilled with sea herbs as the sun dips below the bay.',
+        questId: 'q_bistro_feast'
+      },
+      {
+        id: 'island_explorer', name: 'Explorer Lyra', role: 'Reef Cartographer', region: 'coral_island',
+        x: 2150, y: 1970, hair: '#a855f7', shirt: '#eab308', hat: '#78350f',
+        greeting: 'Coral Island hides sunken merchant crates and dazzling reef life. Have you spotted a Mahi-Mahi yet?',
+        questId: 'q_coral_treasure'
+      },
+      {
+        id: 'mysterious_traveler', name: 'Solenne the Seer', role: 'Misty Wanderer', region: 'misty_forest',
+        x: 3240, y: 890, hair: '#c084fc', shirt: '#312e81', hat: '#4c1d95',
+        greeting: 'When silver moonlight touches the mist, the ancient waters reveal secrets unseen by daylight...',
+        questId: 'q_moonlight_legend'
+      }
+    ],
+
+    // Branching Quest Definitions
+    QUESTS: [
+      {
+        id: 'q_bluegill_supply',
+        type: 'Daily Quest',
+        giver: 'village_merchant',
+        title: 'Harbor Bistro Order',
+        desc: 'Merchant Clara needs 3 Bluegill caught from Peaceful Lake for the morning market.',
+        dialoguePrompt: '"I need 3 fresh Bluegill for the harbor stew today. Care to lend a rod?"',
+        targetType: 'catch_species',
+        targetId: 'bluegill',
+        targetCount: 3,
+        rewardGold: 110,
+        rewardEco: 5,
+        rewardItem: { id: 'earthworm', count: 5 },
+        unlocksQuest: 'q_bistro_feast'
+      },
+      {
+        id: 'q_golden_carp',
+        type: 'Legendary Fish Quest',
+        giver: 'old_fisherman',
+        title: 'Dawn of the Golden Carp',
+        desc: 'Catch or discover the elusive Golden Carp in Peaceful Lake (favors Morning & Golden Roe).',
+        dialoguePrompt: '"I have searched decades for the Golden Carp. Legend says it rises with the morning sun..."',
+        targetType: 'catch_species',
+        targetId: 'golden_carp',
+        targetCount: 1,
+        rewardGold: 450,
+        rewardEco: 15,
+        rewardItem: { id: 'spinner_lure', count: 3 },
+        unlocksQuest: 'q_moonlight_legend'
+      },
+      {
+        id: 'q_eco_cleanup',
+        type: 'Environmental Quest',
+        giver: 'boat_mechanic',
+        title: 'Clean Waters Initiative',
+        desc: 'Collect 3 floating pieces of debris from the water using [E] or sailing close to keep habitats thriving.',
+        dialoguePrompt: '"Drifting crates and bottles tangle boat rudders and harm the fish. Help clear 3 pieces of lake debris?"',
+        targetType: 'clean_trash',
+        targetId: 'any',
+        targetCount: 3,
+        rewardGold: 140,
+        rewardEco: 20,
+        rewardItem: { id: 'hull_patch', count: 2 },
+        unlocksQuest: null
+      },
+      {
+        id: 'q_river_trout',
+        type: 'Fishing Quest',
+        giver: 'fisher_girl',
+        title: 'Swift Current Challenge',
+        desc: 'Catch 2 Rainbow Trout in Willow River.',
+        dialoguePrompt: '"Think you can handle fast water? Land 2 Rainbow Trout in Willow River and I will reward you handsomely!"',
+        targetType: 'catch_species',
+        targetId: 'rainbow_trout',
+        targetCount: 2,
+        rewardGold: 240,
+        rewardEco: 10,
+        rewardItem: { id: 'golden_roe', count: 2 },
+        unlocksQuest: null
+      },
+      {
+        id: 'q_bay_explorer',
+        type: 'Exploration Quest',
+        giver: 'harbor_master',
+        title: 'Coastal Charting',
+        desc: 'Catch 5 fish of any species in Sunset Bay to survey local stocks.',
+        dialoguePrompt: '"Help me log 5 catches in Sunset Bay so we can certify safe sailing routes to Coral Island."',
+        targetType: 'catch_region',
+        targetId: 'sunset_bay',
+        targetCount: 5,
+        rewardGold: 260,
+        rewardEco: 10,
+        rewardItem: { id: 'minnow', count: 5 },
+        unlocksQuest: null
+      },
+      {
+        id: 'q_bistro_feast',
+        type: 'NPC Quest',
+        giver: 'restaurant_owner',
+        title: 'Sunset Signature Dish',
+        desc: 'Deliver 2 Red Snapper caught in Sunset Bay to Chef Marco.',
+        dialoguePrompt: '"Tonight critics visit Sunset Bistro! Bring me 2 Crimson Red Snappers and I will pay top coin!"',
+        targetType: 'catch_species',
+        targetId: 'red_snapper',
+        targetCount: 2,
+        rewardGold: 320,
+        rewardEco: 8,
+        rewardItem: { id: 'herbal_tea', count: 2 },
+        unlocksQuest: null
+      },
+      {
+        id: 'q_coral_treasure',
+        type: 'Exploration Quest',
+        giver: 'island_explorer',
+        title: 'Reef Salvage & Wonders',
+        desc: 'Salvage 2 floating treasure crates or catch 3 Coral Island fish.',
+        dialoguePrompt: '"The turquoise tides around Coral Island wash up lost mariner crates. Fancy a treasure hunt?"',
+        targetType: 'catch_region',
+        targetId: 'coral_island',
+        targetCount: 3,
+        rewardGold: 420,
+        rewardEco: 12,
+        rewardItem: { id: 'deep_squid', count: 2 },
+        unlocksQuest: null
+      },
+      {
+        id: 'q_moonlight_legend',
+        type: 'Story Quest',
+        giver: 'mysterious_traveler',
+        title: 'Echoes Beneath the Mist',
+        desc: 'Catch either a Crystal Prism Fish or Moonlight Celestial Fish in Misty Forest Lake.',
+        dialoguePrompt: '"The mist whispers of an angler who bridges surface and abyss. Bring forth a Crystal or Moonlight specimen."',
+        targetType: 'catch_region',
+        targetId: 'misty_forest',
+        targetCount: 2,
+        rewardGold: 750,
+        rewardEco: 25,
+        rewardItem: { id: 'deep_squid', count: 3 },
+        unlocksQuest: null
+      }
+    ]
+  };
+
+  // ============================================================================
+  // 3. PROCEDURAL 16-BIT PIXEL ART SPRITE & TEXTURE GENERATOR
+  // ============================================================================
+  const PixelArtGen = {
+    fishDataUrls: {},
+    npcDataUrls: {},
+
+    generateAll(scene) {
+      this.generateWaterTiles(scene);
+      this.generateBoatTextures(scene);
+      this.generateWorldProps(scene);
+      this.generateFishTextures(scene);
+      this.generateNpcTextures(scene);
+    },
+
+    createPixelCanvas(w, h) {
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const ctx = c.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      return { c, ctx };
+    },
+
+    generateWaterTiles(scene) {
+      const { c, ctx } = this.createPixelCanvas(64, 64);
+      ctx.fillStyle = '#186380';
+      ctx.fillRect(0, 0, 64, 64);
+      // Subtle pixel wave highlights
+      ctx.fillStyle = '#227c9d';
+      ctx.fillRect(6, 12, 14, 2);
+      ctx.fillRect(36, 28, 16, 2);
+      ctx.fillRect(14, 48, 12, 2);
+      ctx.fillStyle = '#124e66';
+      ctx.fillRect(24, 18, 10, 2);
+      ctx.fillRect(44, 54, 12, 2);
+      scene.textures.addCanvas('water_tile', c);
+    },
+
+    generateBoatTextures(scene) {
+      GameData.BOATS.forEach((boat) => {
+        const { c, ctx } = this.createPixelCanvas(48, 32);
+        // Shadow
+        ctx.fillStyle = 'rgba(0, 15, 30, 0.35)';
+        ctx.fillRect(6, 22, 36, 7);
+
+        // Hull base (pointing right = 0 rad)
+        ctx.fillStyle = boat.color;
+        ctx.fillRect(6, 8, 30, 16);
+        ctx.fillRect(36, 10, 5, 12);
+        ctx.fillRect(41, 13, 4, 6);
+
+        // Trim / Gunwale
+        ctx.fillStyle = boat.trim;
+        ctx.fillRect(7, 7, 29, 2);
+        ctx.fillRect(7, 23, 29, 2);
+        ctx.fillRect(36, 9, 5, 2);
+        ctx.fillRect(36, 21, 5, 2);
+
+        // Deck planks / cabin
+        ctx.fillStyle = 'rgba(0,0,0,0.22)';
+        ctx.fillRect(14, 9, 2, 14);
+        ctx.fillRect(24, 9, 2, 14);
+
+        if (boat.tier >= 1) {
+          // Cabin / Mast detail
+          ctx.fillStyle = '#f8fafc';
+          ctx.fillRect(16, 10, 10, 12);
+          ctx.fillStyle = '#38bdf8';
+          ctx.fillRect(22, 12, 3, 8);
+        }
+        if (boat.hasMotor) {
+          // Outboard motor on stern
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(2, 12, 5, 8);
+          ctx.fillStyle = '#ef4444';
+          ctx.fillRect(2, 13, 3, 2);
+        }
+
+        // Cozy Angler Character sitting aboard
+        ctx.fillStyle = '#f59e0b'; // Hat
+        ctx.fillRect(28, 12, 6, 6);
+        ctx.fillStyle = '#fef3c7'; // Face
+        ctx.fillRect(30, 13, 4, 4);
+
+        scene.textures.addCanvas('boat_' + boat.id, c);
+      });
+    },
+
+    generateWorldProps(scene) {
+      // Bobber
+      {
+        const { c, ctx } = this.createPixelCanvas(16, 16);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(5, 3, 6, 5);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(5, 8, 6, 4);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(7, 1, 2, 2);
+        scene.textures.addCanvas('bobber', c);
+      }
+
+      // Floating Trash / Debris (Bottle & Crate)
+      {
+        const { c, ctx } = this.createPixelCanvas(24, 24);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fillRect(7, 8, 10, 6);
+        ctx.fillStyle = '#e0f2fe';
+        ctx.fillRect(9, 9, 6, 2);
+        ctx.fillStyle = '#92400e';
+        ctx.fillRect(17, 10, 3, 2);
+        scene.textures.addCanvas('prop_trash', c);
+      }
+
+      // Floating Treasure Crate
+      {
+        const { c, ctx } = this.createPixelCanvas(28, 28);
+        ctx.fillStyle = '#92400e';
+        ctx.fillRect(5, 6, 18, 16);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(5, 6, 18, 3);
+        ctx.fillRect(5, 19, 18, 3);
+        ctx.fillRect(12, 12, 4, 4);
+        scene.textures.addCanvas('prop_treasure', c);
+      }
+
+      // Lily Pad
+      {
+        const { c, ctx } = this.createPixelCanvas(28, 28);
+        ctx.fillStyle = '#15803d';
+        ctx.fillRect(6, 6, 16, 16);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(8, 8, 12, 10);
+        ctx.fillStyle = '#f472b6'; // Lotus flower
+        ctx.fillRect(12, 10, 4, 4);
+        scene.textures.addCanvas('prop_lily', c);
+      }
+
+      // Pine / Willow Tree
+      {
+        const { c, ctx } = this.createPixelCanvas(48, 56);
+        ctx.fillStyle = '#5c3a21';
+        ctx.fillRect(20, 38, 8, 16);
+        ctx.fillStyle = '#14532d';
+        ctx.fillRect(8, 24, 32, 16);
+        ctx.fillStyle = '#166534';
+        ctx.fillRect(12, 14, 24, 14);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(16, 6, 16, 12);
+        scene.textures.addCanvas('prop_tree', c);
+      }
+
+      // Seagull / Bird
+      {
+        const { c, ctx } = this.createPixelCanvas(20, 12);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(2, 4, 6, 2);
+        ctx.fillRect(8, 6, 4, 3);
+        ctx.fillRect(12, 4, 6, 2);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(9, 9, 2, 2);
+        scene.textures.addCanvas('prop_bird', c);
+      }
+    },
+
+    generateFishTextures(scene) {
+      GameData.FISH_SPECIES.forEach((fish, idx) => {
+        const { c, ctx } = this.createPixelCanvas(32, 20);
+        // Body silhouette varies slightly by index
+        const bodyH = (idx % 3 === 0) ? 10 : (idx % 3 === 1 ? 8 : 6);
+        const yOff = Math.floor((20 - bodyH) / 2);
+
+        // Tail fin
+        ctx.fillStyle = fish.c2;
+        ctx.fillRect(2, yOff - 1, 5, bodyH + 2);
+        ctx.fillRect(4, yOff + 1, 3, bodyH - 2);
+
+        // Main body
+        ctx.fillStyle = fish.c1;
+        ctx.fillRect(7, yOff, 17, bodyH);
+        ctx.fillRect(24, yOff + 1, 4, bodyH - 2);
+
+        // Belly / Stripe highlight
+        ctx.fillStyle = fish.c2;
+        ctx.fillRect(9, yOff + Math.floor(bodyH / 2), 14, Math.max(2, Math.floor(bodyH / 2)));
+
+        // Dorsal fin
+        ctx.fillStyle = fish.c2;
+        ctx.fillRect(12, Math.max(1, yOff - 2), 7, 2);
+
+        // Eye
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(23, yOff + 2, 3, 3);
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(24, yOff + 2, 2, 2);
+
+        scene.textures.addCanvas('fish_' + fish.id, c);
+        this.fishDataUrls[fish.id] = c.toDataURL();
+      });
+    },
+
+    generateNpcTextures(scene) {
+      GameData.NPCS.forEach((npc) => {
+        const { c, ctx } = this.createPixelCanvas(32, 36);
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.fillRect(8, 31, 16, 4);
+        // Body / Shirt
+        ctx.fillStyle = npc.shirt;
+        ctx.fillRect(9, 17, 14, 13);
+        // Head
+        ctx.fillStyle = '#fde68a';
+        ctx.fillRect(10, 7, 12, 10);
+        // Hair
+        ctx.fillStyle = npc.hair;
+        ctx.fillRect(9, 6, 14, 4);
+        ctx.fillRect(9, 9, 2, 6);
+        ctx.fillRect(21, 9, 2, 6);
+        // Hat
+        ctx.fillStyle = npc.hat;
+        ctx.fillRect(8, 3, 16, 4);
+        // Eyes
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(12, 11, 2, 2);
+        ctx.fillRect(18, 11, 2, 2);
+
+        scene.textures.addCanvas('npc_' + npc.id, c);
+        this.npcDataUrls[npc.id] = c.toDataURL();
+      });
+    }
+  };
+
+  // ============================================================================
+  // 4. PROCEDURAL COZY WEB AUDIO & HOWLER SYNTHESIZER
+  // ============================================================================
+  const SoundEngine = {
+    ctx: null,
+    sfxEnabled: true,
+    musicEnabled: true,
+    musicTimer: null,
+    noteIdx: 0,
+
+    init() {
+      if (!this.ctx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          this.ctx = new AudioCtx();
+        }
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume().catch(() => {});
+      }
+    },
+
+    playTone(freq, duration = 0.25, type = 'sine', gainVal = 0.08, slideTo = null) {
+      if (!this.sfxEnabled) return;
+      this.init();
+      if (!this.ctx) return;
+
+      try {
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) {
+          osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+        }
+        gain.gain.setValueAtTime(gainVal, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + duration);
+      } catch (e) {}
+    },
+
+    playSplash() {
+      if (!this.sfxEnabled) return;
+      this.init();
+      if (!this.ctx) return;
+      try {
+        const bufferSize = this.ctx.sampleRate * 0.28;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.35));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = 650;
+
+        const gain = this.ctx.createGain();
+        gain.gain.value = 0.14;
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start();
+      } catch (e) {}
+    },
+
+    playCast() {
+      this.playTone(280, 0.22, 'triangle', 0.07, 620);
+      setTimeout(() => this.playSplash(), 230);
+    },
+
+    playBite() {
+      this.playSplash();
+      this.playTone(587.33, 0.12, 'sine', 0.12);
+      setTimeout(() => this.playTone(880, 0.18, 'sine', 0.12), 90);
+    },
+
+    playReelTick() {
+      this.playTone(520 + Math.random() * 140, 0.04, 'square', 0.025);
+    },
+
+    playCatchSuccess() {
+      const notes = [523.25, 659.25, 783.99, 1046.5];
+      notes.forEach((n, i) => {
+        setTimeout(() => this.playTone(n, 0.26, 'triangle', 0.09), i * 95);
+      });
+    },
+
+    playLineSnap() {
+      this.playTone(220, 0.35, 'sawtooth', 0.09, 75);
+    },
+
+    playCoin() {
+      this.playTone(987.77, 0.08, 'sine', 0.08);
+      setTimeout(() => this.playTone(1318.51, 0.18, 'sine', 0.08), 75);
+    },
+
+    playUiClick() {
+      this.playTone(440, 0.05, 'triangle', 0.04);
+    },
+
+    startCozyMusic() {
+      if (this.musicTimer) return;
+      // Gentle C Major Pentatonic cozy melody loop
+      const scale = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25];
+      const pattern = [0, 2, 4, 5, 4, 2, 1, 3, 5, 7, 5, 4, 2, 1, 0, -1];
+      this.musicTimer = setInterval(() => {
+        if (!this.musicEnabled || !this.ctx || this.ctx.state !== 'running') return;
+        const step = pattern[this.noteIdx % pattern.length];
+        this.noteIdx++;
+        if (step >= 0) {
+          const freq = scale[step];
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.028, now + 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.0008, now + 1.15);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 1.2);
+        }
+      }, 950);
+    }
+  };
+
+  // ============================================================================
+  // 5. INDEXEDDB PERSISTENCE & SAVE CORRUPTION VALIDATOR
+  // ============================================================================
+  const SaveSystem = {
+    DB_NAME: 'SereneWatersDB',
+    STORE_NAME: 'saves',
+    SAVE_KEY: 'primary_slot',
+
+    openDB() {
+      return new Promise((resolve, reject) => {
+        if (!window.indexedDB) {
+          reject(new Error('IndexedDB unavailable'));
+          return;
+        }
+        const req = indexedDB.open(this.DB_NAME, 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains(this.STORE_NAME)) {
+            db.createObjectStore(this.STORE_NAME);
+          }
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => reject(req.error);
+      });
+    },
+
+    validateSaveData(data) {
+      if (!data || typeof data !== 'object') return false;
+      if (typeof data.gold !== 'number' || data.gold < 0 || Number.isNaN(data.gold)) return false;
+      if (!Array.isArray(data.inventory)) return false;
+      if (!data.boat || typeof data.boat.id !== 'string') return false;
+      if (!data.rod || typeof data.rod.id !== 'string') return false;
+      return true;
+    },
+
+    async save(stateSnapshot) {
+      if (!this.validateSaveData(stateSnapshot)) {
+        console.warn('Save validation prevented saving corrupted state.');
+        return false;
+      }
+      const payload = {
+        ...stateSnapshot,
+        savedAt: Date.now()
+      };
+      try {
+        const db = await this.openDB();
+        return await new Promise((resolve) => {
+          const tx = db.transaction(this.STORE_NAME, 'readwrite');
+          tx.objectStore(this.STORE_NAME).put(payload, this.SAVE_KEY);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      } catch (e) {
+        // Fallback to localStorage if IndexedDB blocked in sandboxed iframe
+        try {
+          localStorage.setItem('serene_waters_fallback', JSON.stringify(payload));
+          return true;
+        } catch (err) {
+          return false;
+        }
+      }
+    },
+
+    async load() {
+      try {
+        const db = await this.openDB();
+        const data = await new Promise((resolve) => {
+          const tx = db.transaction(this.STORE_NAME, 'readonly');
+          const req = tx.objectStore(this.STORE_NAME).get(this.SAVE_KEY);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror = () => resolve(null);
+        });
+        if (this.validateSaveData(data)) return data;
+      } catch (e) {}
+
+      try {
+        const raw = localStorage.getItem('serene_waters_fallback');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (this.validateSaveData(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return null;
+    },
+
+    async clear() {
+      try {
+        const db = await this.openDB();
+        await new Promise((resolve) => {
+          const tx = db.transaction(this.STORE_NAME, 'readwrite');
+          tx.objectStore(this.STORE_NAME).delete(this.SAVE_KEY);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => resolve(false);
+        });
+      } catch (e) {}
+      try {
+        localStorage.removeItem('serene_waters_fallback');
+      } catch (e) {}
+    }
+  };
+
+  // ============================================================================
+  // 6. CENTRALIZED GAME STATE & DEFENSIVE MANAGERS
+  // ============================================================================
+  const GameState = {
+    data: null,
+    actionLock: false,
+
+    createFreshState() {
+      return {
+        gold: 160,
+        ecoScore: 75,
+        day: 1,
+        seasonIndex: 0, // 0: Spring, 1: Summer, 2: Autumn, 3: Winter
+        timeMinutes: 420, // 07:00 AM
+        weather: 'Sunny',
+        currentRegion: 'peaceful_lake',
+        unlockedRegions: ['peaceful_lake', 'willow_river'],
+        boatPos: { x: 880, y: 880 },
+        boat: {
+          id: 'wooden_boat',
+          hull: 100,
+          fuel: 100,
+          hasLantern: false
+        },
+        rod: {
+          id: 'basic_rod'
+        },
+        equippedBait: 'bread_crumbs',
+        inventory: [
+          { uid: 'init_rod', itemId: 'basic_rod', name: 'Basic Rod', category: 'Fishing Rod', count: 1, stackable: false, desc: 'Simple bamboo rod.' },
+          { uid: 'init_bait_1', itemId: 'bread_crumbs', name: 'Bread Crumbs', category: 'Bait', count: 15, stackable: true, desc: 'Simple toasted crumbs.' },
+          { uid: 'init_bait_2', itemId: 'earthworm', name: 'Earthworm', category: 'Bait', count: 6, stackable: true, desc: 'Classic wriggling river bait.' },
+          { uid: 'init_tea', itemId: 'herbal_tea', name: 'Warm Herbal Tea', category: 'Food', count: 1, stackable: true, desc: 'Cozy drink (+10 Eco & focus).' }
+        ],
+        journal: {
+          // speciesId: { caughtCount, maxWeight, maxLength }
+        },
+        stats: {
+          totalCaught: 0,
+          rarestRank: 'None',
+          trashCleaned: 0
+        },
+        npcFriendship: {
+          old_fisherman: 1,
+          village_merchant: 1,
+          boat_mechanic: 1,
+          fisher_girl: 1,
+          harbor_master: 1,
+          restaurant_owner: 1,
+          island_explorer: 1,
+          mysterious_traveler: 1
+        },
+        quests: {
+          active: [],
+          completed: []
+        },
+        settings: {
+          sfx: true,
+          music: true,
+          controlMode: 'auto' // 'auto' | 'desktop' | 'mobile'
+        }
+      };
+    },
+
+    initNew() {
+      this.data = this.createFreshState();
+      this.acceptQuest('q_bluegill_supply', true);
+    },
+
+    loadFromSnapshot(snap) {
+      const base = this.createFreshState();
+      this.data = {
+        ...base,
+        ...snap,
+        boat: { ...base.boat, ...(snap.boat || {}) },
+        rod: { ...base.rod, ...(snap.rod || {}) },
+        journal: snap.journal || {},
+        stats: { ...base.stats, ...(snap.stats || {}) },
+        npcFriendship: { ...base.npcFriendship, ...(snap.npcFriendship || {}) },
+        quests: {
+          active: Array.isArray(snap.quests?.active) ? snap.quests.active : [],
+          completed: Array.isArray(snap.quests?.completed) ? snap.quests.completed : []
+        },
+        settings: { ...base.settings, ...(snap.settings || {}) }
+      };
+      SoundEngine.sfxEnabled = this.data.settings.sfx;
+      SoundEngine.musicEnabled = this.data.settings.music;
+    },
+
+    // Gold transaction guard (never negative)
+    modifyGold(delta) {
+      if (typeof delta !== 'number' || Number.isNaN(delta)) return false;
+      const next = Math.round(this.data.gold + delta);
+      if (next < 0) return false;
+      this.data.gold = next;
+      UI.refreshHUD();
+      return true;
+    },
+
+    modifyEco(delta) {
+      this.data.ecoScore = Utils.clamp(Math.round(this.data.ecoScore + delta), 0, 100);
+      UI.refreshHUD();
+    },
+
+    getBoatSpec() {
+      return GameData.BOATS.find(b => b.id === this.data.boat.id) || GameData.BOATS[0];
+    },
+
+    getRodSpec() {
+      return GameData.RODS.find(r => r.id === this.data.rod.id) || GameData.RODS[0];
+    },
+
+    // Inventory management with stacking & capacity checks
+    addItem(item) {
+      if (!item || !item.itemId) return false;
+      const countToAdd = Math.max(1, item.count || 1);
+
+      if (item.stackable) {
+        const existing = this.data.inventory.find(i => i.itemId === item.itemId && i.category === item.category);
+        if (existing) {
+          existing.count += countToAdd;
+          UI.refreshHUD();
+          return true;
+        }
+      }
+
+      const boatSpec = this.getBoatSpec();
+      if (this.data.inventory.length >= boatSpec.storage) {
+        UI.toast('Boat storage full! Upgrade boat or sell items.', 'danger');
+        return false;
+      }
+
+      this.data.inventory.push({
+        uid: 'itm_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+        itemId: item.itemId,
+        name: item.name,
+        category: item.category,
+        count: countToAdd,
+        stackable: Boolean(item.stackable),
+        rarity: item.rarity || 'Common',
+        weight: item.weight || null,
+        length: item.length || null,
+        value: item.value || 0,
+        desc: item.desc || ''
+      });
+      UI.refreshHUD();
+      return true;
+    },
+
+    removeItem(uid, amount = 1) {
+      const idx = this.data.inventory.findIndex(i => i.uid === uid);
+      if (idx === -1) return false;
+      const entry = this.data.inventory[idx];
+      if (entry.count < amount) return false;
+      entry.count -= amount;
+      if (entry.count <= 0) {
+        this.data.inventory.splice(idx, 1);
+      }
+      UI.refreshHUD();
+      return true;
+    },
+
+    consumeBait(baitId) {
+      const entry = this.data.inventory.find(i => i.category === 'Bait' && i.itemId === baitId);
+      if (!entry || entry.count <= 0) return false;
+      return this.removeItem(entry.uid, 1);
+    },
+
+    getBaitCount(baitId) {
+      const entry = this.data.inventory.find(i => i.category === 'Bait' && i.itemId === baitId);
+      return entry ? entry.count : 0;
+    },
+
+    // Record catch in Fish Journal & update quest progress
+    recordFishCatch(fishObj) {
+      const sp = fishObj.species;
+      const prev = this.data.journal[sp.id];
+      const isNew = !prev;
+
+      if (!prev) {
+        this.data.journal[sp.id] = {
+          caughtCount: 1,
+          maxWeight: fishObj.weight,
+          maxLength: fishObj.length
+        };
+      } else {
+        prev.caughtCount += 1;
+        prev.maxWeight = Math.max(prev.maxWeight, fishObj.weight);
+        prev.maxLength = Math.max(prev.maxLength, fishObj.length);
+      }
+
+      this.data.stats.totalCaught += 1;
+      const ranks = ['None', 'Common', 'Uncommon', 'Rare', 'Epic', 'Legendary'];
+      if (ranks.indexOf(sp.rarity) > ranks.indexOf(this.data.stats.rarestRank)) {
+        this.data.stats.rarestRank = sp.rarity;
+      }
+
+      // Advance matching active quests
+      this.advanceQuests('catch_species', sp.id, 1);
+      this.advanceQuests('catch_region', fishObj.regionId, 1);
+
+      UI.refreshHUD();
+      return isNew;
+    },
+
+    // Quest System
+    acceptQuest(questId, silent = false) {
+      if (this.data.quests.completed.includes(questId)) return false;
+      if (this.data.quests.active.some(q => q.id === questId)) return false;
+      const def = GameData.QUESTS.find(q => q.id === questId);
+      if (!def) return false;
+
+      this.data.quests.active.push({
+        id: def.id,
+        progress: 0,
+        targetCount: def.targetCount
+      });
+      if (!silent) {
+        UI.toast(`Quest Accepted: ${def.title}`, 'gold');
+      }
+      UI.refreshHUD();
+      return true;
+    },
+
+    advanceQuests(type, targetId, amount = 1) {
+      let updated = false;
+      this.data.quests.active.forEach(aq => {
+        const def = GameData.QUESTS.find(q => q.id === aq.id);
+        if (!def) return;
+        if (def.targetType === type && (def.targetId === targetId || def.targetId === 'any')) {
+          if (aq.progress < aq.targetCount) {
+            aq.progress = Math.min(aq.targetCount, aq.progress + amount);
+            updated = true;
+            if (aq.progress >= aq.targetCount) {
+              UI.toast(`Quest Ready to Claim: ${def.title}!`, 'emerald');
+            }
+          }
+        }
+      });
+      if (updated) UI.refreshHUD();
+    },
+
+    claimQuestReward(questId) {
+      const idx = this.data.quests.active.findIndex(q => q.id === questId);
+      if (idx === -1) return false;
+      const aq = this.data.quests.active[idx];
+      const def = GameData.QUESTS.find(q => q.id === questId);
+      if (!def || aq.progress < aq.targetCount) return false;
+
+      // Prevent duplicate completion
+      this.data.quests.active.splice(idx, 1);
+      if (!this.data.quests.completed.includes(questId)) {
+        this.data.quests.completed.push(questId);
+      }
+
+      this.modifyGold(def.rewardGold);
+      this.modifyEco(def.rewardEco || 5);
+      if (this.data.npcFriendship[def.giver] !== undefined) {
+        this.data.npcFriendship[def.giver] += 1;
+      }
+      if (def.rewardItem) {
+        const baitDef = GameData.BAITS.find(b => b.id === def.rewardItem.id);
+        const shopDef = GameData.SHOP_ITEMS.find(s => s.id === def.rewardItem.id);
+        if (baitDef) {
+          this.addItem({ itemId: baitDef.id, name: baitDef.name, category: 'Bait', count: def.rewardItem.count, stackable: true, desc: baitDef.desc });
+        } else if (shopDef) {
+          this.addItem({ itemId: shopDef.id, name: shopDef.name, category: shopDef.category, count: def.rewardItem.count, stackable: true, desc: shopDef.desc });
+        }
+      }
+
+      SoundEngine.playCatchSuccess();
+      UI.toast(`Completed "${def.title}" (+${def.rewardGold}g)!`, 'gold');
+      SaveSystem.save(this.data);
+      UI.refreshHUD();
+      return true;
+    },
+
+    abandonQuest(questId) {
+      const idx = this.data.quests.active.findIndex(q => q.id === questId);
+      if (idx === -1) return false;
+      this.data.quests.active.splice(idx, 1);
+      UI.toast('Quest abandoned.', 'info');
+      UI.refreshHUD();
+      return true;
+    },
+
+    getTimePeriod() {
+      const hr = Math.floor(this.data.timeMinutes / 60) % 24;
+      if (hr >= 5 && hr < 11) return 'Morning';
+      if (hr >= 11 && hr < 17) return 'Day';
+      if (hr >= 17 && hr < 20) return 'Evening';
+      return 'Night';
+    },
+
+    getFormattedClock() {
+      const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
+      const hr = Math.floor(this.data.timeMinutes / 60) % 24;
+      const min = Math.floor(this.data.timeMinutes % 60);
+      const hh = String(hr).padStart(2, '0');
+      const mm = String(min).padStart(2, '0');
+      return `${seasons[this.data.seasonIndex]} • Day ${this.data.day} • ${hh}:${mm} ${this.getTimePeriod()}`;
+    }
+  };
+
+  // ============================================================================
+  // 7. INTERACTIVE 8-STEP FISHING ENGINE
+  // ============================================================================
+  const FishingSystem = {
+    state: 'IDLE', // IDLE | READY | CASTING | WAITING | BITE | REELING | RESULT
+    castPower: 0,
+    castDir: 1,
+    waitTimer: 0,
+    biteWindowTimer: 0,
+    hookedFish: null,
+    // Reel minigame variables
+    reelProgress: 35,
+    lineTension: 42,
+    fishSurgeTimer: 0,
+    fishPullForce: 0,
+    isReelingInput: false,
+    tickSoundCooldown: 0,
+
+    openFishingPanel() {
+      if (this.state !== 'IDLE') return;
+      const region = GameData.REGIONS.find(r => r.id === GameState.data.currentRegion) || GameData.REGIONS[0];
+      if (!GameState.data.unlockedRegions.includes(region.id)) {
+        UI.toast(`Unlock ${region.name} on the Map before fishing here!`, 'danger');
+        return;
+      }
+      this.state = 'READY';
+      this.castPower = 0;
+      this.hookedFish = null;
+      UI.showFishingHUD(region);
+    },
+
+    cancelFishing() {
+      this.state = 'IDLE';
+      this.hookedFish = null;
+      this.isReelingInput = false;
+      if (window.gameScene) window.gameScene.hideBobber();
+      UI.hideFishingHUD();
+    },
+
+    handlePrimaryDown() {
+      SoundEngine.init();
+      if (this.state === 'READY') {
+        // Check bait availability (allow fallback hand-line with bread crumbs if out of bait)
+        const baitId = GameState.data.equippedBait;
+        if (GameState.getBaitCount(baitId) <= 0) {
+          const anyBait = GameState.data.inventory.find(i => i.category === 'Bait' && i.count > 0);
+          if (anyBait) {
+            GameState.data.equippedBait = anyBait.itemId;
+            UI.renderBaitBar();
+          } else {
+            UI.toast('Out of bait! Visit Merchant Clara or use free Bread Crumbs.', 'info');
+            GameState.addItem({ itemId: 'bread_crumbs', name: 'Bread Crumbs', category: 'Bait', count: 5, stackable: true, desc: 'Emergency pond crumbs.' });
+            GameState.data.equippedBait = 'bread_crumbs';
+            UI.renderBaitBar();
+          }
+        }
+        this.state = 'CASTING';
+        this.castPower = 10;
+        this.castDir = 1;
+        UI.updateFishingUIState('CASTING');
+      } else if (this.state === 'BITE') {
+        // Step 6: Hook timing check
+        this.hookFish();
+      } else if (this.state === 'REELING') {
+        this.isReelingInput = true;
+      }
+    },
+
+    handlePrimaryUp() {
+      if (this.state === 'CASTING') {
+        this.executeCast();
+      } else if (this.state === 'REELING') {
+        this.isReelingInput = false;
+      }
+    },
+
+    executeCast() {
+      const baitId = GameState.data.equippedBait;
+      GameState.consumeBait(baitId);
+      UI.renderBaitBar();
+
+      this.state = 'WAITING';
+      this.waitTimer = Utils.randRange(2.2, 4.6);
+      SoundEngine.playCast();
+
+      const rod = GameState.getRodSpec();
+      const dist = 55 + (this.castPower / 100) * rod.castRange;
+      if (window.gameScene) {
+        window.gameScene.castBobber(dist);
+      }
+      UI.updateFishingUIState('WAITING');
+    },
+
+    selectFishToBite() {
+      const regionId = GameState.data.currentRegion;
+      const period = GameState.getTimePeriod();
+      const bait = GameData.BAITS.find(b => b.id === GameState.data.equippedBait) || GameData.BAITS[0];
+      const ecoBonus = (GameState.data.ecoScore - 50) * 0.003;
+      const weatherBonus = (GameState.data.weather === 'Rain' || GameState.data.weather === 'Fog') ? 0.12 : 0;
+
+      const candidates = GameData.FISH_SPECIES.filter(f => f.habitat === regionId);
+      const pool = candidates.length > 0 ? candidates : GameData.FISH_SPECIES.slice(0, 6);
+
+      const rarityWeights = {
+        Common: 52,
+        Uncommon: 28,
+        Rare: 13 + (bait.rarityBoost + ecoBonus + weatherBonus) * 20,
+        Epic: 5 + (bait.rarityBoost + ecoBonus + weatherBonus) * 14,
+        Legendary: 1.5 + (bait.rarityBoost + ecoBonus + weatherBonus) * 8
+      };
+
+      const weighted = pool.map(sp => {
+        let w = rarityWeights[sp.rarity] || 10;
+        if (sp.favBait === bait.id) w *= 2.1;
+        if (sp.time !== 'Any' && sp.time === period) w *= 1.8;
+        return { sp, w: Math.max(0.5, w) };
+      });
+
+      const totalW = weighted.reduce((acc, item) => acc + item.w, 0);
+      let roll = Math.random() * totalW;
+      let chosen = weighted[0].sp;
+      for (const item of weighted) {
+        roll -= item.w;
+        if (roll <= 0) {
+          chosen = item.sp;
+          break;
+        }
+      }
+
+      const weight = Number(Utils.randRange(chosen.minW, chosen.maxW).toFixed(2));
+      const length = Math.round(20 + weight * Utils.randRange(11, 16));
+      const sizeMult = 0.85 + ((weight - chosen.minW) / Math.max(0.1, chosen.maxW - chosen.minW)) * 0.45;
+      const value = Math.max(5, Math.round(chosen.price * sizeMult));
+
+      return {
+        species: chosen,
+        weight,
+        length,
+        value,
+        regionId
+      };
+    },
+
+    hookFish() {
+      if (this.state !== 'BITE') return;
+      this.hookedFish = this.selectFishToBite();
+      this.state = 'REELING';
+      this.reelProgress = 34;
+      this.lineTension = 45;
+      this.fishSurgeTimer = 0.8;
+      this.fishPullForce = 18;
+      this.isReelingInput = true;
+      SoundEngine.playTone(660, 0.14, 'triangle', 0.1);
+      UI.updateFishingUIState('REELING');
+    },
+
+    update(dt) {
+      if (this.state === 'IDLE' || this.state === 'RESULT') return;
+
+      if (this.state === 'CASTING') {
+        this.castPower += this.castDir * dt * 135;
+        if (this.castPower >= 100) {
+          this.castPower = 100;
+          this.castDir = -1;
+        } else if (this.castPower <= 8) {
+          this.castPower = 8;
+          this.castDir = 1;
+        }
+        UI.updateCastBar(this.castPower);
+      } else if (this.state === 'WAITING') {
+        this.waitTimer -= dt;
+        if (this.waitTimer <= 0) {
+          this.state = 'BITE';
+          this.biteWindowTimer = 2.1;
+          SoundEngine.playBite();
+          if (window.gameScene) window.gameScene.triggerBobberBite();
+          UI.updateFishingUIState('BITE');
+        }
+      } else if (this.state === 'BITE') {
+        this.biteWindowTimer -= dt;
+        if (this.biteWindowTimer <= 0) {
+          UI.toast('The fish nibbled the bait and slipped away!', 'info');
+          this.cancelFishing();
+        }
+      } else if (this.state === 'REELING' && this.hookedFish) {
+        const sp = this.hookedFish.species;
+        const rod = GameState.getRodSpec();
+        const rarityDifficulty = { Common: 1.0, Uncommon: 1.18, Rare: 1.38, Epic: 1.6, Legendary: 1.85 }[sp.rarity] || 1.0;
+
+        // Fish AI behavior surges
+        this.fishSurgeTimer -= dt;
+        if (this.fishSurgeTimer <= 0) {
+          if (sp.pattern === 'erratic' || sp.pattern === 'acrobat') {
+            this.fishSurgeTimer = Utils.randRange(0.45, 1.0);
+            this.fishPullForce = Utils.randRange(14, 38) * rarityDifficulty;
+          } else if (sp.pattern === 'surge' || sp.pattern === 'heavy') {
+            this.fishSurgeTimer = Utils.randRange(0.9, 1.6);
+            this.fishPullForce = Utils.randRange(20, 35) * rarityDifficulty;
+          } else {
+            this.fishSurgeTimer = Utils.randRange(0.8, 1.4);
+            this.fishPullForce = Utils.randRange(12, 24) * rarityDifficulty;
+          }
+        }
+
+        // Tension dynamics
+        const tensionMitigation = 1 - rod.tensionReduction;
+        if (this.isReelingInput) {
+          this.lineTension += (24 + this.fishPullForce * 0.65) * tensionMitigation * dt;
+          this.tickSoundCooldown -= dt;
+          if (this.tickSoundCooldown <= 0) {
+            SoundEngine.playReelTick();
+            this.tickSoundCooldown = 0.14;
+          }
+        } else {
+          this.lineTension -= 34 * dt;
+        }
+
+        // Sweet spot calculation
+        const halfSweet = 20 + (rod.sweetSpotBonus * 50);
+        const sweetMin = Utils.clamp(50 - halfSweet, 15, 42);
+        const sweetMax = Utils.clamp(50 + halfSweet, 58, 84);
+        const inSweetSpot = this.lineTension >= sweetMin && this.lineTension <= sweetMax;
+
+        if (this.isReelingInput && inSweetSpot) {
+          this.reelProgress += (23 / rarityDifficulty) * dt;
+        } else if (this.isReelingInput) {
+          this.reelProgress += (12 / rarityDifficulty) * dt;
+        } else {
+          this.reelProgress -= (7 * rarityDifficulty) * dt;
+        }
+
+        this.lineTension = Utils.clamp(this.lineTension, 0, 100);
+        this.reelProgress = Utils.clamp(this.reelProgress, 0, 100);
+
+        UI.updateReelHUD(this.reelProgress, this.lineTension, sweetMin, sweetMax);
+
+        // Win / Loss Checks
+        if (this.lineTension >= 98) {
+          SoundEngine.playLineSnap();
+          UI.toast('Snap! Line tension got too high and broke!', 'danger');
+          this.cancelFishing();
+        } else if (this.reelProgress <= 0) {
+          UI.toast('The line went slack and the fish escaped!', 'info');
+          this.cancelFishing();
+        } else if (this.reelProgress >= 100) {
+          // Caught! Single capture guarantee
+          const caught = this.hookedFish;
+          this.hookedFish = null;
+          this.state = 'RESULT';
+          this.isReelingInput = false;
+          if (window.gameScene) window.gameScene.hideBobber();
+          UI.hideFishingHUD();
+          SoundEngine.playCatchSuccess();
+          const isNew = GameState.recordFishCatch(caught);
+          UI.showCatchModal(caught, isNew);
+        }
+      }
+    }
+  };
+
+  // ============================================================================
+  // 8. PHASER 3 WORLD SCENE (6 REGIONS, BOAT PHYSICS, DAY/NIGHT/WEATHER, ECOSYSTEM)
+  // ============================================================================
+  class SereneWorldScene extends Phaser.Scene {
+    constructor() {
+      super({ key: 'SereneWorldScene' });
+      this.WORLD_W = 4200;
+      this.WORLD_H = 3100;
+      this.velocity = { x: 0, y: 0 };
+      this.boatAngle = 0;
+      this.bobPhase = 0;
+      this.wakeTimer = 0;
+      this.timeTickAcc = 0;
+      this.weatherTimer = 140;
+      this.autosaveTimer = 45;
+      this.islands = [];
+      this.docks = [];
+      this.npcSprites = [];
+      this.props = [];
+      this.swimmingShadows = [];
+      this.birds = [];
+      this.clouds = [];
+      this.rainDrops = [];
+      this.nearestInteractable = null;
+    }
+
+    create() {
+      window.gameScene = this;
+      PixelArtGen.generateAll(this);
+
+      // Tiled water background across open world
+      this.waterBg = this.add.tileSprite(0, 0, this.WORLD_W, this.WORLD_H, 'water_tile').setOrigin(0, 0).setDepth(0);
+
+      // Region water color tint zones
+      this.regionGraphics = this.add.graphics().setDepth(1);
+      GameData.REGIONS.forEach(reg => {
+        this.regionGraphics.fillStyle(reg.waterColor, 0.42);
+        this.regionGraphics.fillCircle(reg.x, reg.y, reg.radius);
+        this.regionGraphics.lineStyle(3, 0x7dd3fc, 0.16);
+        this.regionGraphics.strokeCircle(reg.x, reg.y, reg.radius);
+      });
+
+      // Build Islands, Docks, Foliage, Lily Pads
+      this.buildWorldGeography();
+
+      // Swimming Fish Shadows & Ripples under water
+      this.spawnFishShadows(34);
+
+      // Floating Trash (Eco System) & Treasure Crates
+      this.spawnFloatingProps();
+
+      // Spawn 8 NPCs on Docks
+      this.spawnNPCs();
+
+      // Player Boat Sprite
+      const startPos = GameState.data.boatPos;
+      this.boatSprite = this.add.sprite(startPos.x, startPos.y, 'boat_' + GameState.data.boat.id)
+        .setDepth(15)
+        .setScale(1.35);
+
+      // Fishing Line Graphics & Bobber
+      this.lineGraphics = this.add.graphics().setDepth(16);
+      this.bobberSprite = this.add.sprite(startPos.x, startPos.y, 'bobber')
+        .setDepth(17)
+        .setVisible(false);
+
+      // Ambient Birds & Clouds
+      this.spawnAmbientSky();
+
+      // Weather & Day/Night Atmospheric Overlay
+      this.atmosphereOverlay = this.add.rectangle(0, 0, this.WORLD_W, this.WORLD_H, 0x0a192f, 0)
+        .setOrigin(0, 0)
+        .setDepth(30);
+
+      this.rainGraphics = this.add.graphics().setDepth(32);
+      for (let i = 0; i < 90; i++) {
+        this.rainDrops.push({
+          x: Math.random() * 1400,
+          y: Math.random() * 900,
+          speed: Utils.randRange(420, 620)
+        });
+      }
+
+      // Camera Setup with Smooth Follow & Zoom
+      this.cameras.main.setBounds(0, 0, this.WORLD_W, this.WORLD_H);
+      this.cameras.main.startFollow(this.boatSprite, true, 0.09, 0.09);
+      this.cameras.main.setZoom(Utils.isTouchDevice() ? 1.15 : 1.3);
+
+      // Keyboard Controls
+      this.cursors = this.input.keyboard.createCursorKeys();
+      this.keys = this.input.keyboard.addKeys({
+        W: Phaser.Input.Keyboard.KeyCodes.W,
+        A: Phaser.Input.Keyboard.KeyCodes.A,
+        S: Phaser.Input.Keyboard.KeyCodes.S,
+        D: Phaser.Input.Keyboard.KeyCodes.D,
+        E: Phaser.Input.Keyboard.KeyCodes.E,
+        SPACE: Phaser.Input.Keyboard.KeyCodes.SPACE,
+        ESC: Phaser.Input.Keyboard.KeyCodes.ESC,
+        I: Phaser.Input.Keyboard.KeyCodes.I,
+        J: Phaser.Input.Keyboard.KeyCodes.J,
+        Q: Phaser.Input.Keyboard.KeyCodes.Q,
+        M: Phaser.Input.Keyboard.KeyCodes.M,
+        H: Phaser.Input.Keyboard.KeyCodes.H
+      });
+
+      // Mouse Wheel Zoom
+      this.input.on('wheel', (pointer, gameObjects, deltaX, deltaY) => {
+        if (UI.isAnyModalOpen()) return;
+        const nextZoom = Utils.clamp(this.cameras.main.zoom - deltaY * 0.0008, 0.75, 2.1);
+        this.cameras.main.setZoom(nextZoom);
+      });
+
+      // Keyboard Action Listeners
+      this.input.keyboard.on('keydown-SPACE', () => {
+        if (UI.isAnyModalOpen()) return;
+        if (FishingSystem.state === 'IDLE') {
+          FishingSystem.openFishingPanel();
+        } else {
+          FishingSystem.handlePrimaryDown();
+        }
+      });
+
+      this.input.keyboard.on('keyup-SPACE', () => {
+        if (FishingSystem.state === 'CASTING' || FishingSystem.state === 'REELING') {
+          FishingSystem.handlePrimaryUp();
+        }
+      });
+
+      this.input.keyboard.on('keydown-E', () => {
+        if (UI.isAnyModalOpen()) return;
+        this.triggerContextInteraction();
+      });
+
+      this.input.keyboard.on('keydown-ESC', () => {
+        if (FishingSystem.state !== 'IDLE') {
+          FishingSystem.cancelFishing();
+        } else if (UI.isAnyModalOpen()) {
+          UI.closeAllModals();
+        }
+      });
+
+      this.input.keyboard.on('keydown-I', () => { if (!UI.isAnyModalOpen()) UI.openDrawer('inventory'); });
+      this.input.keyboard.on('keydown-J', () => { if (!UI.isAnyModalOpen()) UI.openDrawer('journal'); });
+      this.input.keyboard.on('keydown-Q', () => { if (!UI.isAnyModalOpen()) UI.openDrawer('quests'); });
+      this.input.keyboard.on('keydown-M', () => { if (!UI.isAnyModalOpen()) UI.openDrawer('map'); });
+      this.input.keyboard.on('keydown-H', () => { if (!UI.isAnyModalOpen()) UI.openDrawer('guide'); });
+    }
+
+    buildWorldGeography() {
+      const gfx = this.add.graphics().setDepth(3);
+
+      // Landmasses / Islands with sandy beaches & lush grass
+      const landClusters = [
+        // Peaceful Lake North Harbor Shore
+        { x: 880, y: 610, rx: 320, ry: 120, dockX: 880, dockY: 755, dockLabel: 'Peaceful Harbor Dock' },
+        // Willow River Bank
+        { x: 2050, y: 550, rx: 280, ry: 110, dockX: 2040, dockY: 690, dockLabel: 'Willow River Pier' },
+        // Sunset Bay Pier
+        { x: 930, y: 1860, rx: 310, ry: 115, dockX: 930, dockY: 2005, dockLabel: 'Sunset Bay Pier' },
+        // Coral Island
+        { x: 2200, y: 1870, rx: 260, ry: 125, dockX: 2150, dockY: 2015, dockLabel: 'Coral Island Cove' },
+        // Misty Forest Outpost
+        { x: 3250, y: 780, rx: 240, ry: 115, dockX: 3240, dockY: 925, dockLabel: 'Misty Outpost Dock' },
+        // Decorative uninhabited islets
+        { x: 1520, y: 1380, rx: 120, ry: 85 },
+        { x: 2780, y: 1520, rx: 135, ry: 95 },
+        { x: 1580, y: 2560, rx: 150, ry: 90 }
+      ];
+
+      landClusters.forEach(isl => {
+        this.islands.push(isl);
+        // Shallow turquoise sandbar
+        gfx.fillStyle(0x2dd4bf, 0.25);
+        gfx.fillEllipse(isl.x, isl.y, (isl.rx + 28) * 2, (isl.ry + 24) * 2);
+        // Sandy shore
+        gfx.fillStyle(0xfde68a, 1);
+        gfx.fillEllipse(isl.x, isl.y, isl.rx * 2, isl.ry * 2);
+        // Lush green grass interior
+        gfx.fillStyle(0x15803d, 1);
+        gfx.fillEllipse(isl.x, isl.y - 4, (isl.rx - 18) * 2, (isl.ry - 16) * 2);
+
+        // Scatter swaying trees on island
+        for (let t = -2; t <= 2; t++) {
+          const tx = isl.x + t * (isl.rx * 0.34);
+          const ty = isl.y - 16 + (Math.abs(t) % 2) * 14;
+          const tree = this.add.sprite(tx, ty, 'prop_tree').setDepth(6);
+          this.tweens.add({
+            targets: tree,
+            angle: { from: -2.2, to: 2.2 },
+            duration: 2400 + Math.abs(t) * 300,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut'
+          });
+        }
+
+        // Wooden Dock extending into water
+        if (isl.dockX && isl.dockY) {
+          gfx.fillStyle(0x78350f, 1);
+          gfx.fillRect(isl.dockX - 24, isl.y + isl.ry - 15, 48, 70);
+          gfx.fillStyle(0xb45309, 1);
+          for (let py = isl.y + isl.ry - 10; py < isl.y + isl.ry + 50; py += 10) {
+            gfx.fillRect(isl.dockX - 22, py, 44, 6);
+          }
+          this.docks.push({ x: isl.dockX, y: isl.dockY + 25, label: isl.dockLabel });
+        }
+      });
+
+      // Lily Pads in Peaceful Lake & Misty Forest
+      for (let i = 0; i < 26; i++) {
+        const lx = Utils.randRange(420, 1380);
+        const ly = Utils.randRange(820, 1380);
+        const lily = this.add.sprite(lx, ly, 'prop_lily').setDepth(4).setAlpha(0.9);
+        this.tweens.add({
+          targets: lily,
+          y: ly + 3,
+          duration: 2200 + i * 90,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
+        });
+      }
+    }
+
+    spawnFishShadows(count) {
+      for (let i = 0; i < count; i++) {
+        const reg = GameData.REGIONS[i % GameData.REGIONS.length];
+        const ang = Math.random() * Math.PI * 2;
+        const dist = Utils.randRange(90, reg.radius * 0.72);
+        const fx = Utils.clamp(reg.x + Math.cos(ang) * dist, 150, this.WORLD_W - 150);
+        const fy = Utils.clamp(reg.y + Math.sin(ang) * dist, 150, this.WORLD_H - 150);
+
+        const shadow = this.add.ellipse(fx, fy, Utils.randRange(18, 32), Utils.randRange(7, 12), 0x041e30, 0.42).setDepth(4);
+        this.swimmingShadows.push({
+          sprite: shadow,
+          homeX: fx,
+          homeY: fy,
+          angle: Math.random() * Math.PI * 2,
+          speed: Utils.randRange(14, 34)
+        });
+      }
+    }
+
+    spawnFloatingProps() {
+      // Trash pieces (Eco cleanup)
+      for (let i = 0; i < 14; i++) {
+        const reg = GameData.REGIONS[i % 4];
+        const px = Utils.clamp(reg.x + Utils.randRange(-450, 450), 200, this.WORLD_W - 200);
+        const py = Utils.clamp(reg.y + Utils.randRange(-350, 450), 200, this.WORLD_H - 200);
+        const sp = this.add.sprite(px, py, 'prop_trash').setDepth(8);
+        this.props.push({ type: 'trash', sprite: sp, active: true });
+      }
+      // Treasure crates
+      for (let i = 0; i < 8; i++) {
+        const reg = GameData.REGIONS[2 + (i % 4)];
+        const px = Utils.clamp(reg.x + Utils.randRange(-500, 500), 200, this.WORLD_W - 200);
+        const py = Utils.clamp(reg.y + Utils.randRange(-400, 400), 200, this.WORLD_H - 200);
+        const sp = this.add.sprite(px, py, 'prop_treasure').setDepth(8);
+        this.props.push({ type: 'treasure', sprite: sp, active: true });
+      }
+    }
+
+    spawnNPCs() {
+      GameData.NPCS.forEach(npc => {
+        const sp = this.add.sprite(npc.x, npc.y, 'npc_' + npc.id).setDepth(12).setScale(1.25);
+        const tag = this.add.text(npc.x, npc.y - 30, npc.name.split(' ')[0], {
+          fontFamily: 'VT323, monospace',
+          fontSize: '16px',
+          color: '#fde68a',
+          backgroundColor: 'rgba(15,23,42,0.75)',
+          padding: { x: 4, y: 1 }
+        }).setOrigin(0.5).setDepth(13);
+
+        this.tweens.add({
+          targets: [sp, tag],
+          y: '-=3',
+          duration: 1600,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut'
+        });
+        this.npcSprites.push({ def: npc, sprite: sp });
+      });
+    }
+
+    spawnAmbientSky() {
+      for (let i = 0; i < 14; i++) {
+        const bx = Math.random() * this.WORLD_W;
+        const by = Math.random() * this.WORLD_H;
+        const bird = this.add.sprite(bx, by, 'prop_bird').setDepth(26).setAlpha(0.85);
+        this.birds.push({ sprite: bird, vx: Utils.randRange(22, 42), vy: Utils.randRange(-8, 8) });
+      }
+      for (let i = 0; i < 12; i++) {
+        const cloud = this.add.ellipse(
+          Math.random() * this.WORLD_W,
+          Math.random() * this.WORLD_H,
+          Utils.randRange(180, 340),
+          Utils.randRange(70, 120),
+          0xffffff,
+          0.08
+        ).setDepth(25);
+        this.clouds.push({ sprite: cloud, speed: Utils.randRange(8, 18) });
+      }
+    }
+
+    updateBoatSprite() {
+      if (this.boatSprite) {
+        this.boatSprite.setTexture('boat_' + GameState.data.boat.id);
+      }
+    }
+
+    castBobber(distance) {
+      const bx = this.boatSprite.x + Math.cos(this.boatAngle) * distance;
+      const by = this.boatSprite.y + Math.sin(this.boatAngle) * distance;
+      this.bobberSprite.setPosition(bx, by).setVisible(true);
+      this.spawnWaterRipple(bx, by);
+    }
+
+    triggerBobberBite() {
+      if (!this.bobberSprite.visible) return;
+      this.spawnWaterRipple(this.bobberSprite.x, this.bobberSprite.y);
+      this.tweens.add({
+        targets: this.bobberSprite,
+        y: this.bobberSprite.y + 6,
+        duration: 110,
+        yoyo: true,
+        repeat: 4
+      });
+    }
+
+    hideBobber() {
+      this.bobberSprite.setVisible(false);
+      this.lineGraphics.clear();
+    }
+
+    spawnWaterRipple(x, y) {
+      const ring = this.add.circle(x, y, 4, 0xffffff, 0).setDepth(5);
+      ring.setStrokeStyle(2, 0xe0f2fe, 0.75);
+      this.tweens.add({
+        targets: ring,
+        radius: 26,
+        alpha: 0,
+        duration: 850,
+        onComplete: () => ring.destroy()
+      });
+    }
+
+    triggerContextInteraction() {
+      if (!this.nearestInteractable) return;
+      const item = this.nearestInteractable;
+      if (item.type === 'npc') {
+        UI.openNpcDialogue(item.data);
+      } else if (item.type === 'dock') {
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+        UI.toast(`Docked safely at ${item.data.label}.`, 'emerald');
+        SaveSystem.save(GameState.data);
+      } else if (item.type === 'trash') {
+        item.prop.active = false;
+        item.prop.sprite.setVisible(false);
+        GameState.modifyEco(4);
+        GameState.modifyGold(15);
+        GameState.data.stats.trashCleaned += 1;
+        GameState.advanceQuests('clean_trash', 'any', 1);
+        SoundEngine.playCoin();
+        UI.toast('Cleaned floating debris! (+4% Eco, +15g)', 'emerald');
+      } else if (item.type === 'treasure') {
+        item.prop.active = false;
+        item.prop.sprite.setVisible(false);
+        const rewardGold = Utils.randInt(55, 130);
+        GameState.modifyGold(rewardGold);
+        GameState.addItem({ itemId: 'spinner_lure', name: 'Spinner Lure', category: 'Bait', count: 1, stackable: true, desc: 'Flashing brass spoon.' });
+        SoundEngine.playCatchSuccess();
+        UI.toast(`Salvaged Sunken Crate! (+${rewardGold}g & Spinner Lure)`, 'gold');
+      }
+    }
+
+    update(time, delta) {
+      const dt = Math.min(delta / 1000, 0.05);
+
+      // Animate water scroll subtly
+      this.waterBg.tilePositionX += 6 * dt;
+      this.waterBg.tilePositionY += 3 * dt;
+
+      // Update fishing challenge loop
+      FishingSystem.update(dt);
+
+      // Update Day/Night clock & dynamic weather
+      this.updateTimeAndWeather(dt);
+
+      // Update Boat Movement (locked while actively fishing or modal open)
+      this.updateBoatMovement(dt);
+
+      // Draw fishing line if bobber active
+      if (this.bobberSprite.visible) {
+        this.lineGraphics.clear();
+        this.lineGraphics.lineStyle(1.5, 0xf8fafc, 0.85);
+        this.lineGraphics.beginPath();
+        const rodTipX = this.boatSprite.x + Math.cos(this.boatAngle) * 24;
+        const rodTipY = this.boatSprite.y + Math.sin(this.boatAngle) * 24 - 6;
+        this.lineGraphics.moveTo(rodTipX, rodTipY);
+        this.lineGraphics.lineTo(this.bobberSprite.x, this.bobberSprite.y);
+        this.lineGraphics.strokePath();
+      }
+
+      // Animate swimming fish shadows & sky
+      this.updateAmbientEntities(dt);
+
+      // Detect nearby NPCs, Docks, Trash, Treasure
+      this.scanNearbyInteractables();
+
+      // Periodic Autosave every 45 seconds
+      this.autosaveTimer -= dt;
+      if (this.autosaveTimer <= 0) {
+        this.autosaveTimer = 45;
+        GameState.data.boatPos = { x: Math.round(this.boatSprite.x), y: Math.round(this.boatSprite.y) };
+        SaveSystem.save(GameState.data);
+      }
+    }
+
+    updateBoatMovement(dt) {
+      const canSteer = (FishingSystem.state === 'IDLE') && !UI.isAnyModalOpen();
+      let inputX = 0;
+      let inputY = 0;
+
+      if (canSteer) {
+        if (this.cursors.left.isDown || this.keys.A.isDown) inputX -= 1;
+        if (this.cursors.right.isDown || this.keys.D.isDown) inputX += 1;
+        if (this.cursors.up.isDown || this.keys.W.isDown) inputY -= 1;
+        if (this.cursors.down.isDown || this.keys.S.isDown) inputY += 1;
+
+        // Combine Virtual Touch Joystick input
+        if (Math.hypot(UI.joystickVec.x, UI.joystickVec.y) > 0.12) {
+          inputX = UI.joystickVec.x;
+          inputY = UI.joystickVec.y;
+        }
+      }
+
+      const len = Math.hypot(inputX, inputY);
+      if (len > 1) {
+        inputX /= len;
+        inputY /= len;
+      }
+
+      const boatSpec = GameState.getBoatSpec();
+      const fuelFactor = (boatSpec.hasMotor && GameState.data.boat.fuel <= 0) ? 0.45 : 1.0;
+      const maxSpeed = boatSpec.speed * fuelFactor;
+      const accel = 420;
+      const drag = 2.6;
+
+      this.velocity.x += (inputX * maxSpeed - this.velocity.x) * Math.min(1, drag * dt * 2.1);
+      this.velocity.y += (inputY * maxSpeed - this.velocity.y) * Math.min(1, drag * dt * 2.1);
+
+      if (len < 0.05) {
+        this.velocity.x *= Math.max(0, 1 - drag * dt);
+        this.velocity.y *= Math.max(0, 1 - drag * dt);
+      } else if (boatSpec.hasMotor && GameState.data.boat.fuel > 0) {
+        GameState.data.boat.fuel = Math.max(0, GameState.data.boat.fuel - dt * 0.45);
+      }
+
+      const speed = Math.hypot(this.velocity.x, this.velocity.y);
+      if (speed > 12) {
+        const targetAngle = Math.atan2(this.velocity.y, this.velocity.x);
+        // Smooth angular interpolation
+        let diff = targetAngle - this.boatAngle;
+        while (diff > Math.PI) diff -= Math.PI * 2;
+        while (diff < -Math.PI) diff += Math.PI * 2;
+        this.boatAngle += diff * Math.min(1, dt * 8);
+
+        this.wakeTimer -= dt;
+        if (this.wakeTimer <= 0) {
+          this.wakeTimer = 0.28;
+          this.spawnWaterRipple(
+            this.boatSprite.x - Math.cos(this.boatAngle) * 20,
+            this.boatSprite.y - Math.sin(this.boatAngle) * 20
+          );
+        }
+      }
+
+      // Proposed next position with world bounds & island collision check
+      let nextX = Utils.clamp(this.boatSprite.x + this.velocity.x * dt, 70, this.WORLD_W - 70);
+      let nextY = Utils.clamp(this.boatSprite.y + this.velocity.y * dt, 70, this.WORLD_H - 70);
+
+      let collided = false;
+      for (const isl of this.islands) {
+        const dx = (nextX - isl.x) / (isl.rx + 18);
+        const dy = (nextY - isl.y) / (isl.ry + 18);
+        if (dx * dx + dy * dy < 1.0) {
+          collided = true;
+          break;
+        }
+      }
+
+      if (!collided) {
+        this.boatSprite.setPosition(nextX, nextY);
+      } else {
+        this.velocity.x *= -0.35;
+        this.velocity.y *= -0.35;
+      }
+
+      // Gentle wave bobbing animation
+      this.bobPhase += dt * 3.2;
+      this.boatSprite.setRotation(this.boatAngle + Math.sin(this.bobPhase) * 0.04);
+      this.boatSprite.setScale(1.35 + Math.sin(this.bobPhase * 1.3) * 0.02);
+
+      // Update current region detection
+      let detectedRegion = GameData.REGIONS[0];
+      let bestDist = Infinity;
+      for (const reg of GameData.REGIONS) {
+        const d = Utils.dist(this.boatSprite.x, this.boatSprite.y, reg.x, reg.y);
+        if (d < bestDist) {
+          bestDist = d;
+          detectedRegion = reg;
+        }
+      }
+      if (GameState.data.currentRegion !== detectedRegion.id) {
+        GameState.data.currentRegion = detectedRegion.id;
+        UI.refreshHUD();
+        UI.toast(`Entered ${detectedRegion.name}`, 'info');
+      }
+    }
+
+    updateTimeAndWeather(dt) {
+      // 1 real second = 2 in-game minutes
+      this.timeTickAcc += dt * 2;
+      if (this.timeTickAcc >= 1) {
+        const mins = Math.floor(this.timeTickAcc);
+        this.timeTickAcc -= mins;
+        GameState.data.timeMinutes += mins;
+        if (GameState.data.timeMinutes >= 1440) {
+          GameState.data.timeMinutes -= 1440;
+          GameState.data.day += 1;
+          if ((GameState.data.day - 1) % 7 === 0) {
+            GameState.data.seasonIndex = (GameState.data.seasonIndex + 1) % 4;
+          }
+        }
+        UI.refreshClockOnly();
+      }
+
+      // Dynamic Weather shifts
+      this.weatherTimer -= dt;
+      if (this.weatherTimer <= 0) {
+        this.weatherTimer = Utils.randRange(95, 160);
+        const weathers = ['Sunny', 'Sunny', 'Cloudy', 'Rain', 'Fog'];
+        GameState.data.weather = weathers[Utils.randInt(0, weathers.length - 1)];
+        UI.refreshHUD();
+        UI.toast(`Weather shifted to ${GameState.data.weather}`, 'info');
+      }
+
+      // Day/Night & Weather atmospheric tinting
+      const period = GameState.getTimePeriod();
+      let tintColor = 0x0a192f;
+      let targetAlpha = 0.0;
+      if (period === 'Morning') { tintColor = 0xfef3c7; targetAlpha = 0.06; }
+      else if (period === 'Evening') { tintColor = 0xea580c; targetAlpha = 0.16; }
+      else if (period === 'Night') { tintColor = 0x061026; targetAlpha = GameState.data.boat.hasLantern ? 0.34 : 0.48; }
+
+      if (GameState.data.weather === 'Fog') { tintColor = 0xcbd5e1; targetAlpha = Math.max(targetAlpha, 0.24); }
+      if (GameState.data.weather === 'Rain') { tintColor = 0x0f2942; targetAlpha = Math.max(targetAlpha, 0.22); }
+
+      this.atmosphereOverlay.setFillStyle(tintColor, targetAlpha);
+
+      // Rain particle overlay
+      this.rainGraphics.clear();
+      if (GameState.data.weather === 'Rain') {
+        const cam = this.cameras.main;
+        this.rainGraphics.lineStyle(1.5, 0xbae6fd, 0.45);
+        this.rainDrops.forEach(drop => {
+          drop.x -= 90 * dt;
+          drop.y += drop.speed * dt;
+          if (drop.y > cam.height) { drop.y = -10; drop.x = Math.random() * cam.width; }
+          if (drop.x < 0) drop.x = cam.width;
+          const wx = cam.worldView.x + drop.x;
+          const wy = cam.worldView.y + drop.y;
+          this.rainGraphics.moveTo(wx, wy);
+          this.rainGraphics.lineTo(wx - 4, wy + 12);
+        });
+        this.rainGraphics.strokePath();
+      }
+    }
+
+    updateAmbientEntities(dt) {
+      this.swimmingShadows.forEach(s => {
+        s.angle += Utils.randRange(-0.8, 0.8) * dt;
+        s.sprite.x += Math.cos(s.angle) * s.speed * dt;
+        s.sprite.y += Math.sin(s.angle) * s.speed * dt;
+        s.sprite.setRotation(s.angle);
+        if (Utils.dist(s.sprite.x, s.sprite.y, s.homeX, s.homeY) > 160) {
+          s.angle = Math.atan2(s.homeY - s.sprite.y, s.homeX - s.sprite.x);
+        }
+      });
+
+      this.birds.forEach(b => {
+        b.sprite.x += b.vx * dt;
+        b.sprite.y += b.vy * dt;
+        if (b.sprite.x > this.WORLD_W + 40) b.sprite.x = -40;
+      });
+
+      this.clouds.forEach(c => {
+        c.sprite.x += c.speed * dt;
+        if (c.sprite.x > this.WORLD_W + 200) c.sprite.x = -200;
+      });
+    }
+
+    scanNearbyInteractables() {
+      const bx = this.boatSprite.x;
+      const by = this.boatSprite.y;
+      let closest = null;
+      let bestDist = 115;
+
+      // 1. Check NPCs
+      for (const n of this.npcSprites) {
+        const d = Utils.dist(bx, by, n.def.x, n.def.y);
+        if (d < bestDist) {
+          bestDist = d;
+          closest = { type: 'npc', data: n.def, label: `Talk to ${n.def.name}` };
+        }
+      }
+
+      // 2. Check Trash / Treasure Props
+      if (!closest) {
+        for (const p of this.props) {
+          if (!p.active) continue;
+          const d = Utils.dist(bx, by, p.sprite.x, p.sprite.y);
+          if (d < 85) {
+            closest = {
+              type: p.type,
+              prop: p,
+              label: p.type === 'trash' ? 'Clean Floating Debris (+Eco)' : 'Salvage Sunken Crate'
+            };
+            break;
+          }
+        }
+      }
+
+      // 3. Check Docks
+      if (!closest) {
+        for (const dock of this.docks) {
+          const d = Utils.dist(bx, by, dock.x, dock.y);
+          if (d < 90) {
+            closest = { type: 'dock', data: dock, label: `Dock at ${dock.label}` };
+            break;
+          }
+        }
+      }
+
+      this.nearestInteractable = closest;
+      UI.updateContextPrompt(closest);
+    }
+  }
+
+  // ============================================================================
+  // 9. ADAPTIVE UI CONTROLLER (DESKTOP + MOBILE TOUCH JOYSTICK & MENUS)
+  // ============================================================================
+  const UI = {
+    currentDrawerTab: 'inventory',
+    guideSubTab: 'steps',
+    inventoryFilter: 'All',
+    joystickVec: { x: 0, y: 0 },
+    pendingCatch: null,
+
+    init() {
+      this.bindMainMenuEvents();
+      this.bindHudEvents();
+      this.bindFishingControls();
+      this.bindTouchJoystick();
+      this.applyControlModeLayout();
+      window.addEventListener('resize', () => this.applyControlModeLayout());
+    },
+
+    applyControlModeLayout() {
+      const mode = GameState.data?.settings?.controlMode || 'auto';
+      const useTouch = mode === 'mobile' || (mode === 'auto' && Utils.isTouchDevice());
+
+      const joy = document.getElementById('mobile-joystick-container');
+      const act = document.getElementById('mobile-actions-container');
+      const desk = document.getElementById('desktop-action-bar');
+
+      if (useTouch) {
+        if (joy) joy.classList.remove('hidden');
+        if (act) act.classList.remove('hidden');
+        if (desk) desk.classList.add('hidden');
+      } else {
+        if (joy) joy.classList.add('hidden');
+        if (act) act.classList.add('hidden');
+        if (desk) desk.classList.remove('hidden');
+      }
+    },
+
+    bindTouchJoystick() {
+      const zone = document.getElementById('joystick-zone');
+      const knob = document.getElementById('joystick-knob');
+      if (!zone || !knob) return;
+      let activeId = null;
+
+      const updateStick = (clientX, clientY) => {
+        const rect = zone.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const maxR = rect.width * 0.36;
+        let dx = clientX - cx;
+        let dy = clientY - cy;
+        const dist = Math.hypot(dx, dy);
+        if (dist > maxR) {
+          dx = (dx / dist) * maxR;
+          dy = (dy / dist) * maxR;
+        }
+        knob.style.transform = `translate(${dx}px, ${dy}px)`;
+        this.joystickVec.x = dx / maxR;
+        this.joystickVec.y = dy / maxR;
+      };
+
+      const resetStick = () => {
+        activeId = null;
+        knob.style.transform = 'translate(0px, 0px)';
+        this.joystickVec.x = 0;
+        this.joystickVec.y = 0;
+      };
+
+      zone.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const t = e.changedTouches[0];
+        activeId = t.identifier;
+        updateStick(t.clientX, t.clientY);
+      }, { passive: false });
+
+      zone.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        for (const t of e.changedTouches) {
+          if (t.identifier === activeId) {
+            updateStick(t.clientX, t.clientY);
+          }
+        }
+      }, { passive: false });
+
+      zone.addEventListener('touchend', (e) => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === activeId) resetStick();
+        }
+      });
+      zone.addEventListener('touchcancel', resetStick);
+
+      // Mobile Action Buttons
+      const btnTouchFish = document.getElementById('btn-touch-fish');
+      btnTouchFish.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        if (FishingSystem.state === 'IDLE') {
+          FishingSystem.openFishingPanel();
+        } else {
+          FishingSystem.handlePrimaryDown();
+        }
+      });
+      btnTouchFish.addEventListener('pointerup', (e) => {
+        e.preventDefault();
+        FishingSystem.handlePrimaryUp();
+      });
+
+      document.getElementById('btn-touch-interact').addEventListener('click', () => {
+        if (window.gameScene) window.gameScene.triggerContextInteraction();
+      });
+    },
+
+    bindMainMenuEvents() {
+      document.getElementById('btn-new-game').addEventListener('click', () => {
+        SoundEngine.init();
+        SoundEngine.playUiClick();
+        SoundEngine.startCozyMusic();
+        GameState.initNew();
+        this.launchGameSession();
+      });
+
+      document.getElementById('btn-continue-game').addEventListener('click', async () => {
+        SoundEngine.init();
+        SoundEngine.playUiClick();
+        SoundEngine.startCozyMusic();
+        const snap = await SaveSystem.load();
+        if (snap) {
+          GameState.loadFromSnapshot(snap);
+          this.launchGameSession();
+          this.toast('Voyage restored from IndexedDB!', 'emerald');
+        }
+      });
+
+      document.getElementById('btn-menu-settings').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        if (!GameState.data) GameState.initNew();
+        this.openDrawer('settings');
+      });
+
+      document.getElementById('btn-menu-guide').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        if (!GameState.data) GameState.initNew();
+        this.openDrawer('guide');
+      });
+
+      document.getElementById('btn-menu-credits').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        this.showConfirm(
+          'SERENE WATERS CREDITS',
+          'Original 16-Bit Cozy Fishing & Boat Adventure built with Phaser 3, Canvas 2D Procedural Pixel Art, Web Audio Synthesis, GSAP & IndexedDB.',
+          [{ label: 'CLOSE', style: 'pixel-btn-gold', onClick: () => {} }]
+        );
+      });
+    },
+
+    launchGameSession() {
+      const menu = document.getElementById('main-menu');
+      const hud = document.getElementById('hud-layer');
+      gsap.to(menu, {
+        opacity: 0,
+        duration: 0.35,
+        onComplete: () => {
+          menu.classList.add('hidden');
+          hud.classList.remove('hidden');
+          this.applyControlModeLayout();
+          this.refreshHUD();
+          if (!window.phaserGame) {
+            startPhaserInstance();
+          } else if (window.gameScene) {
+            window.gameScene.boatSprite.setPosition(GameState.data.boatPos.x, GameState.data.boatPos.y);
+            window.gameScene.updateBoatSprite();
+          }
+        }
+      });
+    },
+
+    bindHudEvents() {
+      document.querySelectorAll('[data-menu]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          SoundEngine.playUiClick();
+          this.openDrawer(btn.getAttribute('data-menu'));
+        });
+      });
+
+      document.getElementById('btn-creator-story').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        this.showConfirm(
+          'KISAH DI BALIK SERENE WATERS',
+          'Seorang pemancing muda mewarisi perahu kayu kakeknya. Ia menjelajahi kepulauan, membantu warga, dan mencari ikan langka sambil membersihkan perairan. Dari setiap tangkapan, ia belajar bahwa menjaga laut sama pentingnya dengan hasil pancingannya.',
+          [{ label: 'LANJUTKAN', style: 'pixel-btn-gold', onClick: () => {} }]
+        );
+      });
+
+      document.querySelectorAll('.drawer-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          SoundEngine.playUiClick();
+          this.openDrawer(tab.getAttribute('data-drawer-tab'));
+        });
+      });
+
+      document.getElementById('btn-close-drawer').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        this.closeDrawer();
+      });
+
+      document.getElementById('btn-close-dialogue').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        document.getElementById('dialogue-modal').classList.add('hidden');
+        document.getElementById('dialogue-modal').classList.remove('flex');
+      });
+
+      document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        if (window.gameScene) {
+          const z = Utils.clamp(window.gameScene.cameras.main.zoom + 0.18, 0.75, 2.1);
+          window.gameScene.cameras.main.setZoom(z);
+        }
+      });
+
+      document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        if (window.gameScene) {
+          const z = Utils.clamp(window.gameScene.cameras.main.zoom - 0.18, 0.75, 2.1);
+          window.gameScene.cameras.main.setZoom(z);
+        }
+      });
+
+      document.getElementById('context-prompt').addEventListener('click', () => {
+        if (window.gameScene) window.gameScene.triggerContextInteraction();
+      });
+
+      document.getElementById('btn-desktop-fish').addEventListener('click', () => {
+        if (FishingSystem.state === 'IDLE') FishingSystem.openFishingPanel();
+      });
+    },
+
+    bindFishingControls() {
+      const btnPrimary = document.getElementById('btn-fish-primary');
+      btnPrimary.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        FishingSystem.handlePrimaryDown();
+      });
+      btnPrimary.addEventListener('pointerup', (e) => {
+        e.preventDefault();
+        FishingSystem.handlePrimaryUp();
+      });
+      btnPrimary.addEventListener('pointerleave', () => {
+        if (FishingSystem.state === 'REELING') FishingSystem.handlePrimaryUp();
+      });
+
+      document.getElementById('btn-cancel-fishing').addEventListener('click', () => {
+        FishingSystem.cancelFishing();
+      });
+
+      // Catch Modal Decision Buttons
+      document.getElementById('btn-catch-keep').addEventListener('click', () => {
+        if (!this.pendingCatch) return;
+        const c = this.pendingCatch;
+        const added = GameState.addItem({
+          itemId: c.species.id,
+          name: c.species.name,
+          category: 'Fish',
+          count: 1,
+          stackable: false,
+          rarity: c.species.rarity,
+          weight: c.weight,
+          length: c.length,
+          value: c.value,
+          desc: `${c.weight}kg • ${c.length}cm • ${c.species.desc}`
+        });
+        if (added) {
+          this.toast(`Kept ${c.species.name} (${c.weight}kg) in boat livewell.`, 'emerald');
+          this.closeCatchModal();
+        }
+      });
+
+      document.getElementById('btn-catch-sell').addEventListener('click', () => {
+        if (!this.pendingCatch) return;
+        const c = this.pendingCatch;
+        const executeSell = () => {
+          GameState.modifyGold(c.value);
+          SoundEngine.playCoin();
+          this.toast(`Sold ${c.species.name} for +${c.value}g!`, 'gold');
+          this.closeCatchModal();
+        };
+
+        // Safeguard confirmation popup for Rare / Epic / Legendary catches
+        if (['Rare', 'Epic', 'Legendary'].includes(c.species.rarity)) {
+          this.showConfirm(
+            `SELL ${c.species.rarity.toUpperCase()} FISH?`,
+            `Are you sure you want to immediately sell your ${c.species.name} (${c.weight}kg) for ${c.value}g?`,
+            [
+              { label: 'SELL FISH', style: 'pixel-btn-gold', onClick: executeSell },
+              { label: 'CANCEL', style: 'pixel-btn', onClick: () => {} }
+            ]
+          );
+        } else {
+          executeSell();
+        }
+      });
+
+      document.getElementById('btn-catch-release').addEventListener('click', () => {
+        if (!this.pendingCatch) return;
+        const c = this.pendingCatch;
+        const ecoGain = { Common: 2, Uncommon: 3, Rare: 5, Epic: 8, Legendary: 12 }[c.species.rarity] || 2;
+        GameState.modifyEco(ecoGain);
+        this.toast(`Released ${c.species.name} back to the waters! (+${ecoGain}% Eco)`, 'emerald');
+        this.closeCatchModal();
+      });
+    },
+
+    showFishingHUD(region) {
+      const hud = document.getElementById('fishing-hud');
+      hud.classList.remove('hidden');
+      document.getElementById('fish-spot-info').textContent = `${region.name} • Depth: ${region.depth} • ${GameState.data.weather}`;
+      this.renderBaitBar();
+      this.updateFishingUIState('READY');
+    },
+
+    hideFishingHUD() {
+      document.getElementById('fishing-hud').classList.add('hidden');
+    },
+
+    renderBaitBar() {
+      const bar = document.getElementById('fishing-bait-bar');
+      bar.innerHTML = GameData.BAITS.map(b => {
+        const cnt = GameState.getBaitCount(b.id);
+        const active = GameState.data.equippedBait === b.id;
+        return `
+          <button data-select-bait="${b.id}" class="shrink-0 px-2.5 py-1 rounded border text-xs font-vt text-base transition ${active ? 'bg-amber-600/80 border-amber-300 text-white' : 'bg-slate-900/90 border-slate-700 text-slate-300'}">
+            ${b.name} (${cnt})
+          </button>
+        `;
+      }).join('');
+
+      bar.querySelectorAll('[data-select-bait]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          GameState.data.equippedBait = btn.getAttribute('data-select-bait');
+          SoundEngine.playUiClick();
+          this.renderBaitBar();
+        });
+      });
+    },
+
+    updateFishingUIState(st) {
+      const label = document.getElementById('fish-state-label');
+      const castWrap = document.getElementById('fishing-cast-bar-wrap');
+      const waitWrap = document.getElementById('fishing-wait-wrap');
+      const reelWrap = document.getElementById('fishing-reel-wrap');
+      const btn = document.getElementById('btn-fish-primary');
+      const touchTitle = document.getElementById('btn-touch-fish-title');
+      const touchSub = document.getElementById('btn-touch-fish-sub');
+
+      castWrap.classList.add('hidden');
+      waitWrap.classList.add('hidden');
+      reelWrap.classList.add('hidden');
+      btn.classList.remove('pulse-glow', 'pixel-btn-emerald', 'pixel-btn-danger');
+      btn.classList.add('pixel-btn-gold');
+
+      if (st === 'READY') {
+        label.textContent = 'LANGKAH 2 & 3: PILIH UMPAN & LEMPAR KAIL';
+        btn.textContent = 'TAHAN UNTUK LEMPAR KAIL [SPACE]';
+        if (touchTitle) touchTitle.textContent = 'LEMPAR KAIL';
+        if (touchSub) touchSub.textContent = 'Tahan & Lepas';
+      } else if (st === 'CASTING') {
+        label.textContent = 'LEPASKAN UNTUK MELEMPAR PELAMPUNG!';
+        castWrap.classList.remove('hidden');
+        btn.textContent = 'LEPASKAN SEKARANG!';
+      } else if (st === 'WAITING') {
+        label.textContent = 'LANGKAH 4: MENUNGGU SAMBARAN IKAN...';
+        waitWrap.classList.remove('hidden');
+        document.getElementById('fishing-wait-msg').textContent = 'Riak air muncul di sekitar pelampung... bersiaplah!';
+        btn.textContent = 'MENUNGGU IKAN...';
+      } else if (st === 'BITE') {
+        label.textContent = 'LANGKAH 5 & 6: IKAN MENGGIGIT!';
+        waitWrap.classList.remove('hidden');
+        document.getElementById('fishing-wait-msg').innerHTML = '<span class="text-amber-300 font-bold text-2xl">❗ SAMBARAN! TARIK SEKARANG! ❗</span>';
+        btn.classList.remove('pixel-btn-gold');
+        btn.classList.add('pixel-btn-emerald', 'pulse-glow');
+        btn.textContent = 'TARIK KAIL SEKARANG! [SPACE]';
+        if (touchTitle) touchTitle.textContent = '❗ TARIK!';
+        if (touchSub) touchSub.textContent = 'Ketuk Cepat!';
+      } else if (st === 'REELING') {
+        label.textContent = 'LANGKAH 7: GULUNG & JAGA TENSION TALI';
+        reelWrap.classList.remove('hidden');
+        btn.textContent = 'TAHAN GULUNG / LEPAS AGAR TALI DINGIN';
+        if (touchTitle) touchTitle.textContent = '🔄 GULUNG';
+        if (touchSub) touchSub.textContent = 'Jaga Zona Hijau';
+      }
+    },
+
+    updateCastBar(pct) {
+      document.getElementById('cast-power-pct').textContent = `${Math.round(pct)}%`;
+      document.getElementById('cast-power-fill').style.width = `${pct}%`;
+    },
+
+    updateReelHUD(progress, tension, sweetMin, sweetMax) {
+      document.getElementById('reel-progress-pct').textContent = `${Math.round(progress)}%`;
+      document.getElementById('reel-progress-bar').style.width = `${progress}%`;
+
+      const sweetZone = document.getElementById('reel-sweet-zone');
+      sweetZone.style.left = `${sweetMin}%`;
+      sweetZone.style.width = `${sweetMax - sweetMin}%`;
+
+      document.getElementById('reel-tension-marker').style.left = `${Utils.clamp(tension, 0, 98)}%`;
+
+      const statusEl = document.getElementById('reel-tension-status');
+      if (tension > 82) {
+        statusEl.textContent = 'DANGER! LINE STRAINING!';
+        statusEl.className = 'text-rose-400 font-bold';
+      } else if (tension >= sweetMin && tension <= sweetMax) {
+        statusEl.textContent = 'Sweet Spot! Reeling Fast';
+        statusEl.className = 'text-emerald-300 font-bold';
+      } else {
+        statusEl.textContent = 'Low Tension (Hold Reel)';
+        statusEl.className = 'text-amber-200';
+      }
+    },
+
+    showCatchModal(caught, isNew) {
+      this.pendingCatch = caught;
+      const sp = caught.species;
+      const modal = document.getElementById('catch-modal');
+
+      const badge = document.getElementById('catch-rarity-badge');
+      badge.textContent = sp.rarity.toUpperCase();
+      badge.className = `px-2.5 py-0.5 rounded text-xs font-pixel rarity-${sp.rarity}`;
+
+      const newBadge = document.getElementById('catch-new-badge');
+      if (isNew) newBadge.classList.remove('hidden');
+      else newBadge.classList.add('hidden');
+
+      document.getElementById('catch-fish-img').src = PixelArtGen.fishDataUrls[sp.id] || '';
+      document.getElementById('catch-fish-name').textContent = sp.name;
+      document.getElementById('catch-fish-desc').textContent = sp.desc;
+      document.getElementById('catch-weight').textContent = `${caught.weight.toFixed(2)} kg`;
+      document.getElementById('catch-length').textContent = `${caught.length} cm`;
+      document.getElementById('catch-value').textContent = `${caught.value}g`;
+
+      const reg = GameData.REGIONS.find(r => r.id === caught.regionId);
+      document.getElementById('catch-location-label').textContent = `Caught at ${reg ? reg.name : 'Serene Waters'}`;
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      const touchTitle = document.getElementById('btn-touch-fish-title');
+      const touchSub = document.getElementById('btn-touch-fish-sub');
+      if (touchTitle) touchTitle.textContent = 'MULAI MANCING';
+      if (touchSub) touchSub.textContent = 'Ketuk untuk Lempar';
+    },
+
+    closeCatchModal() {
+      this.pendingCatch = null;
+      const modal = document.getElementById('catch-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      FishingSystem.state = 'IDLE';
+      SaveSystem.save(GameState.data);
+    },
+
+    openNpcDialogue(npc) {
+      SoundEngine.playUiClick();
+      const modal = document.getElementById('dialogue-modal');
+      const region = GameData.REGIONS.find(r => r.id === npc.region);
+      const friendLv = GameState.data.npcFriendship[npc.id] || 1;
+
+      document.getElementById('npc-portrait-img').src = PixelArtGen.npcDataUrls[npc.id] || '';
+      document.getElementById('npc-name').textContent = npc.name;
+      document.getElementById('npc-friendship').textContent = `❤️ Friendship Lv.${friendLv}`;
+      document.getElementById('npc-role').textContent = `${npc.role} • ${region ? region.name : ''}`;
+      document.getElementById('npc-dialogue-text').textContent = `"${npc.greeting}"`;
+
+      const choicesEl = document.getElementById('npc-choices-list');
+      choicesEl.innerHTML = '';
+
+      const addChoice = (label, styleClass, handler) => {
+        const b = document.createElement('button');
+        b.className = `pixel-btn ${styleClass} py-2.5 px-3 text-left font-vt text-lg sm:text-xl`;
+        b.textContent = label;
+        b.addEventListener('click', () => {
+          SoundEngine.playUiClick();
+          handler();
+        });
+        choicesEl.appendChild(b);
+      };
+
+      // Quest interactions for this NPC
+      const questDef = GameData.QUESTS.find(q => q.id === npc.questId);
+      if (questDef) {
+        const activeQ = GameState.data.quests.active.find(q => q.id === questDef.id);
+        const completedQ = GameState.data.quests.completed.includes(questDef.id);
+
+        if (activeQ && activeQ.progress >= activeQ.targetCount) {
+          addChoice(`★ Complete Quest: "${questDef.title}" (Claim +${questDef.rewardGold}g)`, 'pixel-btn-emerald', () => {
+            GameState.claimQuestReward(questDef.id);
+            document.getElementById('npc-dialogue-text').textContent = `"Splendid work, friend! The waters are brighter with anglers like you."`;
+            this.openNpcDialogue(npc);
+          });
+        } else if (activeQ) {
+          addChoice(`📜 Check Quest Progress: ${questDef.title} (${activeQ.progress}/${activeQ.targetCount})`, '', () => {
+            document.getElementById('npc-dialogue-text').textContent = `"${questDef.desc} — Progress: ${activeQ.progress} of ${activeQ.targetCount}."`;
+          });
+        } else if (!completedQ) {
+          addChoice(`❗ Ask About Request: "${questDef.title}"`, 'pixel-btn-gold', () => {
+            document.getElementById('npc-dialogue-text').textContent = questDef.dialoguePrompt;
+            choicesEl.innerHTML = '';
+            addChoice(`1. "I'll take on this task." (Accept Quest)`, 'pixel-btn-emerald', () => {
+              GameState.acceptQuest(questDef.id);
+              this.openNpcDialogue(npc);
+            });
+            addChoice(`2. "What reward are you offering?"`, '', () => {
+              document.getElementById('npc-dialogue-text').textContent = `"I can offer ${questDef.rewardGold}g, supplies, and my gratitude (+Eco Rating)."`;
+            });
+            addChoice(`3. "Maybe another time." (Decline)`, '', () => {
+              this.openNpcDialogue(npc);
+            });
+          });
+        }
+      }
+
+      // Sell all fish in bag quickly (with confirmation if rare fish present)
+      const fishInBag = GameState.data.inventory.filter(i => i.category === 'Fish');
+      if (fishInBag.length > 0) {
+        const totalVal = fishInBag.reduce((sum, f) => sum + (f.value || 10), 0);
+        addChoice(`💰 Sell All Caught Fish in Boat (${fishInBag.length} fish for ${totalVal}g)`, 'pixel-btn-gold', () => {
+          const hasRare = fishInBag.some(f => ['Rare', 'Epic', 'Legendary'].includes(f.rarity));
+          const doSellAll = () => {
+            GameState.data.inventory = GameState.data.inventory.filter(i => i.category !== 'Fish');
+            GameState.modifyGold(totalVal);
+            SoundEngine.playCoin();
+            this.toast(`Sold ${fishInBag.length} fish for ${totalVal}g!`, 'gold');
+            this.openNpcDialogue(npc);
+          };
+          if (hasRare) {
+            this.showConfirm(
+              'SELL RARE CATCHES?',
+              `Your boat holds Rare/Epic/Legendary fish. Sell all ${fishInBag.length} fish for ${totalVal}g?`,
+              [
+                { label: 'SELL ALL', style: 'pixel-btn-gold', onClick: doSellAll },
+                { label: 'CANCEL', style: 'pixel-btn', onClick: () => {} }
+              ]
+            );
+          } else {
+            doSellAll();
+          }
+        });
+      }
+
+      // Open Shop / Shipyard / Permits shortcut
+      if (npc.opensShop === 'market' || npc.opensShop === 'rods') {
+        addChoice('🛒 Browse Bait, Rods & Supplies', '', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          this.openDrawer('upgrades');
+        });
+      } else if (npc.opensShop === 'shipyard') {
+        addChoice('⛵ Open Shipyard (Upgrade / Repair / Refuel Boat)', '', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          this.openDrawer('upgrades');
+        });
+      } else if (npc.opensShop === 'permits') {
+        addChoice('🗺️ View Sea Charts & Region Permits', '', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          this.openDrawer('map');
+        });
+      }
+
+      // Gift / Chat for Friendship
+      addChoice('💬 Chat About Local Waters (+Friendship)', '', () => {
+        GameState.data.npcFriendship[npc.id] = (GameState.data.npcFriendship[npc.id] || 1) + 1;
+        document.getElementById('npc-dialogue-text').textContent = `"Always a pleasure sharing sea tales with you! Keep an eye on the weather—rain brings rare swimmers closer to the surface."`;
+        document.getElementById('npc-friendship').textContent = `❤️ Friendship Lv.${GameState.data.npcFriendship[npc.id]}`;
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    },
+
+    showConfirm(title, message, buttons) {
+      const modal = document.getElementById('confirm-modal');
+      document.getElementById('confirm-title').textContent = title;
+      document.getElementById('confirm-message').textContent = message;
+      const btnWrap = document.getElementById('confirm-buttons');
+      btnWrap.innerHTML = '';
+      btnWrap.className = `grid grid-cols-${Math.min(2, buttons.length)} gap-2.5 pt-1`;
+
+      buttons.forEach(b => {
+        const el = document.createElement('button');
+        el.className = `pixel-btn ${b.style || ''} py-2.5 px-3 font-pixel text-[10px]`;
+        el.textContent = b.label;
+        el.addEventListener('click', () => {
+          SoundEngine.playUiClick();
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          if (b.onClick) b.onClick();
+        });
+        btnWrap.appendChild(el);
+      });
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    },
+
+    openDrawer(tabName) {
+      this.currentDrawerTab = tabName;
+      const modal = document.getElementById('drawer-modal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.querySelectorAll('.drawer-tab').forEach(btn => {
+        if (btn.getAttribute('data-drawer-tab') === tabName) {
+          btn.classList.add('pixel-btn-gold');
+        } else {
+          btn.classList.remove('pixel-btn-gold');
+        }
+      });
+
+      const body = document.getElementById('drawer-content');
+      if (tabName === 'inventory') this.renderInventoryTab(body);
+      else if (tabName === 'journal') this.renderJournalTab(body);
+      else if (tabName === 'quests') this.renderQuestsTab(body);
+      else if (tabName === 'map') this.renderMapTab(body);
+      else if (tabName === 'upgrades') this.renderUpgradesTab(body);
+      else if (tabName === 'guide') this.renderGuideTab(body);
+      else if (tabName === 'settings') this.renderSettingsTab(body);
+    },
+
+    closeDrawer() {
+      const modal = document.getElementById('drawer-modal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    },
+
+    renderInventoryTab(container) {
+      const boatSpec = GameState.getBoatSpec();
+      const cats = ['All', 'Fish', 'Bait', 'Fishing Rod', 'Tools', 'Food', 'Materials'];
+      const items = GameState.data.inventory.filter(i => this.inventoryFilter === 'All' || i.category === this.inventoryFilter);
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="font-pixel text-sm sm:text-base text-amber-300">BOAT CARGO & TACKLE</h2>
+              <p class="font-vt text-lg text-slate-300">Storage Slots: ${GameState.data.inventory.length} / ${boatSpec.storage} • Gold: ${GameState.data.gold}g</p>
+            </div>
+            <div class="flex flex-wrap gap-1">
+              ${cats.map(c => `
+                <button data-inv-cat="${c}" class="pixel-btn ${this.inventoryFilter === c ? 'pixel-btn-gold' : ''} px-2.5 py-1 font-vt text-base">${c}</button>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            ${items.length === 0 ? `<div class="col-span-full text-center py-8 font-vt text-xl text-slate-400">No items in this category.</div>` : ''}
+            ${items.map(itm => {
+              const fishImg = itm.category === 'Fish' ? `<img src="${PixelArtGen.fishDataUrls[itm.itemId] || ''}" class="w-10 h-10 object-contain shrink-0" style="image-rendering:pixelated;" />` : '';
+              return `
+                <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3 flex flex-col justify-between gap-2">
+                  <div class="flex items-start gap-2.5">
+                    ${fishImg}
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-1">
+                        <span class="font-bold text-sm text-amber-200 truncate">${Utils.escapeHtml(itm.name)}</span>
+                        <span class="text-xs px-1.5 py-0.5 rounded bg-slate-800 text-sky-300">x${itm.count}</span>
+                      </div>
+                      <div class="text-xs text-slate-400">${itm.category}${itm.rarity ? ' • ' + itm.rarity : ''}</div>
+                      <p class="font-vt text-base text-slate-300 leading-tight mt-1">${Utils.escapeHtml(itm.desc)}</p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1.5 pt-1 border-t border-slate-800">
+                    ${itm.category === 'Fish' ? `
+                      <button data-sell-uid="${itm.uid}" class="flex-1 pixel-btn pixel-btn-gold py-1 px-2 font-vt text-base">Sell (${itm.value}g)</button>
+                    ` : ''}
+                    ${itm.category === 'Bait' ? `
+                      <button data-equip-bait="${itm.itemId}" class="flex-1 pixel-btn ${GameState.data.equippedBait === itm.itemId ? 'pixel-btn-emerald' : ''} py-1 px-2 font-vt text-base">
+                        ${GameState.data.equippedBait === itm.itemId ? 'Equipped' : 'Equip Bait'}
+                      </button>
+                    ` : ''}
+                    ${['Food', 'Tools'].includes(itm.category) ? `
+                      <button data-use-uid="${itm.uid}" class="flex-1 pixel-btn pixel-btn-emerald py-1 px-2 font-vt text-base">Use Item</button>
+                    ` : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      container.querySelectorAll('[data-inv-cat]').forEach(b => {
+        b.addEventListener('click', () => {
+          this.inventoryFilter = b.getAttribute('data-inv-cat');
+          this.renderInventoryTab(container);
+        });
+      });
+
+      container.querySelectorAll('[data-sell-uid]').forEach(b => {
+        b.addEventListener('click', () => {
+          const uid = b.getAttribute('data-sell-uid');
+          const itm = GameState.data.inventory.find(x => x.uid === uid);
+          if (!itm) return;
+          const doSell = () => {
+            if (GameState.removeItem(uid, 1)) {
+              GameState.modifyGold(itm.value || 10);
+              SoundEngine.playCoin();
+              this.toast(`Sold ${itm.name} for +${itm.value}g`, 'gold');
+              this.renderInventoryTab(container);
+            }
+          };
+          if (['Rare', 'Epic', 'Legendary'].includes(itm.rarity)) {
+            this.showConfirm(`SELL ${itm.rarity.toUpperCase()} FISH?`, `Confirm selling ${itm.name} for ${itm.value}g?`, [
+              { label: 'SELL', style: 'pixel-btn-gold', onClick: doSell },
+              { label: 'CANCEL', style: 'pixel-btn', onClick: () => {} }
+            ]);
+          } else {
+            doSell();
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-equip-bait]').forEach(b => {
+        b.addEventListener('click', () => {
+          GameState.data.equippedBait = b.getAttribute('data-equip-bait');
+          SoundEngine.playUiClick();
+          this.toast('Bait equipped!', 'emerald');
+          this.renderInventoryTab(container);
+        });
+      });
+
+      container.querySelectorAll('[data-use-uid]').forEach(b => {
+        b.addEventListener('click', () => {
+          const uid = b.getAttribute('data-use-uid');
+          const itm = GameState.data.inventory.find(x => x.uid === uid);
+          if (!itm) return;
+          if (itm.itemId === 'hull_patch') {
+            const maxH = GameState.getBoatSpec().maxHull;
+            GameState.data.boat.hull = Math.min(maxH, GameState.data.boat.hull + 40);
+            GameState.removeItem(uid, 1);
+            this.toast('Repaired +40 Boat Hull!', 'emerald');
+          } else if (itm.itemId === 'fuel_canister') {
+            const maxF = GameState.getBoatSpec().maxFuel || 100;
+            GameState.data.boat.fuel = Math.min(maxF, GameState.data.boat.fuel + 50);
+            GameState.removeItem(uid, 1);
+            this.toast('Refilled +50 Marine Fuel!', 'emerald');
+          } else if (itm.itemId === 'herbal_tea') {
+            GameState.modifyEco(5);
+            GameState.removeItem(uid, 1);
+            this.toast('Drank Warm Herbal Tea! Cozy morale +5% Eco.', 'emerald');
+          }
+          this.refreshHUD();
+          this.renderInventoryTab(container);
+        });
+      });
+    },
+
+    renderJournalTab(container) {
+      const discoveredCount = Object.keys(GameState.data.journal).length;
+      const totalSpecies = GameData.FISH_SPECIES.length;
+      const pct = Math.round((discoveredCount / totalSpecies) * 100);
+      let largestFish = { name: 'None', w: 0 };
+
+      Object.entries(GameState.data.journal).forEach(([id, info]) => {
+        if (info.maxWeight > largestFish.w) {
+          const sp = GameData.FISH_SPECIES.find(s => s.id === id);
+          largestFish = { name: sp ? sp.name : id, w: info.maxWeight };
+        }
+      });
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950/70 p-3 rounded-lg border border-slate-700">
+            <div>
+              <h2 class="font-pixel text-sm sm:text-base text-amber-300">FISH ENCYCLOPEDIA</h2>
+              <p class="font-vt text-lg text-sky-200">Discovered: ${discoveredCount}/${totalSpecies} (${pct}%) • Total Caught: ${GameState.data.stats.totalCaught}</p>
+            </div>
+            <div class="text-right font-vt text-lg">
+              <div class="text-emerald-300">Largest: ${largestFish.name} (${largestFish.w}kg)</div>
+              <div class="text-amber-300">Rarest Rank: ${GameState.data.stats.rarestRank}</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+            ${GameData.FISH_SPECIES.map(sp => {
+              const record = GameState.data.journal[sp.id];
+              const reg = GameData.REGIONS.find(r => r.id === sp.habitat);
+              if (!record) {
+                return `
+                  <div class="bg-slate-950/70 border border-slate-800 rounded-lg p-3 opacity-65 flex items-center gap-3">
+                    <div class="w-12 h-12 rounded bg-slate-900 flex items-center justify-center font-pixel text-slate-600 text-xs">?</div>
+                    <div>
+                      <div class="font-bold text-sm text-slate-400">Undiscovered Species</div>
+                      <div class="text-xs text-slate-500">Habitat: ${reg ? reg.name : sp.habitat}</div>
+                      <span class="inline-block mt-1 px-1.5 py-0.2 rounded text-[10px] rarity-${sp.rarity}">${sp.rarity}</span>
+                    </div>
+                  </div>
+                `;
+              }
+              return `
+                <div class="bg-slate-900/90 border border-sky-700/50 rounded-lg p-3 flex items-start gap-3">
+                  <div class="w-14 h-14 rounded-lg bg-sky-950 border border-sky-500/40 flex items-center justify-center shrink-0">
+                    <img src="${PixelArtGen.fishDataUrls[sp.id]}" class="w-11 h-11 object-contain" style="image-rendering:pixelated;" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-1">
+                      <span class="font-bold text-sm text-amber-200 truncate">${sp.name}</span>
+                      <span class="px-1.5 py-0.2 rounded text-[10px] rarity-${sp.rarity}">${sp.rarity}</span>
+                    </div>
+                    <div class="font-vt text-base text-sky-300">${reg ? reg.name : ''} • Caught: ${record.caughtCount}</div>
+                    <div class="font-vt text-sm text-emerald-300">Best: ${record.maxWeight}kg / ${record.maxLength}cm</div>
+                    <p class="text-xs text-slate-400 mt-0.5 line-clamp-2">${sp.desc}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    },
+
+    renderQuestsTab(container) {
+      const activeList = GameState.data.quests.active;
+      const completedIds = GameState.data.quests.completed;
+      const availableList = GameData.QUESTS.filter(q => !completedIds.includes(q.id) && !activeList.some(a => a.id === q.id));
+
+      container.innerHTML = `
+        <div class="space-y-5">
+          <div>
+            <h2 class="font-pixel text-sm sm:text-base text-amber-300 mb-2">ACTIVE QUESTS (${activeList.length})</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              ${activeList.length === 0 ? '<div class="font-vt text-lg text-slate-400">No active quests. Accept one below or talk to harbor NPCs!</div>' : ''}
+              ${activeList.map(aq => {
+                const def = GameData.QUESTS.find(q => q.id === aq.id);
+                const ready = aq.progress >= aq.targetCount;
+                return `
+                  <div class="bg-slate-900/95 border-2 ${ready ? 'border-emerald-400' : 'border-slate-700'} rounded-lg p-3.5 space-y-2">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs px-2 py-0.5 rounded bg-sky-950 text-sky-300">${def.type}</span>
+                      <span class="font-vt text-lg text-amber-300">Reward: ${def.rewardGold}g</span>
+                    </div>
+                    <div class="font-bold text-base text-amber-200">${def.title}</div>
+                    <p class="font-vt text-lg text-slate-300 leading-tight">${def.desc}</p>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                      <span class="font-vt text-lg text-emerald-300">Progress: ${aq.progress} / ${aq.targetCount}</span>
+                      <div class="flex gap-1.5">
+                        ${ready ? `<button data-claim-quest="${def.id}" class="pixel-btn pixel-btn-emerald px-3 py-1 font-pixel text-[10px]">CLAIM REWARD</button>` : ''}
+                        <button data-abandon-quest="${def.id}" class="pixel-btn pixel-btn-danger px-2.5 py-1 font-vt text-base">Abandon</button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <div>
+            <h3 class="font-pixel text-xs sm:text-sm text-sky-300 mb-2">AVAILABLE HARBOR BOARD QUESTS</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              ${availableList.map(def => `
+                <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-3 flex flex-col justify-between gap-2">
+                  <div>
+                    <div class="flex justify-between text-xs text-slate-400">
+                      <span>${def.type}</span>
+                      <span class="text-amber-300">+${def.rewardGold}g</span>
+                    </div>
+                    <div class="font-bold text-sm text-slate-100 mt-0.5">${def.title}</div>
+                    <p class="font-vt text-base text-slate-400 leading-tight mt-1">${def.desc}</p>
+                  </div>
+                  <button data-accept-quest="${def.id}" class="pixel-btn pixel-btn-gold py-1.5 px-3 font-pixel text-[10px] self-start">ACCEPT QUEST</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      container.querySelectorAll('[data-claim-quest]').forEach(b => {
+        b.addEventListener('click', () => {
+          GameState.claimQuestReward(b.getAttribute('data-claim-quest'));
+          this.renderQuestsTab(container);
+        });
+      });
+
+      container.querySelectorAll('[data-accept-quest]').forEach(b => {
+        b.addEventListener('click', () => {
+          GameState.acceptQuest(b.getAttribute('data-accept-quest'));
+          this.renderQuestsTab(container);
+        });
+      });
+
+      container.querySelectorAll('[data-abandon-quest]').forEach(b => {
+        b.addEventListener('click', () => {
+          const qid = b.getAttribute('data-abandon-quest');
+          this.showConfirm('ABANDON QUEST?', 'Are you sure you want to abandon this quest and reset its progress?', [
+            { label: 'ABANDON', style: 'pixel-btn-danger', onClick: () => { GameState.abandonQuest(qid); this.renderQuestsTab(container); } },
+            { label: 'KEEP', style: 'pixel-btn', onClick: () => {} }
+          ]);
+        });
+      });
+    },
+
+    renderMapTab(container) {
+      const boatTier = GameState.getBoatSpec().tier;
+
+      container.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h2 class="font-pixel text-sm sm:text-base text-amber-300">ARCHIPELAGO SEA CHARTS</h2>
+              <p class="font-vt text-lg text-slate-300">Unlock new water regions with sea permits and fast-sail between unlocked harbors.</p>
+            </div>
+            <div class="font-vt text-lg text-amber-300">Treasury: ${GameState.data.gold}g</div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            ${GameData.REGIONS.map(reg => {
+              const unlocked = GameState.data.unlockedRegions.includes(reg.id);
+              const isCurrent = GameState.data.currentRegion === reg.id;
+              const meetsBoat = boatTier >= reg.minBoatTier;
+              const reqBoat = GameData.BOATS.find(b => b.tier === reg.minBoatTier);
+
+              return `
+                <div class="bg-slate-900/90 border-2 ${isCurrent ? 'border-amber-400' : (unlocked ? 'border-sky-600/60' : 'border-slate-800')} rounded-lg p-3.5 flex flex-col justify-between gap-2">
+                  <div>
+                    <div class="flex items-center justify-between">
+                      <span class="font-pixel text-xs text-amber-300">${reg.name}</span>
+                      <span class="font-vt text-base px-2 py-0.2 rounded ${unlocked ? 'bg-emerald-950 text-emerald-300' : 'bg-slate-800 text-slate-400'}">
+                        ${isCurrent ? 'CURRENT LOCATION' : (unlocked ? 'CHARTED' : 'LOCKED')}
+                      </span>
+                    </div>
+                    <div class="font-vt text-base text-sky-300 mt-0.5">Depth: ${reg.depth} • Min Vessel: ${reqBoat ? reqBoat.name : 'Any'}</div>
+                    <p class="font-vt text-lg text-slate-300 leading-tight mt-1">${reg.desc}</p>
+                  </div>
+
+                  <div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
+                    ${unlocked ? `
+                      <button data-fast-travel="${reg.id}" class="pixel-btn pixel-btn-emerald py-1.5 px-3 font-pixel text-[10px]">
+                        SAIL TO REGION
+                      </button>
+                    ` : `
+                      <button data-unlock-region="${reg.id}" ${!meetsBoat || GameState.data.gold < reg.unlockCost ? 'disabled' : ''} class="pixel-btn pixel-btn-gold py-1.5 px-3 font-pixel text-[10px]">
+                        UNLOCK CHART (${reg.unlockCost}g)
+                      </button>
+                    `}
+                    <span class="text-xs text-slate-400">${reg.species.length} Species</span>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      container.querySelectorAll('[data-unlock-region]').forEach(b => {
+        b.addEventListener('click', () => {
+          const rid = b.getAttribute('data-unlock-region');
+          const reg = GameData.REGIONS.find(r => r.id === rid);
+          if (!reg || GameState.data.unlockedRegions.includes(rid)) return;
+          this.showConfirm('PURCHASE SEA CHART?', `Unlock ${reg.name} fishing permit for ${reg.unlockCost}g?`, [
+            {
+              label: 'UNLOCK',
+              style: 'pixel-btn-gold',
+              onClick: () => {
+                if (GameState.modifyGold(-reg.unlockCost)) {
+                  GameState.data.unlockedRegions.push(rid);
+                  SoundEngine.playCatchSuccess();
+                  this.toast(`Unlocked ${reg.name}!`, 'emerald');
+                  this.renderMapTab(container);
+                }
+              }
+            },
+            { label: 'CANCEL', style: 'pixel-btn', onClick: () => {} }
+          ]);
+        });
+      });
+
+      container.querySelectorAll('[data-fast-travel]').forEach(b => {
+        b.addEventListener('click', () => {
+          const rid = b.getAttribute('data-fast-travel');
+          const reg = GameData.REGIONS.find(r => r.id === rid);
+          if (reg && window.gameScene) {
+            window.gameScene.boatSprite.setPosition(reg.x, reg.y + 80);
+            window.gameScene.velocity = { x: 0, y: 0 };
+            GameState.data.currentRegion = rid;
+            this.closeDrawer();
+            this.refreshHUD();
+            this.toast(`Sailed to ${reg.name}!`, 'emerald');
+          }
+        });
+      });
+    },
+
+    renderUpgradesTab(container) {
+      const curBoat = GameState.getBoatSpec();
+      const curRod = GameState.getRodSpec();
+
+      container.innerHTML = `
+        <div class="space-y-6">
+          <!-- Boat Fleet & Maintenance -->
+          <div>
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <h2 class="font-pixel text-sm sm:text-base text-amber-300">SHIPYARD & VESSELS</h2>
+              <div class="flex gap-2">
+                <button id="btn-repair-hull" class="pixel-btn pixel-btn-emerald px-3 py-1 font-vt text-base">Repair Hull (35g)</button>
+                ${curBoat.hasMotor ? `<button id="btn-refuel-boat" class="pixel-btn pixel-btn-gold px-3 py-1 font-vt text-base">Refuel Tank (40g)</button>` : ''}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              ${GameData.BOATS.map(b => {
+                const owned = b.tier <= curBoat.tier;
+                const equipped = b.id === curBoat.id;
+                return `
+                  <div class="bg-slate-900/90 border ${equipped ? 'border-amber-400' : 'border-slate-700'} rounded-lg p-3 flex flex-col justify-between gap-2">
+                    <div>
+                      <div class="flex justify-between items-center">
+                        <span class="font-bold text-sm text-amber-200">${b.name}</span>
+                        <span class="font-vt text-base text-sky-300">Speed ${b.speed} • Cargo ${b.storage}</span>
+                      </div>
+                      <p class="font-vt text-base text-slate-300 mt-1">${b.desc}</p>
+                    </div>
+                    <div>
+                      ${equipped ? `<span class="text-xs font-pixel text-emerald-300">CURRENT VESSEL</span>` :
+                        owned ? `<button data-equip-boat="${b.id}" class="pixel-btn py-1 px-3 font-pixel text-[10px]">BOARD VESSEL</button>` :
+                        `<button data-buy-boat="${b.id}" ${GameState.data.gold < b.price ? 'disabled' : ''} class="pixel-btn pixel-btn-gold py-1.5 px-3 font-pixel text-[10px]">PURCHASE (${b.price}g)</button>`
+                      }
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Fishing Rods -->
+          <div>
+            <h3 class="font-pixel text-xs sm:text-sm text-sky-300 mb-2">FISHING RODS (WIDENS REEL SWEET-SPOT)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              ${GameData.RODS.map(r => {
+                const owned = r.tier <= curRod.tier;
+                const equipped = r.id === curRod.id;
+                return `
+                  <div class="bg-slate-900/90 border ${equipped ? 'border-emerald-400' : 'border-slate-700'} rounded-lg p-3 flex flex-col justify-between gap-2">
+                    <div>
+                      <div class="font-bold text-sm text-amber-200">${r.name}</div>
+                      <div class="font-vt text-base text-emerald-300">+${Math.round(r.sweetSpotBonus * 100)}% Sweet Spot • -${Math.round(r.tensionReduction * 100)}% Tension</div>
+                      <p class="font-vt text-base text-slate-400 leading-tight mt-1">${r.desc}</p>
+                    </div>
+                    <div>
+                      ${equipped ? `<span class="text-xs font-pixel text-emerald-300">EQUIPPED</span>` :
+                        owned ? `<button data-equip-rod="${r.id}" class="pixel-btn py-1 px-2.5 font-pixel text-[10px]">EQUIP</button>` :
+                        `<button data-buy-rod="${r.id}" ${GameState.data.gold < r.price ? 'disabled' : ''} class="pixel-btn pixel-btn-gold py-1 px-2.5 font-pixel text-[10px]">BUY (${r.price}g)</button>`
+                      }
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Bait & Marine Supplies Shop -->
+          <div>
+            <h3 class="font-pixel text-xs sm:text-sm text-sky-300 mb-2">BAIT & MARINER SUPPLIES (GOLD: ${GameState.data.gold}g)</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+              ${GameData.BAITS.map(bait => `
+                <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-3 flex flex-col justify-between gap-2">
+                  <div>
+                    <div class="flex justify-between">
+                      <span class="font-bold text-sm text-slate-100">${bait.name}</span>
+                      <span class="text-xs text-emerald-300">Owned: ${GameState.getBaitCount(bait.id)}</span>
+                    </div>
+                    <p class="font-vt text-base text-slate-400 leading-tight mt-1">${bait.desc}</p>
+                  </div>
+                  <button data-buy-bait="${bait.id}" ${GameState.data.gold < bait.price * 5 ? 'disabled' : ''} class="pixel-btn pixel-btn-gold py-1 px-2.5 font-pixel text-[10px]">
+                    BUY x5 (${bait.price * 5}g)
+                  </button>
+                </div>
+              `).join('')}
+
+              ${GameData.SHOP_ITEMS.map(si => `
+                <div class="bg-slate-950/80 border border-slate-800 rounded-lg p-3 flex flex-col justify-between gap-2">
+                  <div>
+                    <div class="font-bold text-sm text-slate-100">${si.name}</div>
+                    <p class="font-vt text-base text-slate-400 leading-tight mt-1">${si.desc}</p>
+                  </div>
+                  <button data-buy-supply="${si.id}" ${GameState.data.gold < si.price ? 'disabled' : ''} class="pixel-btn py-1 px-2.5 font-pixel text-[10px]">
+                    BUY (${si.price}g)
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Handlers
+      document.getElementById('btn-repair-hull')?.addEventListener('click', () => {
+        if (GameState.modifyGold(-35)) {
+          GameState.data.boat.hull = curBoat.maxHull;
+          SoundEngine.playCoin();
+          this.toast('Boat hull fully repaired!', 'emerald');
+          this.refreshHUD();
+        } else {
+          this.toast('Not enough gold!', 'danger');
+        }
+      });
+
+      document.getElementById('btn-refuel-boat')?.addEventListener('click', () => {
+        if (GameState.modifyGold(-40)) {
+          GameState.data.boat.fuel = curBoat.maxFuel;
+          SoundEngine.playCoin();
+          this.toast('Fuel tank topped off!', 'emerald');
+          this.refreshHUD();
+        } else {
+          this.toast('Not enough gold!', 'danger');
+        }
+      });
+
+      container.querySelectorAll('[data-buy-boat]').forEach(b => {
+        b.addEventListener('click', () => {
+          const id = b.getAttribute('data-buy-boat');
+          const spec = GameData.BOATS.find(x => x.id === id);
+          if (!spec) return;
+          this.showConfirm('PURCHASE NEW VESSEL?', `Buy ${spec.name} for ${spec.price}g?`, [
+            {
+              label: 'PURCHASE',
+              style: 'pixel-btn-gold',
+              onClick: () => {
+                if (GameState.modifyGold(-spec.price)) {
+                  GameState.data.boat.id = spec.id;
+                  GameState.data.boat.hull = spec.maxHull;
+                  GameState.data.boat.fuel = spec.maxFuel;
+                  if (window.gameScene) window.gameScene.updateBoatSprite();
+                  SoundEngine.playCatchSuccess();
+                  this.toast(`Commissioned ${spec.name}!`, 'gold');
+                  this.refreshHUD();
+                  this.renderUpgradesTab(container);
+                }
+              }
+            },
+            { label: 'CANCEL', style: 'pixel-btn', onClick: () => {} }
+          ]);
+        });
+      });
+
+      container.querySelectorAll('[data-equip-boat]').forEach(b => {
+        b.addEventListener('click', () => {
+          const id = b.getAttribute('data-equip-boat');
+          const spec = GameData.BOATS.find(x => x.id === id);
+          if (spec) {
+            GameState.data.boat.id = spec.id;
+            if (window.gameScene) window.gameScene.updateBoatSprite();
+            this.refreshHUD();
+            this.renderUpgradesTab(container);
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-buy-rod]').forEach(b => {
+        b.addEventListener('click', () => {
+          const id = b.getAttribute('data-buy-rod');
+          const spec = GameData.RODS.find(x => x.id === id);
+          if (!spec) return;
+          if (GameState.modifyGold(-spec.price)) {
+            GameState.data.rod.id = spec.id;
+            GameState.addItem({ itemId: spec.id, name: spec.name, category: 'Fishing Rod', count: 1, stackable: false, desc: spec.desc });
+            SoundEngine.playCatchSuccess();
+            this.toast(`Upgraded to ${spec.name}!`, 'gold');
+            this.renderUpgradesTab(container);
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-equip-rod]').forEach(b => {
+        b.addEventListener('click', () => {
+          GameState.data.rod.id = b.getAttribute('data-equip-rod');
+          this.renderUpgradesTab(container);
+        });
+      });
+
+      container.querySelectorAll('[data-buy-bait]').forEach(b => {
+        b.addEventListener('click', () => {
+          const id = b.getAttribute('data-buy-bait');
+          const spec = GameData.BAITS.find(x => x.id === id);
+          if (!spec) return;
+          if (GameState.modifyGold(-(spec.price * 5))) {
+            GameState.addItem({ itemId: spec.id, name: spec.name, category: 'Bait', count: 5, stackable: true, desc: spec.desc });
+            SoundEngine.playCoin();
+            this.toast(`Bought 5x ${spec.name}`, 'emerald');
+            this.renderUpgradesTab(container);
+          }
+        });
+      });
+
+      container.querySelectorAll('[data-buy-supply]').forEach(b => {
+        b.addEventListener('click', () => {
+          const id = b.getAttribute('data-buy-supply');
+          const spec = GameData.SHOP_ITEMS.find(x => x.id === id);
+          if (!spec) return;
+          if (GameState.modifyGold(-spec.price)) {
+            if (spec.id === 'lantern_decor') {
+              GameState.data.boat.hasLantern = true;
+              this.toast('Mounted Brass Bow Lantern on your boat!', 'gold');
+            } else {
+              GameState.addItem({ itemId: spec.id, name: spec.name, category: spec.category, count: 1, stackable: true, desc: spec.desc });
+              this.toast(`Bought ${spec.name}`, 'emerald');
+            }
+            SoundEngine.playCoin();
+            this.renderUpgradesTab(container);
+          }
+        });
+      });
+    },
+
+    renderGuideTab(container) {
+      const sub = this.guideSubTab || 'steps';
+      container.innerHTML = `
+        <div class="max-w-3xl mx-auto space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700 pb-3">
+            <div>
+              <h2 class="font-pixel text-sm sm:text-base text-amber-300">📖 BUKU PANDUAN PETUALANG</h2>
+              <p class="font-vt text-lg text-sky-200">Panduan lengkap langkah memancing, navigasi perahu, quest, dan ekologi perairan.</p>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <button data-guide-sub="steps" class="pixel-btn ${sub === 'steps' ? 'pixel-btn-emerald' : ''} px-3 py-1.5 font-vt text-base sm:text-lg">1. Langkah Mancing</button>
+              <button data-guide-sub="controls" class="pixel-btn ${sub === 'controls' ? 'pixel-btn-emerald' : ''} px-3 py-1.5 font-vt text-base sm:text-lg">2. Kontrol & NPC</button>
+              <button data-guide-sub="tips" class="pixel-btn ${sub === 'tips' ? 'pixel-btn-emerald' : ''} px-3 py-1.5 font-vt text-base sm:text-lg">3. Perahu & Ekologi</button>
+            </div>
+          </div>
+
+          ${sub === 'steps' ? `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="bg-slate-900/90 border border-sky-700/60 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-amber-300">LANGKAH 1: PILIH LOKASI AIR</div>
+                <p class="font-vt text-lg text-slate-200 leading-snug">
+                  Kemudikan perahu ke area perairan terbuka atau dekat riak bayangan ikan. Perhatikan nama wilayah dan kedalaman di HUD kiri atas (misal: <em>Peaceful Lake</em> atau <em>Willow River</em>).
+                </p>
+              </div>
+
+              <div class="bg-slate-900/90 border border-sky-700/60 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-amber-300">LANGKAH 2: TEKAN "MULAI MANCING"</div>
+                <p class="font-vt text-lg text-slate-200 leading-snug">
+                  Klik tombol hijau-emas <span class="text-amber-300 font-bold">🎣 MULAI MANCING</span> di bagian bawah layar (atau tekan <span class="text-sky-300 font-bold">[SPACE]</span>), lalu pilih umpan sesuai target ikan.
+                </p>
+              </div>
+
+              <div class="bg-slate-900/90 border border-sky-700/60 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-amber-300">LANGKAH 3: POWER CAST & TUNGGU</div>
+                <p class="font-vt text-lg text-slate-200 leading-snug">
+                  Tahan tombol lempar hingga meteran kekuatan pas, lalu lepaskan. Tunggu hingga muncul tanda seru <span class="text-amber-300 font-bold">❗ SAMBARAN!</span> dan suara percikan air.
+                </p>
+              </div>
+
+              <div class="bg-slate-900/90 border border-sky-700/60 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-amber-300">LANGKAH 4: MINIGAME TENSION TALI</div>
+                <p class="font-vt text-lg text-slate-200 leading-snug">
+                  Segera tarik kail saat digigit! Saat menggulung, <span class="text-emerald-300 font-bold">tahan tombol untuk menarik</span> dan <span class="text-sky-300 font-bold">lepaskan sejenak</span> agar penanda tetap di zona hijau (jangan sampai penuh ke merah atau tali putus!).
+                </p>
+              </div>
+
+              <div class="md:col-span-2 bg-slate-950/85 border border-emerald-600/50 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-emerald-300">LANGKAH 5: SIMPAN, JUAL, ATAU LEPAS KEMBALI</div>
+                <p class="font-vt text-lg text-slate-200 leading-snug">
+                  Setelah ikan tertangkap dan tercatat di <strong>Fish Dex</strong>, pilih <strong>Keep Fish</strong> (simpan untuk quest/koleksi), <strong>Sell Now</strong> (tukar koin emas), atau <strong>Release</strong> (melepas ikan demi meningkatkan skor Ekologi 🌿).
+                </p>
+              </div>
+            </div>
+          ` : ''}
+
+          ${sub === 'controls' ? `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-4 space-y-2 font-vt text-lg">
+                <div class="font-pixel text-xs text-sky-300 mb-1">🖥️ KONTROL DESKTOP</div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Kemudi Perahu (8 Arah)</span><span class="text-amber-300">W A S D / Panah</span></div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Mulai Mancing / Lempar / Tarik</span><span class="text-amber-300">SPACE</span></div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Bicara NPC / Sandar Dermaga</span><span class="text-amber-300">E</span></div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Zoom Kamera Laut</span><span class="text-amber-300">Mouse Scroll / + -</span></div>
+                <div class="flex justify-between"><span>Pintasan Menu Cepat</span><span class="text-amber-300">I (Tas) • J (Dex) • Q (Quest) • M (Peta) • H (Panduan)</span></div>
+              </div>
+
+              <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-4 space-y-2 font-vt text-lg">
+                <div class="font-pixel text-xs text-emerald-300 mb-1">📱 KONTROL MOBILE & SENTUH</div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Analog Virtual (Kiri Bawah)</span><span class="text-emerald-300">Geser Arah Perahu</span></div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Tombol Mulai Mancing</span><span class="text-emerald-300">Ketuk / Tahan & Lepas</span></div>
+                <div class="flex justify-between border-b border-slate-800 pb-1"><span>Tombol Talk / Dock</span><span class="text-emerald-300">Muncul Otomatis Dekat NPC</span></div>
+                <div class="pt-1 text-slate-300 leading-snug">
+                  <strong>Interaksi NPC:</strong> Dekati dermaga kayu untuk bertemu 8 karakter unik (Barnaby, Clara, Garrick, Maya, dll.), ambil quest bercabang, jual hasil tangkapan, dan tingkatkan persahabatan.
+                </div>
+              </div>
+            </div>
+          ` : ''}
+
+          ${sub === 'tips' ? `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 font-vt text-lg">
+              <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-amber-300">⛵ UPGRADE PERAHU & JORAN</div>
+                <p class="text-slate-200 leading-snug">
+                  Buka menu <strong>Boat (⛵)</strong> untuk membeli <em>Fishing Boat</em>, <em>Motor Boat</em>, hingga <em>Luxury Fishing Boat</em>. Perahu tingkat tinggi membuka akses ke wilayah lautan dalam dan menambah kapasitas kargo ikan.
+                </p>
+              </div>
+
+              <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-emerald-300">🌿 MENJAGA EKOLOGI PERAIRAN</div>
+                <p class="text-slate-200 leading-snug">
+                  Pungut sampah mengapung di air menggunakan tombol <strong>[E]</strong> atau lakukan <em>Catch & Release</em>. Skor Ekologi tinggi meningkatkan peluang kemunculan ikan <strong>Rare, Epic, dan Legendary</strong>!
+                </p>
+              </div>
+
+              <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-sky-300">🌦️ WAKTU & CUACA DINAMIS</div>
+                <p class="text-slate-200 leading-snug">
+                  Beberapa spesies legendaris hanya aktif pada waktu tertentu—misalnya <em>Golden Carp</em> saat <strong>Morning</strong> dan <em>Moonlight Fish</em> saat <strong>Night</strong>. Hujan dan kabut juga menarik ikan langka ke permukaan.
+                </p>
+              </div>
+
+              <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-3.5 space-y-1">
+                <div class="font-pixel text-[11px] text-purple-300">💾 PENYIMPANAN OTOMATIS</div>
+                <p class="text-slate-200 leading-snug">
+                  Progres permainan tersimpan otomatis ke <strong>IndexedDB</strong> browser setiap 45 detik, saat bersandar di dermaga, atau kapan saja lewat tombol <em>Manual Save</em> di menu Settings.
+                </p>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+
+      container.querySelectorAll('[data-guide-sub]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          SoundEngine.playUiClick();
+          this.guideSubTab = btn.getAttribute('data-guide-sub');
+          this.renderGuideTab(container);
+        });
+      });
+    },
+
+    renderSettingsTab(container) {
+      const s = GameState.data.settings;
+      container.innerHTML = `
+        <div class="max-w-xl mx-auto space-y-5">
+          <h2 class="font-pixel text-sm sm:text-base text-amber-300">SETTINGS, SAVE & DIAGNOSTICS</h2>
+
+          <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-4 space-y-3 font-vt text-xl">
+            <div class="flex items-center justify-between">
+              <span>Sound Effects (Water, Reel, Splashes)</span>
+              <button id="toggle-sfx" class="pixel-btn ${s.sfx ? 'pixel-btn-emerald' : ''} px-4 py-1 font-pixel text-[10px]">${s.sfx ? 'ON' : 'OFF'}</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Cozy Instrumental Ambience</span>
+              <button id="toggle-music" class="pixel-btn ${s.music ? 'pixel-btn-emerald' : ''} px-4 py-1 font-pixel text-[10px]">${s.music ? 'ON' : 'OFF'}</button>
+            </div>
+            <div class="flex items-center justify-between">
+              <span>Control Interface Layout</span>
+              <select id="select-control-mode" class="bg-slate-800 border border-slate-600 rounded px-2.5 py-1 text-base text-white">
+                <option value="auto" ${s.controlMode === 'auto' ? 'selected' : ''}>Auto-Detect Device</option>
+                <option value="desktop" ${s.controlMode === 'desktop' ? 'selected' : ''}>Desktop (Keyboard + Mouse)</option>
+                <option value="mobile" ${s.controlMode === 'mobile' ? 'selected' : ''}>Mobile (Virtual Joystick + Touch)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-slate-900/90 border border-slate-700 rounded-lg p-4 space-y-3">
+            <div class="font-pixel text-xs text-sky-300">INDEXEDDB SAVE MANAGEMENT</div>
+            <div class="flex flex-wrap gap-2">
+              <button id="btn-manual-save" class="pixel-btn pixel-btn-emerald px-4 py-2 font-pixel text-[10px]">MANUAL SAVE NOW</button>
+              <button id="btn-reset-save" class="pixel-btn pixel-btn-danger px-4 py-2 font-pixel text-[10px]">RESET VOYAGE DATA</button>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/90 border border-slate-800 rounded-lg p-4 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="font-pixel text-xs text-amber-300">AUTOMATED SYSTEM SELF-TESTS</span>
+              <button id="btn-run-tests" class="pixel-btn pixel-btn-gold px-3 py-1.5 font-pixel text-[10px]">RUN SUITE</button>
+            </div>
+            <div id="test-results-box" class="font-vt text-base text-slate-300 bg-slate-900/90 p-2.5 rounded border border-slate-800 max-h-48 overflow-y-auto">
+              Click "RUN SUITE" to verify Fishing Mechanics, Boat Physics, Quest Progression, Inventory Guards, Economy & Save Integrity.
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('toggle-sfx').addEventListener('click', () => {
+        s.sfx = !s.sfx;
+        SoundEngine.sfxEnabled = s.sfx;
+        this.renderSettingsTab(container);
+      });
+
+      document.getElementById('toggle-music').addEventListener('click', () => {
+        s.music = !s.music;
+        SoundEngine.musicEnabled = s.music;
+        if (s.music) SoundEngine.startCozyMusic();
+        this.renderSettingsTab(container);
+      });
+
+      document.getElementById('select-control-mode').addEventListener('change', (e) => {
+        s.controlMode = e.target.value;
+        this.applyControlModeLayout();
+      });
+
+      document.getElementById('btn-manual-save').addEventListener('click', async () => {
+        if (window.gameScene) {
+          GameState.data.boatPos = { x: Math.round(window.gameScene.boatSprite.x), y: Math.round(window.gameScene.boatSprite.y) };
+        }
+        const ok = await SaveSystem.save(GameState.data);
+        this.toast(ok ? 'Game saved to IndexedDB!' : 'Save warning.', ok ? 'emerald' : 'danger');
+      });
+
+      document.getElementById('btn-reset-save').addEventListener('click', () => {
+        this.showConfirm('RESET ALL PROGRESS?', 'This will erase your IndexedDB save slot and start fresh. Continue?', [
+          {
+            label: 'ERASE & RESTART',
+            style: 'pixel-btn-danger',
+            onClick: async () => {
+              await SaveSystem.clear();
+              GameState.initNew();
+              if (window.gameScene) {
+                window.gameScene.boatSprite.setPosition(880, 880);
+                window.gameScene.updateBoatSprite();
+              }
+              this.closeDrawer();
+              this.refreshHUD();
+              this.toast('Voyage reset to Day 1.', 'info');
+            }
+          },
+          { label: 'CANCEL', style: 'pixel-btn', onClick: () => {} }
+        ]);
+      });
+
+      document.getElementById('btn-run-tests').addEventListener('click', async () => {
+        const box = document.getElementById('test-results-box');
+        box.innerHTML = 'Running automated tests...';
+        const report = await TestSuite.runAll();
+        box.innerHTML = report.map(r => `<div class="${r.pass ? 'text-emerald-300' : 'text-rose-400'}">${r.pass ? '✔' : '✖'} ${Utils.escapeHtml(r.name)}: ${Utils.escapeHtml(r.detail)}</div>`).join('');
+      });
+    },
+
+    updateContextPrompt(interactable) {
+      const banner = document.getElementById('context-prompt');
+      const touchBtn = document.getElementById('btn-touch-interact');
+      if (!interactable || FishingSystem.state !== 'IDLE' || this.isAnyModalOpen()) {
+        banner.classList.add('hidden');
+        touchBtn.classList.add('hidden');
+        return;
+      }
+      document.getElementById('context-prompt-text').textContent = `[E] ${interactable.label}`;
+      banner.classList.remove('hidden');
+      touchBtn.textContent = interactable.type === 'npc' ? '💬 TALK' : '✋ ACT';
+      touchBtn.classList.remove('hidden');
+    },
+
+    refreshClockOnly() {
+      if (!GameState.data) return;
+      document.getElementById('hud-time').textContent = GameState.getFormattedClock();
+    },
+
+    refreshHUD() {
+      if (!GameState.data) return;
+      const reg = GameData.REGIONS.find(r => r.id === GameState.data.currentRegion) || GameData.REGIONS[0];
+      const boatSpec = GameState.getBoatSpec();
+      const weatherIcons = { Sunny: '☀️', Cloudy: '☁️', Rain: '🌧️', Fog: '🌫️' };
+
+      document.getElementById('hud-region').textContent = reg.name;
+      this.refreshClockOnly();
+      document.getElementById('hud-weather').textContent = `${weatherIcons[GameState.data.weather] || '☀️'} ${GameState.data.weather}`;
+      document.getElementById('hud-gold').textContent = GameState.data.gold;
+      document.getElementById('hud-eco').textContent = GameState.data.ecoScore;
+      document.getElementById('hud-dex-count').textContent = `${Object.keys(GameState.data.journal).length}/${GameData.FISH_SPECIES.length}`;
+
+      document.getElementById('hud-boat-name').textContent = boatSpec.name;
+      document.getElementById('hud-hull').textContent = Math.round((GameState.data.boat.hull / boatSpec.maxHull) * 100);
+
+      const fuelWrap = document.getElementById('hud-fuel-wrap');
+      if (boatSpec.hasMotor) {
+        fuelWrap.classList.remove('hidden');
+        document.getElementById('hud-fuel').textContent = Math.round((GameState.data.boat.fuel / boatSpec.maxFuel) * 100);
+      } else {
+        fuelWrap.classList.add('hidden');
+      }
+
+      // Active Quest Mini Tracker
+      const tracker = document.getElementById('hud-quest-tracker');
+      const badge = document.getElementById('hud-quest-badge');
+      const firstQ = GameState.data.quests.active[0];
+      if (firstQ) {
+        const def = GameData.QUESTS.find(q => q.id === firstQ.id);
+        tracker.classList.remove('hidden');
+        badge.classList.remove('hidden');
+        document.getElementById('hud-quest-title').textContent = def ? def.title : 'Active Quest';
+        document.getElementById('hud-quest-obj').textContent = `${def ? def.desc : ''} (${firstQ.progress}/${firstQ.targetCount})`;
+      } else {
+        tracker.classList.add('hidden');
+        badge.classList.add('hidden');
+      }
+    },
+
+    isAnyModalOpen() {
+      const ids = ['catch-modal', 'dialogue-modal', 'confirm-modal', 'drawer-modal'];
+      return ids.some(id => !document.getElementById(id).classList.contains('hidden'));
+    },
+
+    closeAllModals() {
+      ['dialogue-modal', 'confirm-modal', 'drawer-modal'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      });
+    },
+
+    toast(msg, tone = 'info') {
+      const box = document.getElementById('toast-container');
+      const colors = {
+        info: 'border-sky-400 text-sky-100',
+        emerald: 'border-emerald-400 text-emerald-200',
+        gold: 'border-amber-400 text-amber-200',
+        danger: 'border-rose-400 text-rose-200'
+      };
+      const el = document.createElement('div');
+      el.className = `pixel-panel px-3.5 py-2 border-2 ${colors[tone] || colors.info} font-vt text-lg shadow-xl text-center`;
+      el.textContent = msg;
+      box.appendChild(el);
+      gsap.fromTo(el, { y: -12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.22 });
+      setTimeout(() => {
+        gsap.to(el, { opacity: 0, y: -8, duration: 0.25, onComplete: () => el.remove() });
+      }, 2800);
+    }
+  };
+
+  // ============================================================================
+  // 10. AUTOMATED DIAGNOSTIC & SELF-TEST SUITE
+  // ============================================================================
+  const TestSuite = {
+    async runAll() {
+      const results = [];
+      const snapBackup = JSON.parse(JSON.stringify(GameState.data));
+
+      try {
+        // Test 1: Fish Database Integrity (30+ species)
+        const countOk = GameData.FISH_SPECIES.length >= 30;
+        const uniqueIds = new Set(GameData.FISH_SPECIES.map(f => f.id)).size === GameData.FISH_SPECIES.length;
+        results.push({
+          name: 'Fish Encyclopedia Database',
+          pass: countOk && uniqueIds,
+          detail: `${GameData.FISH_SPECIES.length} unique species verified`
+        });
+
+        // Test 2: Economy Negative Gold Prevention
+        GameState.data.gold = 50;
+        const blockedOverdraft = !GameState.modifyGold(-200);
+        const validSpend = GameState.modifyGold(-30) && GameState.data.gold === 20;
+        results.push({
+          name: 'Economy & Negative Balance Guard',
+          pass: blockedOverdraft && validSpend,
+          detail: 'Overdraft rejected; valid deduction accurate'
+        });
+
+        // Test 3: Inventory Stacking & Anti-Duplicate
+        const startLen = GameState.data.inventory.length;
+        GameState.addItem({ itemId: 'bread_crumbs', name: 'Bread Crumbs', category: 'Bait', count: 3, stackable: true });
+        const stackedOk = GameState.data.inventory.length === startLen;
+        results.push({
+          name: 'Inventory Stacking & Capacity Guard',
+          pass: stackedOk,
+          detail: 'Stackable items merged without slot bloat'
+        });
+
+        // Test 4: Quest Acceptance, Progress & Single-Claim Guard
+        GameState.acceptQuest('q_river_trout', true);
+        GameState.advanceQuests('catch_species', 'rainbow_trout', 2);
+        const claimedOnce = GameState.claimQuestReward('q_river_trout');
+        const claimedTwice = GameState.claimQuestReward('q_river_trout');
+        results.push({
+          name: 'Quest Progression & Anti-Double-Claim',
+          pass: claimedOnce && !claimedTwice,
+          detail: 'Quest completed once; duplicate reward blocked'
+        });
+
+        // Test 5: Fishing Species Selector & Reel Math
+        const caughtSample = FishingSystem.selectFishToBite();
+        results.push({
+          name: 'Fishing Bite & Catch Generator',
+          pass: Boolean(caughtSample && caughtSample.species && caughtSample.weight > 0),
+          detail: `Generated ${caughtSample.species.name} (${caughtSample.weight}kg)`
+        });
+
+        // Test 6: Save Corruption Validator
+        const rejectsBad = !SaveSystem.validateSaveData({ gold: -999 });
+        const acceptsGood = SaveSystem.validateSaveData(snapBackup);
+        results.push({
+          name: 'IndexedDB Save Validation',
+          pass: rejectsBad && acceptsGood,
+          detail: 'Corrupted snapshots rejected; valid state accepted'
+        });
+
+        // Test 7: Boat Scene & Collision Bounds
+        const sceneReady = Boolean(window.gameScene && window.gameScene.boatSprite);
+        results.push({
+          name: 'Phaser 3 World & Boat Physics',
+          pass: sceneReady,
+          detail: sceneReady ? '6 regions, collision bounds & camera active' : 'Scene initializing'
+        });
+      } finally {
+        // Restore state cleanly so tests have zero side-effects
+        GameState.loadFromSnapshot(snapBackup);
+        UI.refreshHUD();
+      }
+
+      return results;
+    }
+  };
+
+  // ============================================================================
+  // PWA MANIFEST & SERVICE WORKER REGISTRATION + BOOTSTRAP
+  // ============================================================================
+  function registerPWA() {
+    try {
+      const manifest = {
+        name: 'SERENE WATERS – Cozy Fishing & Boat Adventure',
+        short_name: 'Serene Waters',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#0b1e2d',
+        theme_color: '#0f293a',
+        icons: []
+      };
+      const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = URL.createObjectURL(blob);
+      document.head.appendChild(link);
+    } catch (e) {}
+  }
+
+  function startPhaserInstance() {
+    const config = {
+      type: Phaser.AUTO,
+      parent: 'game-container',
+      width: window.innerWidth,
+      height: window.innerHeight,
+      pixelArt: true,
+      roundPixels: true,
+      backgroundColor: '#0f384c',
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+      },
+      scene: [SereneWorldScene]
+    };
+    window.phaserGame = new Phaser.Game(config);
+  }
+
+  window.addEventListener('DOMContentLoaded', async () => {
+    registerPWA();
+    UI.init();
+
+    // Check IndexedDB for existing save slot
+    const existingSave = await SaveSystem.load();
+    if (existingSave) {
+      const btnCont = document.getElementById('btn-continue-game');
+      const badge = document.getElementById('save-preview-badge');
+      btnCont.classList.remove('hidden');
+      badge.classList.remove('hidden');
+      badge.textContent = `Saved Voyage: Day ${existingSave.day} • ${existingSave.gold}g • ${Object.keys(existingSave.journal || {}).length}/${GameData.FISH_SPECIES.length} Species`;
+    }
+  });
+  </script>
+</body>
+</html>

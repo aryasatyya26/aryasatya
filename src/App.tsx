@@ -11,10 +11,20 @@ type Project = {
   role: string;
   live?: string;
   gameUrl?: string;
-  gameTheme?: "neon" | "shadow";
+  gameTheme?: "serene" | "neon" | "shadow" | "cat";
 };
 
 const projects: Project[] = [
+  {
+    title: "Serene Waters",
+    label: "Cozy fishing adventure",
+    description:
+      "Set sail across a peaceful archipelago, discover new fish, and help restore the natural balance of its lakes and coastlines.",
+    technologies: ["Phaser 3", "JavaScript", "Howler.js"],
+    role: "Fishing & Boat Adventure",
+    gameUrl: "/games/serene-waters.html",
+    gameTheme: "serene",
+  },
   {
     title: "Neon Dash",
     label: "Interactive arcade game",
@@ -34,6 +44,16 @@ const projects: Project[] = [
     role: "Fighting 1v1",
     gameUrl: "/games/shadow-strike.html",
     gameTheme: "shadow",
+  },
+  {
+    title: "My Little Cat",
+    label: "Cozy cat life simulator",
+    description:
+      "Welcome to Mochi's little world: care for him, play together, and help him feel at home in a warm, detailed bedroom.",
+    technologies: ["Three.js", "JavaScript", "WebGL"],
+    role: "3D Cat Simulator",
+    gameUrl: "/games/my-little-cat.html",
+    gameTheme: "cat",
   },
   {
     title: "Web Profile",
@@ -750,7 +770,7 @@ function ProjectModal({
   }, [onClose]);
   return (
     <div
-      className={`modal-backdrop${project.gameTheme ? " modal-backdrop-game" : ""}`}
+      className={`modal-backdrop${project.gameTheme ? ` modal-backdrop-game modal-backdrop-game-${project.gameTheme}` : ""}`}
       role="presentation"
       onMouseDown={onClose}
     >
@@ -775,7 +795,7 @@ function ProjectModal({
           <p className="eyebrow">{project.label}</p>
           <h2 id="project-title">{project.title}</h2>
           {project.gameUrl && (
-            <p className="game-ready-status">
+            <p className={`game-ready-status game-ready-status-${project.gameTheme}`}>
               <i />
               Ready to play // System armed
             </p>
@@ -803,6 +823,7 @@ function ProjectModal({
               type="button"
               onClick={() => onPlayGame(gameUrl)}
               className="game-start-button"
+              data-game={project.gameTheme}
             >
               Start Arya's Game <Icon name="arrow" size={14} />
             </button>
@@ -824,22 +845,49 @@ function GameOverlay({
   url: string;
   onClose: () => void;
 }) {
-  const isStreetFightingGame = new URL(url, window.location.href).pathname.endsWith(
-    "/games/shadow-strike.html",
-  );
+  const gamePath = new URL(url, window.location.href).pathname;
+  const isNeonDashGame = gamePath.endsWith("/games/neon-dash.html");
+  const isStreetFightingGame = gamePath.endsWith("/games/shadow-strike.html");
+  const isMyLittleCatGame = gamePath.endsWith("/games/my-little-cat.html");
+  const isSereneWatersGame = gamePath.endsWith("/games/serene-waters.html");
+  const gameFrameRef = useRef<HTMLIFrameElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     document.body.classList.add("game-open");
     document.documentElement.classList.add("game-playing");
+    const handleGameMessage = (event: MessageEvent) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== gameFrameRef.current?.contentWindow ||
+        event.data?.type !== "portfolio:return-from-game"
+      ) {
+        return;
+      }
+      onCloseRef.current();
+    };
+    window.addEventListener("message", handleGameMessage);
     return () => {
+      window.removeEventListener("message", handleGameMessage);
       document.body.classList.remove("game-open");
       document.documentElement.classList.remove("game-playing");
     };
   }, []);
 
+  const overlayClasses = [
+    "game-overlay",
+    isNeonDashGame && "game-overlay-neon",
+    isStreetFightingGame && "game-overlay-fighter",
+    isMyLittleCatGame && "game-overlay-cat",
+    isSereneWatersGame && "game-overlay-serene",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div
-      className={`game-overlay${isStreetFightingGame ? " game-overlay-fighter" : ""}`}
+      className={overlayClasses}
       role="dialog"
       aria-modal="true"
       aria-label="Game player"
@@ -851,25 +899,145 @@ function GameOverlay({
       >
         <Icon name="back" />
       </button>
-      <iframe src={url} title="Interactive portfolio game" allow="autoplay; fullscreen" />
+      <iframe
+        ref={gameFrameRef}
+        src={url}
+        title="Interactive portfolio game"
+        allow="autoplay; fullscreen"
+      />
     </div>
   );
 }
 
 function GameArtwork({ project }: { project: Project }) {
   const isNeon = project.gameTheme === "neon";
+  const isSerene = project.gameTheme === "serene";
+  const isCat = project.gameTheme === "cat";
 
   return (
     <div className={`game-artwork game-artwork-${project.gameTheme}`} aria-hidden="true">
-      <span className="game-art-topline">ARYA GAMES // {isNeon ? "RUN 001" : "ARENA 002"}</span>
+      <span className="game-art-topline">
+        ARYA GAMES // {isSerene ? "VOYAGE 001" : isNeon ? "RUN 001" : isCat ? "ROOM 004" : "ARENA 002"}
+      </span>
+      {isSerene && (
+        <svg
+          className="serene-landscape"
+          viewBox="0 0 800 500"
+          preserveAspectRatio="xMidYMid slice"
+          focusable="false"
+        >
+          <circle cx="602" cy="112" r="52" fill="#f3d89a" opacity=".92" />
+          <path d="M0 245 118 150l87 70 124-118 146 141 97-91 132 102v116H0Z" fill="#6c9275" />
+          <path d="m0 275 154-93 99 68 151-101 144 119 112-66 140 74v119H0Z" fill="#375f50" />
+          <path d="M0 282q130 4 235-12t212 6 191-9 162 12v221H0Z" fill="#205d68" />
+          <path
+            d="M0 340q87-20 177 0t179 0 180 0 180 0 84-3"
+            fill="none"
+            stroke="#88c4ad"
+            strokeWidth="7"
+            opacity=".62"
+          />
+          <path
+            d="M0 392q90-18 180 0t180 0 180 0 180 0 80-3"
+            fill="none"
+            stroke="#68a9a0"
+            strokeWidth="5"
+            opacity=".72"
+          />
+          <path
+            d="M0 457q110-24 220 0t220 0 220 0 140-4"
+            fill="none"
+            stroke="#9bd1bd"
+            strokeWidth="4"
+            opacity=".5"
+          />
+          <path d="M70 274q85-85 194-45l54 52H70Z" fill="#315744" />
+          <path d="M518 273q74-86 179-28l31 36H518Z" fill="#315744" />
+          <path d="M605 224v-74l46 74Z" fill="#f7eed9" />
+          <path d="M598 225h62l-10 15h-42Z" fill="#6b4c37" />
+          <path d="M604 150v84" stroke="#704f39" strokeWidth="5" />
+          <path
+            d="M120 239v-41m0 16-17-12m17 24 18-14m-18 9 2 21"
+            fill="none"
+            stroke="#283f35"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+          <circle cx="120" cy="186" r="25" fill="#486f50" />
+          <circle cx="100" cy="196" r="18" fill="#587c58" />
+          <circle cx="139" cy="198" r="19" fill="#3c6348" />
+          <path d="M0 486q150-47 292-11t280 2 228-18v41H0Z" fill="#173f45" opacity=".8" />
+        </svg>
+      )}
+      {isCat && (
+        <svg
+          className="cat-room-art"
+          viewBox="0 0 800 500"
+          preserveAspectRatio="xMidYMid slice"
+          focusable="false"
+        >
+          <rect width="800" height="500" fill="#806b60" />
+          <path d="M0 0h800v285H0Z" fill="#9b8170" />
+          <path d="M0 285h800v215H0Z" fill="#705b50" />
+          <path d="M0 278h800v13H0Z" fill="#c4a489" />
+          <path d="M0 292h800v5H0Z" fill="#4d403b" opacity=".45" />
+          <rect x="548" y="58" width="184" height="164" rx="3" fill="#4b403c" />
+          <rect x="558" y="68" width="164" height="144" fill="#36515a" />
+          <path d="M558 165q43-48 83-12t81-9v68H558Z" fill="#647b6c" />
+          <path d="M558 183q48-34 91-4t73-11v44H558Z" fill="#91a081" opacity=".82" />
+          <path d="M638 68v144m-80-73h164" stroke="#d4b99e" strokeWidth="7" />
+          <circle cx="690" cy="94" r="13" fill="#e9cf9f" opacity=".9" />
+          <path d="M0 418h800m-800 36h800m-650-157v203m170-203v203m170-203v203m170-203v203" stroke="#a38770" strokeWidth="3" opacity=".36" />
+          <path d="M76 285v-72m0 26-23-18m23 35 25-21m-25 34 3 21" fill="none" stroke="#584c3d" strokeWidth="8" strokeLinecap="round" />
+          <circle cx="76" cy="199" r="29" fill="#63735b" />
+          <circle cx="53" cy="211" r="19" fill="#7e8b67" />
+          <circle cx="99" cy="211" r="20" fill="#758461" />
+          <path d="M211 333h465v106H211Z" fill="#58473f" />
+          <path d="M190 306q18-20 41 0h431q24-18 46 2l-17 108H202Z" fill="#e2cdb2" />
+          <path d="M202 357q196-32 488 0v55H202Z" fill="#bf9574" />
+          <path d="M226 304q80-38 155 2v53H226Z" fill="#f3e5d1" />
+          <path d="M235 310q68-28 137 1" fill="none" stroke="#d8c2a8" strokeWidth="5" />
+          <g transform="translate(110 0)">
+            <ellipse cx="535" cy="311" rx="84" ry="37" fill="#d77d3f" />
+            <ellipse cx="562" cy="301" rx="54" ry="34" fill="#e18c4c" />
+            <path d="M481 319q-31 34-57 9t-4-34" fill="none" stroke="#d77d3f" strokeWidth="17" strokeLinecap="round" />
+            <path d="m469 287 3-35 28 24m39 1 24-27 4 41" fill="#df8747" stroke="#b96334" strokeWidth="4" strokeLinejoin="round" />
+            <ellipse cx="501" cy="288" rx="5" ry="7" fill="#473a34" />
+            <ellipse cx="535" cy="288" rx="5" ry="7" fill="#473a34" />
+            <path d="M512 302q6 5 12 0m-6 0v6m0 0q-7 8-14 1m14-1q7 8 14 1" fill="none" stroke="#744b3b" strokeWidth="3" strokeLinecap="round" />
+            <path d="M454 370h19m22 2h19" stroke="#f0c69e" strokeWidth="11" strokeLinecap="round" />
+          </g>
+          <path d="M0 494q190-22 360 0t440 0v6H0Z" fill="#d5aa78" opacity=".65" />
+        </svg>
+      )}
       <div className="game-art-center">
-        <span>{isNeon ? "RUN // SURVIVE" : "FIGHT // ADAPT"}</span>
+        <span>
+          {isSerene
+            ? "SAIL // DISCOVER // RESTORE"
+            : isNeon
+              ? "RUN // SURVIVE"
+              : isCat
+                ? "CARE // PLAY // REST"
+                : "FIGHT // ADAPT"}
+        </span>
         <strong>
-          {isNeon ? (
+          {isSerene ? (
+            <>
+              SERENE
+              <br />
+              WATERS
+            </>
+          ) : isNeon ? (
             <>
               NEON
               <br />
               DASH
+            </>
+          ) : isCat ? (
+            <>
+              MY LITTLE
+              <br />
+              CAT
             </>
           ) : (
             <>
@@ -879,10 +1047,25 @@ function GameArtwork({ project }: { project: Project }) {
             </>
           )}
         </strong>
-        <i>{isNeon ? "THREE LANES. ONE CHANCE." : "ENTER THE ARENA."}</i>
+        <i>
+          {isSerene
+            ? "A QUIETER KIND OF ADVENTURE."
+            : isNeon
+              ? "THREE LANES. ONE CHANCE."
+              : isCat
+                ? "MOCHI'S ROOM IS YOURS TO EXPLORE."
+                : "ENTER THE ARENA."}
+        </i>
       </div>
       <span className="game-art-bottom">
-        {isNeon ? "PROTOCOL ACTIVE" : "SYSTEM ARMED"} <b>PLAY NOW ↗</b>
+        {isSerene
+          ? "NATURE AWAITS"
+          : isNeon
+            ? "PROTOCOL ACTIVE"
+            : isCat
+              ? "MOCHI'S ROOM"
+              : "SYSTEM ARMED"}{" "}
+        <b>{isCat ? "MEET MOCHI ↗" : "PLAY NOW ↗"}</b>
       </span>
     </div>
   );
@@ -1470,8 +1653,11 @@ export default function App() {
               <p className="hero-greeting">Haii</p>
               <div className="hero-game-launcher">
                 <p>Start Arya's Games</p>
-                <button onClick={() => openGameProject(projects[0])}>neon-dash</button>
-                <button onClick={() => openGameProject(projects[1])}>street fighting</button>
+                <button onClick={() => openGameProject(projects[1])}>neon-dash</button>
+                <button onClick={() => openGameProject(projects[2])}>street fighting</button>
+                <button data-game="serene" onClick={() => openGameProject(projects[0])}>
+                  serene waters
+                </button>
               </div>
             </div>
             <p className="eyebrow">Data analyst · Web developer</p>
@@ -1608,7 +1794,7 @@ export default function App() {
             {projects.map((item) => (
               <article
                 id={item.gameTheme ? `project-${item.gameTheme}` : undefined}
-                className="project-card"
+                className={`project-card${item.gameTheme ? ` project-card-${item.gameTheme}` : ""}`}
                 key={item.title}
               >
                 <button

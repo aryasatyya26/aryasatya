@@ -1,0 +1,3233 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>MY LITTLE CAT WORLD // 3D Interactive Cat Simulator – Aryasatya Naryama</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=JetBrains+Mono:wght@600;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+
+  <!-- Three.js & GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    :root {
+      --glass-light: rgba(255, 255, 255, 0.82);
+      --glass-dark: rgba(26, 30, 46, 0.88);
+      --glass-border: rgba(255, 255, 255, 0.72);
+      --primary: #ff7597;
+      --primary-deep: #e05277;
+      --sky: #56cfe1;
+      --gold: #ffb703;
+      --mint: #40916c;
+      --violet: #8338ec;
+      --ink: #25283d;
+      --muted: #64748b;
+      --font-display: 'Fredoka', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-sans);
+      background: #d8eeff;
+      color: var(--ink);
+      touch-action: none;
+    }
+
+    #webgl-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* Creator License Badge */
+    .creator-badge {
+      position: fixed;
+      bottom: 14px;
+      right: 14px;
+      z-index: 45;
+      background: var(--glass-dark);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      padding: 6px 13px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fff;
+      font-size: 11px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+    .creator-badge:hover {
+      transform: translateY(-2px) scale(1.03);
+    }
+    .an-pill {
+      background: linear-gradient(135deg, #ff7597, #ffb703);
+      color: #1a1e2e;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    /* Main Menu Screen */
+    #main-menu {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      background: radial-gradient(circle at 50% 38%, rgba(255, 246, 240, 0.88), rgba(208, 236, 255, 0.94));
+      backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+    .menu-kicker {
+      background: rgba(255, 117, 151, 0.16);
+      color: var(--primary-deep);
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 11.5px;
+      letter-spacing: 0.08em;
+      border: 1px solid rgba(255, 117, 151, 0.35);
+      margin-bottom: 12px;
+    }
+    .menu-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.3rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.08;
+      margin-bottom: 12px;
+      text-shadow: 0 6px 22px rgba(255, 117, 151, 0.25);
+    }
+    .menu-title span {
+      color: var(--primary);
+    }
+    .menu-desc {
+      max-width: 510px;
+      font-size: 14.5px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .btn-start {
+      background: linear-gradient(135deg, #ff7597, #ff527e);
+      color: #fff;
+      border: none;
+      padding: 17px 44px;
+      border-radius: 999px;
+      font-family: var(--font-display);
+      font-size: 21px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 12px 28px rgba(255, 82, 126, 0.4);
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .btn-start:hover {
+      transform: translateY(-3px) scale(1.04);
+    }
+    .btn-return-menu {
+      margin-top: 12px;
+      padding: 10px 20px;
+      border: 1px solid rgba(88, 66, 75, 0.22);
+      border-radius: 999px;
+      color: #59434c;
+      background: rgba(255, 255, 255, 0.72);
+      font: 700 13px var(--font-display);
+      cursor: pointer;
+    }
+
+    /* HUD Layer */
+    #hud {
+      position: fixed;
+      inset: 0;
+      z-index: 25;
+      pointer-events: none;
+      display: none;
+    }
+    .interactive {
+      pointer-events: auto;
+    }
+
+    .top-bar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Pet Status Card */
+    .status-card {
+      background: var(--glass-light);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      padding: 11px 15px;
+      box-shadow: 0 10px 28px rgba(37, 40, 61, 0.08);
+      min-width: 265px;
+    }
+    .status-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .cat-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .lvl-tag {
+      background: var(--gold);
+      color: var(--ink);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-left: 6px;
+    }
+    .mood-pill {
+      font-size: 11px;
+      font-weight: 700;
+      background: rgba(255, 117, 151, 0.16);
+      color: var(--primary-deep);
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    .bars-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 12px;
+    }
+    .bar-box {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .bar-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10.5px;
+      font-weight: 700;
+    }
+    .bar-track {
+      width: 100%;
+      height: 6.5px;
+      background: rgba(37, 40, 61, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    /* Guided Care Step Tracker */
+    .care-guide {
+      margin-top: 8px;
+      padding-top: 7px;
+      border-top: 1px dashed rgba(37, 40, 61, 0.16);
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .care-step-txt {
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .care-reward {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--mint);
+      background: rgba(64, 145, 108, 0.14);
+      padding: 2px 7px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    /* Top Right Controls */
+    .right-cluster {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .economy-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .chip {
+      background: var(--glass-light);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    }
+    .circle-btn {
+      background: var(--glass-light);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--glass-border);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 15px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      transition: transform 0.18s ease;
+    }
+    .circle-btn:hover {
+      transform: scale(1.08);
+      background: #fff;
+    }
+
+    .zone-tabs {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .zone-tab {
+      background: var(--glass-light);
+      border: 1px solid var(--glass-border);
+      padding: 5px 11px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .zone-tab.active, .zone-tab:hover {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    /* Bottom Action Dock */
+    .action-dock {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--glass-light);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-border);
+      padding: 9px 12px;
+      border-radius: 24px;
+      display: flex;
+      gap: 7px;
+      box-shadow: 0 12px 30px rgba(37, 40, 61, 0.14);
+      max-width: 96vw;
+      overflow-x: auto;
+    }
+    .dock-item {
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(37, 40, 61, 0.08);
+      border-radius: 16px;
+      padding: 7px 11px;
+      min-width: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .dock-item:hover {
+      transform: translateY(-3px);
+      background: #fff;
+    }
+    .dock-item.active {
+      background: var(--primary);
+      color: #fff;
+    }
+    .dock-emoji {
+      font-size: 19px;
+    }
+    .dock-txt {
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    /* Toast Notification */
+    #toast {
+      position: fixed;
+      top: 175px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      background: var(--glass-dark);
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+      white-space: nowrap;
+      max-width: 92vw;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Mini-Game Banner */
+    #mg-banner {
+      position: fixed;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      background: var(--glass-dark);
+      color: #fff;
+      padding: 11px 20px;
+      border-radius: 999px;
+      display: none;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    .mg-mono {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      font-weight: 800;
+    }
+    .btn-stop-mg {
+      background: #ff4d6d;
+      color: #fff;
+      border: none;
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+
+    /* Modals */
+    .modal-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 70;
+      background: rgba(20, 24, 38, 0.56);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 26px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 84vh;
+      overflow-y: auto;
+      padding: 22px;
+      box-shadow: 0 24px 56px rgba(0,0,0,0.26);
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .modal-head h2 {
+      font-family: var(--font-display);
+      font-size: 22px;
+    }
+    .btn-close {
+      background: #f1f5f9;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(142px, 1fr));
+      gap: 11px;
+    }
+    .card-unit {
+      border: 1.5px solid #e2e8f0;
+      border-radius: 18px;
+      padding: 13px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 7px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .card-unit:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+    .btn-pill {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 11px;
+      font-weight: 700;
+      font-size: 11.5px;
+      cursor: pointer;
+    }
+    .btn-pill:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+    .cat-dialogue {
+      padding: 13px 15px;
+      border: 1px solid rgba(255, 117, 151, 0.28);
+      border-radius: 16px;
+      background: #fff4f6;
+      color: #59434c;
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 12px;
+    }
+    .cat-question-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .cat-question-button {
+      min-height: 58px;
+      padding: 9px;
+      border: 1px solid #f2d6dc;
+      border-radius: 13px;
+      color: #59434c;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cat-question-button:hover {
+      border-color: var(--primary);
+      background: #fff9fa;
+    }
+    .cat-quest-card {
+      padding: 14px;
+      border: 1px solid #eadfdc;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fffaf3, #fff1f4);
+    }
+    .cat-quest-progress {
+      margin-bottom: 6px;
+      color: var(--primary-deep);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .cat-quest-card p {
+      margin: 6px 0 12px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 680px) {
+      .top-bar {
+        top: max(8px, env(safe-area-inset-top));
+        left: 8px;
+        right: 8px;
+        gap: 6px;
+        align-items: stretch;
+      }
+      .status-card {
+        width: 100%;
+        min-width: 0;
+        padding: 9px 11px;
+      }
+      .bars-grid { gap: 5px 8px; }
+      .bar-meta { font-size: 9.5px; }
+      .right-cluster {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+      }
+      .economy-row { justify-content: flex-end; gap: 5px; }
+      .chip { padding: 6px 9px; font-size: 11px; }
+      .zone-tabs {
+        display: flex;
+        width: 100%;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 4px;
+        overflow-x: auto;
+        scrollbar-width: none;
+        touch-action: pan-x;
+      }
+      .zone-tabs::-webkit-scrollbar { display: none; }
+      .zone-tab { flex: 0 0 auto; padding: 5px 9px; font-size: 10px; }
+      .action-dock {
+        bottom: max(8px, env(safe-area-inset-bottom));
+        width: min(440px, calc(100vw - 16px));
+        max-width: none;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 5px;
+        padding: 7px;
+        overflow: visible;
+        touch-action: manipulation;
+      }
+      .dock-item {
+        min-width: 0;
+        min-height: 48px;
+        padding: 5px 3px;
+        border-radius: 12px;
+      }
+      .dock-emoji { font-size: 17px; }
+      .dock-txt { font-size: clamp(8px, 2.4vw, 10px); }
+      .cat-question-grid { grid-template-columns: 1fr; }
+      .cat-question-button { min-height: 42px; text-align: left; }
+      .creator-badge {
+        bottom: calc(132px + env(safe-area-inset-bottom));
+        right: 8px;
+        font-size: 9px;
+        padding: 5px 9px;
+      }
+      #toast {
+        top: calc(220px + env(safe-area-inset-top));
+        max-width: calc(100vw - 24px);
+      }
+      #mg-banner {
+        top: max(8px, env(safe-area-inset-top));
+        width: calc(100vw - 16px);
+        box-sizing: border-box;
+        justify-content: space-between;
+        gap: 6px;
+        padding: 8px 10px;
+      }
+      #mg-label {
+        min-width: 0;
+        max-width: 32%;
+        overflow: hidden;
+        font-size: clamp(8px, 2.7vw, 10px);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .mg-mono {
+        flex: 0 0 auto;
+        font-size: clamp(8px, 2.7vw, 10px);
+      }
+      .btn-stop-mg {
+        flex: 0 0 auto;
+        padding: 6px 8px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 3D WebGL Viewport -->
+  <div id="webgl-stage"></div>
+
+  <!-- Creator License Signature -->
+  <div class="creator-badge" onclick="UI.openModal('modal-license')" title="Creator License & Credits">
+    <span class="an-pill">AN</span>
+    <span>CRAFTED BY <strong>ARYASATYA NARYAMA</strong></span>
+  </div>
+
+  <!-- Main Menu -->
+  <div id="main-menu">
+    <div class="menu-kicker">3D INTERACTIVE CAT SIMULATOR</div>
+    <h1 class="menu-title">My Little <span>Cat World</span></h1>
+    <p class="menu-desc">
+      Elus kepala, gendong, sisir bulu, beri makan, dan jelajahi 5 zona dunia 3D pastel yang hangat bersama sahabat kucing virtualmu!
+    </p>
+    <button class="btn-start" id="btn-launch">▶ Mulai Bermain</button>
+    <button class="btn-return-menu" onclick="returnToPortfolio()">Kembali ke Portofolio</button>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toast">Mochi mendengkur senang! Purrrr~ 🐾</div>
+
+  <!-- Active Mini-Game HUD -->
+  <div id="mg-banner">
+    <span id="mg-label" style="font-weight:800; color:#ffb703;">MINI GAME</span>
+    <span class="mg-mono">SKOR: <span id="mg-score">0</span></span>
+    <span class="mg-mono">WAKTU: <span id="mg-timer">25</span>s</span>
+    <button class="btn-stop-mg" onclick="MiniGames.stop(false)">Selesai</button>
+  </div>
+
+  <!-- HUD Layer -->
+  <div id="hud">
+    <div class="top-bar">
+      <!-- Pet Status & Step Care Guide -->
+      <div class="status-card interactive">
+        <div class="status-top">
+          <div>
+            <span class="cat-title" id="ui-cat-name">Mochi</span>
+            <span class="lvl-tag" id="ui-level">LVL 1</span>
+          </div>
+          <span class="mood-pill" id="ui-mood">😻 Bahagia</span>
+        </div>
+
+        <div class="bars-grid">
+          <div class="bar-box">
+            <div class="bar-meta"><span>❤️ Happiness</span><span id="txt-happy">85%</span></div>
+            <div class="bar-track"><div class="bar-fill" id="fill-happy" style="width:85%; background:#ff7597;"></div></div>
+          </div>
+          <div class="bar-box">
+            <div class="bar-meta"><span>🐟 Hunger</span><span id="txt-hunger">80%</span></div>
+            <div class="bar-track"><div class="bar-fill" id="fill-hunger" style="width:80%; background:#ffb703;"></div></div>
+          </div>
+          <div class="bar-box">
+            <div class="bar-meta"><span>💧 Thirst</span><span id="txt-thirst">80%</span></div>
+            <div class="bar-track"><div class="bar-fill" id="fill-thirst" style="width:80%; background:#38bdf8;"></div></div>
+          </div>
+          <div class="bar-box">
+            <div class="bar-meta"><span>⚡ Energy</span><span id="txt-energy">90%</span></div>
+            <div class="bar-track"><div class="bar-fill" id="fill-energy" style="width:90%; background:#40916c;"></div></div>
+          </div>
+          <div class="bar-box">
+            <div class="bar-meta"><span>✨ Cleanliness</span><span id="txt-clean">85%</span></div>
+            <div class="bar-track"><div class="bar-fill" id="fill-clean" style="width:85%; background:#8338ec;"></div></div>
+          </div>
+          <div class="bar-box">
+            <div class="bar-meta"><span>💕 Affection</span><span id="txt-affection">75%</span></div>
+            <div class="bar-track"><div class="bar-fill" id="fill-affection" style="width:75%; background:#f72585;"></div></div>
+          </div>
+        </div>
+
+        <!-- Guided Daily Care Task -->
+        <div class="care-guide">
+          <span class="care-step-txt" id="ui-care-task">📌 Langkah 1: Klik kepala kucing untuk mengelusnya</span>
+          <span class="care-reward" id="ui-care-reward">+30 🪙</span>
+        </div>
+      </div>
+
+      <!-- Right Controls & Zone Camera Tabs -->
+      <div class="right-cluster interactive">
+        <div class="economy-row">
+          <div class="chip">🪙 <span id="ui-coins">250</span></div>
+          <div class="chip">⭐ XP <span id="ui-xp">0/100</span></div>
+          <button class="circle-btn" onclick="CameraRig.cycleMode()" title="Ganti Sudut Kamera">🎥</button>
+          <button class="circle-btn" onclick="UI.openModal('modal-settings')" title="Pengaturan & Panduan">⚙️</button>
+          <button class="circle-btn" onclick="CatQuest.open()" title="Tanya dan beri tugas untuk Mochi" aria-label="Tanya dan beri tugas untuk Mochi">💬</button>
+          <button class="circle-btn" onclick="returnToPortfolio()" title="Kembali ke Portofolio" aria-label="Kembali ke Portofolio">↩️</button>
+        </div>
+        <div class="zone-tabs">
+          <button class="zone-tab" onclick="CameraRig.focusZone('living', this)">🛋️ Ruang Tamu</button>
+          <button class="zone-tab active" onclick="CameraRig.focusZone('bedroom', this)">🛏️ Kamar</button>
+          <button class="zone-tab" onclick="CameraRig.focusZone('kitchen', this)">🍽️ Dapur</button>
+          <button class="zone-tab" onclick="CameraRig.focusZone('garden', this)">🌷 Taman</button>
+          <button class="zone-tab" onclick="CameraRig.focusZone('playground', this)">🎪 Playground</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Action Dock -->
+    <div class="action-dock interactive">
+      <button class="dock-item" onclick="CatActions.feed()">
+        <span class="dock-emoji">🐟</span>
+        <span class="dock-txt">Makan</span>
+      </button>
+      <button class="dock-item" onclick="CatActions.drink()">
+        <span class="dock-emoji">🥣</span>
+        <span class="dock-txt">Minum</span>
+      </button>
+      <button class="dock-item" id="btn-brush-mode" onclick="CatActions.toggleBrush()">
+        <span class="dock-emoji">🪮</span>
+        <span class="dock-txt">Sisir</span>
+      </button>
+      <button class="dock-item" onclick="CatActions.playBall()">
+        <span class="dock-emoji">🧶</span>
+        <span class="dock-txt">Main Bola</span>
+      </button>
+      <button class="dock-item" onclick="CatActions.sleep()">
+        <span class="dock-emoji">💤</span>
+        <span class="dock-txt">Tidur</span>
+      </button>
+      <button class="dock-item" onclick="UI.openModal('modal-minigames')">
+        <span class="dock-emoji">🎮</span>
+        <span class="dock-txt">Mini Games</span>
+      </button>
+      <button class="dock-item" onclick="UI.openModal('modal-shop')">
+        <span class="dock-emoji">🛍️</span>
+        <span class="dock-txt">Toko</span>
+      </button>
+      <button class="dock-item" onclick="UI.openModal('modal-custom')">
+        <span class="dock-emoji">🎨</span>
+        <span class="dock-txt">Kustom</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL: CAT QUESTIONS AND TASKS -->
+  <div class="modal-bg" id="modal-cat-quest">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>💬 Tanya Mochi</h2>
+        <button class="btn-close" onclick="UI.closeModal('modal-cat-quest')" aria-label="Tutup">✕</button>
+      </div>
+      <div class="cat-dialogue" id="cat-dialogue" role="status" aria-live="polite">
+        Mochi menatapmu penasaran. Apa yang ingin kamu tanyakan?
+      </div>
+      <div class="cat-question-grid">
+        <button class="cat-question-button" onclick="CatQuest.ask('need')">🐟 Apa yang kamu butuhkan?</button>
+        <button class="cat-question-button" onclick="CatQuest.ask('mood')">💕 Bagaimana perasaanmu?</button>
+        <button class="cat-question-button" onclick="CatQuest.ask('play')">🧶 Mau bermain apa?</button>
+      </div>
+      <div class="cat-quest-card">
+        <div class="cat-quest-progress" id="cat-quest-progress">Tugas Mochi · 0/4</div>
+        <strong id="cat-quest-title">Tugas berikutnya</strong>
+        <p id="cat-quest-description">Pilih tugas untuk memulai petualangan bersama Mochi.</p>
+        <button class="btn-pill" id="cat-quest-accept" onclick="CatQuest.accept()">Ambil Tugas</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: MINI GAMES -->
+  <div class="modal-bg" id="modal-minigames">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>🎮 Mini Games Interaktif</h2>
+        <button class="btn-close" onclick="UI.closeModal('modal-minigames')">✕</button>
+      </div>
+      <div class="cards-grid">
+        <div class="card-unit">
+          <div style="font-size:30px;">🦋</div>
+          <strong>Catch the Butterfly</strong>
+          <span style="font-size:11px; color:var(--muted);">Tangkap kupu-kupu di taman bunga!</span>
+          <button class="btn-pill" onclick="MiniGames.start('butterfly')">Mainkan</button>
+        </div>
+        <div class="card-unit">
+          <div style="font-size:30px;">🔴</div>
+          <strong>Chase the Laser</strong>
+          <span style="font-size:11px; color:var(--muted);">Gerakkan laser merah agar dikejar kucing.</span>
+          <button class="btn-pill" onclick="MiniGames.start('laser')">Mainkan</button>
+        </div>
+        <div class="card-unit">
+          <div style="font-size:30px;">🐭</div>
+          <strong>Find the Mouse</strong>
+          <span style="font-size:11px; color:var(--muted);">Klik tikus mainan yang berlari lincah!</span>
+          <button class="btn-pill" onclick="MiniGames.start('mouse')">Mainkan</button>
+        </div>
+        <div class="card-unit">
+          <div style="font-size:30px;">⚽</div>
+          <strong>Ball Adventure</strong>
+          <span style="font-size:11px; color:var(--muted);">Tendang bola wol ke cincin target!</span>
+          <button class="btn-pill" onclick="MiniGames.start('ball')">Mainkan</button>
+        </div>
+        <div class="card-unit">
+          <div style="font-size:30px;">🪜</div>
+          <strong>Jumping Challenge</strong>
+          <span style="font-size:11px; color:var(--muted);">Klik layar untuk melompati rintangan!</span>
+          <button class="btn-pill" onclick="MiniGames.start('jump')">Mainkan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SHOP -->
+  <div class="modal-bg" id="modal-shop">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>🛍️ Pet Shop & Aksesoris</h2>
+        <button class="btn-close" onclick="UI.closeModal('modal-shop')">✕</button>
+      </div>
+      <div class="cards-grid" id="shop-grid"></div>
+    </div>
+  </div>
+
+  <!-- MODAL: CUSTOMIZATION -->
+  <div class="modal-bg" id="modal-custom">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>🎨 Kustomisasi Kucing</h2>
+        <button class="btn-close" onclick="UI.closeModal('modal-custom')">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:13px;">
+        <div>
+          <label style="font-size:12px; font-weight:700;">Nama Kucing:</label>
+          <div style="display:flex; gap:8px; margin-top:5px;">
+            <input type="text" id="input-name" value="Mochi" maxlength="14" style="flex:1; padding:9px 12px; border-radius:11px; border:1.5px solid #cbd5e1; font-weight:700;">
+            <button class="btn-pill" onclick="CatCustomizer.applyName()">Simpan</button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:700;">Warna Bulu:</label>
+          <div style="display:flex; gap:7px; margin-top:6px; flex-wrap:wrap;">
+            <button class="btn-pill" style="background:#d96f1c; color:#fff;" onclick="CatCustomizer.setFur('#d96f1c', '#fff8ef')">Oranye Tabby</button>
+            <button class="btn-pill" style="background:#f8f9fa; color:#25283d; border:1px solid #cbd5e1;" onclick="CatCustomizer.setFur('#f8f9fa', '#ffe5ec')">Putih Salju</button>
+            <button class="btn-pill" style="background:#6c757d;" onclick="CatCustomizer.setFur('#6c757d', '#e9ecef')">Abu British</button>
+            <button class="btn-pill" style="background:#3d405b;" onclick="CatCustomizer.setFur('#3d405b', '#f4f1de')">Tuxedo Gelap</button>
+            <button class="btn-pill" style="background:#e6ccb2; color:#25283d;" onclick="CatCustomizer.setFur('#e6ccb2', '#7f5539')">Siamese Cream</button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:12px; font-weight:700;">Aksesoris:</label>
+          <div style="display:flex; gap:7px; margin-top:6px; flex-wrap:wrap;">
+            <button class="btn-pill" onclick="CatCustomizer.setAccessory('bell')">🔔 Lonceng Emas</button>
+            <button class="btn-pill" onclick="CatCustomizer.setAccessory('bow')">🎀 Pita Merah</button>
+            <button class="btn-pill" onclick="CatCustomizer.setAccessory('crown')">👑 Mahkota Mini</button>
+            <button class="btn-pill" style="background:#64748b;" onclick="CatCustomizer.setAccessory('none')">Lepas</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS -->
+  <div class="modal-bg" id="modal-settings">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>⚙️ Pengaturan & Panduan</h2>
+        <button class="btn-close" onclick="UI.closeModal('modal-settings')">✕</button>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-pill" id="btn-audio" onclick="AudioFX.toggle()">🔊 Suara & Musik: AKTIF</button>
+        <button class="btn-pill" id="btn-gfx" onclick="WorldEngine.toggleQuality()">✨ Kualitas Grafis: TINGGI (Shadows ON)</button>
+        <div style="background:#f8fafc; padding:12px; border-radius:14px; font-size:12px; line-height:1.6;">
+          <strong>Cara Berinteraksi dengan Kucing:</strong><br/>
+          • <b>Klik Kepala Kucing:</b> Mengelus kepala hingga memejamkan mata & mendengkur.<br/>
+          • <b>Klik & Geser (Drag) Badan Kucing:</b> Menggendong & memindahkan posisi kucing.<br/>
+          • <b>Aktifkan Sisir (🪮) lalu Klik/Gesek Badan:</b> Menyisir bulu agar bersih & berkilau.<br/>
+          • <b>Klik Lantai atau Furnitur:</b> Memanggil kucing berjalan ke titik tersebut.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATOR LICENSE -->
+  <div class="modal-bg" id="modal-license">
+    <div class="modal-box" style="text-align:center;">
+      <div class="modal-head">
+        <h2>📜 Creator License</h2>
+        <button class="btn-close" onclick="UI.closeModal('modal-license')">✕</button>
+      </div>
+      <div style="display:inline-block; background:linear-gradient(135deg,#ff7597,#ffb703); color:#1a1e2e; font-family:var(--font-mono); font-weight:800; font-size:22px; padding:9px 18px; border-radius:14px; margin-bottom:10px;">AN</div>
+      <h3 style="font-family:var(--font-display); font-size:20px;">ARYASATYA NARYAMA</h3>
+      <p style="font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.6;">
+        Mochi ditemukan sendirian pada malam hujan. Kini ia tinggal di rumah yang hangat dan selalu menantikan sahabat baru untuk bermain bersama.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. PROCEDURAL WEB AUDIO ENGINE (Meow, Purr, Footsteps, Eat, Jump, BGM)
+       ========================================================================== */
+    const AudioFX = {
+      ctx: null,
+      enabled: true,
+      bgmTimer: null,
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+        this.startBGM();
+      },
+
+      meow(happy = true) {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        const f0 = happy ? 530 : 370;
+        osc.frequency.setValueAtTime(f0, now);
+        osc.frequency.exponentialRampToValueAtTime(f0 * 1.42, now + 0.14);
+        osc.frequency.exponentialRampToValueAtTime(f0 * 0.84, now + 0.42);
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.15, now + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.44);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      },
+
+      purr() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const lfo = this.ctx.createOscillator();
+        const lfoGain = this.ctx.createGain();
+        const outGain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(64, now);
+        lfo.frequency.setValueAtTime(26, now);
+        lfoGain.gain.setValueAtTime(24, now);
+        outGain.gain.setValueAtTime(0.045, now);
+        outGain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+        osc.connect(outGain);
+        outGain.connect(this.ctx.destination);
+        osc.start(now);
+        lfo.start(now);
+        osc.stop(now + 0.66);
+        lfo.stop(now + 0.66);
+      },
+
+      pop(freq = 640) {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now);
+        osc.frequency.exponentialRampToValueAtTime(freq * 1.45, now + 0.1);
+        gain.gain.setValueAtTime(0.11, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      },
+
+      jump() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(250, now);
+        osc.frequency.exponentialRampToValueAtTime(580, now + 0.22);
+        gain.gain.setValueAtTime(0.13, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      },
+
+      eat() {
+        if (!this.enabled || !this.ctx) return;
+        [0, 0.14, 0.28].forEach((offset, idx) => {
+          const now = this.ctx.currentTime + offset;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(320 + idx * 55, now);
+          gain.gain.setValueAtTime(0.09, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        });
+      },
+
+      startBGM() {
+        if (this.bgmTimer) clearInterval(this.bgmTimer);
+        const notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880.00, 783.99];
+        let step = 0;
+        this.bgmTimer = setInterval(() => {
+          if (!this.enabled || !this.ctx || document.hidden) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(notes[step % notes.length], now);
+          gain.gain.setValueAtTime(0.015, now);
+          gain.gain.exponentialRampToValueAtTime(0.0004, now + 0.45);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.48);
+          step++;
+        }, 560);
+      },
+
+      toggle() {
+        this.enabled = !this.enabled;
+        document.getElementById('btn-audio').textContent = `🔊 Suara & Musik: ${this.enabled ? 'AKTIF' : 'NONAKTIF'}`;
+      }
+    };
+
+    /* ==========================================================================
+       2. GAME STATE, CARE TASKS & ECONOMY
+       ========================================================================== */
+    const PetState = {
+      started: false,
+      name: 'Mochi',
+      level: 1,
+      xp: 0,
+      xpNext: 100,
+      coins: 250,
+      stats: {
+        happy: 85,
+        hunger: 80,
+        thirst: 80,
+        energy: 90,
+        clean: 85,
+        affection: 75
+      },
+      pose: 'idle', // idle, walk, run, jump, sleep, eat, drink, happy, carried
+      brushActive: false,
+      taskIndex: 0,
+      tasks: [
+        { id: 'pet_head', text: '📌 Langkah 1: Klik kepala kucing untuk mengelusnya', reward: 30 },
+        { id: 'feed_cat', text: '📌 Langkah 2: Beri makan kucing lewat tombol Makan', reward: 35 },
+        { id: 'brush_cat', text: '📌 Langkah 3: Aktifkan Sisir (🪮) & usap badan kucing', reward: 40 },
+        { id: 'play_ball', text: '📌 Langkah 4: Ajak bermain Bola Wol (🧶)', reward: 45 },
+        { id: 'play_mg', text: '📌 Langkah 5: Mainkan salah satu Mini Games (🎮)', reward: 60 }
+      ]
+    };
+
+    function returnToPortfolio() {
+      if (window.parent === window) {
+        if (window.history.length > 1) {
+          window.history.back();
+        } else {
+          window.location.assign('/');
+        }
+        return;
+      }
+      const targetOrigin = window.location.origin === 'null' ? '*' : window.location.origin;
+      window.parent.postMessage({ type: 'portfolio:return-from-game' }, targetOrigin);
+    }
+
+    function completeCareTask(taskId) {
+      const current = PetState.tasks[PetState.taskIndex];
+      if (!current || current.id !== taskId) return;
+      PetState.coins += current.reward;
+      PetState.taskIndex = (PetState.taskIndex + 1) % PetState.tasks.length;
+      AudioFX.pop(860);
+      UI.toast(`🎉 Tugas Selesai! +${current.reward} Koin!`);
+      UI.refresh();
+    }
+
+    const CatQuest = {
+      index: 0,
+      accepted: false,
+      completed: 0,
+      quests: [
+        { action: 'pet_head', title: 'Berikan perhatian', description: 'Elus kepala Mochi dengan mengetuknya.', reward: 35 },
+        { action: 'feed_cat', title: 'Siapkan camilan', description: 'Ajak Mochi makan lewat tombol Makan atau mangkuknya.', reward: 45 },
+        { action: 'brush_cat', title: 'Rapikan bulunya', description: 'Aktifkan Sisir, lalu usap badan Mochi.', reward: 45 },
+        { action: 'play_ball', title: 'Waktu bermain', description: 'Ajak Mochi mengejar bola wol sampai selesai.', reward: 60 }
+      ],
+
+      open() {
+        this.render();
+        UI.openModal('modal-cat-quest');
+      },
+
+      ask(topic) {
+        const stats = PetState.stats;
+        const answers = {
+          need: stats.hunger < 55
+            ? `${PetState.name}: Perutku mulai lapar. Boleh minta camilan?`
+            : stats.thirst < 55
+              ? `${PetState.name}: Aku haus. Ayo isi mangkuk airku.`
+              : stats.energy < 40
+                ? `${PetState.name}: Aku agak lelah. Kasur empuk terdengar menyenangkan.`
+                : `${PetState.name}: Aku baik-baik saja! Ajak aku makan, minum, atau beristirahat kapan pun.`,
+          mood: stats.happy > 75
+            ? `${PetState.name}: Aku senang sekali bisa bermain bersamamu!`
+            : `${PetState.name}: Aku ingin sedikit perhatian. Elus atau ajak aku bermain, ya.`,
+          play: `${PetState.name}: Kejar-kejaran bola wol, yuk! Ambil tugas bermain, lalu gunakan tombol Main Bola.`
+        };
+        const dialogue = document.getElementById('cat-dialogue');
+        if (dialogue) dialogue.textContent = answers[topic] || `${PetState.name} mengeong pelan.`;
+      },
+
+      accept() {
+        if (this.index >= this.quests.length) return;
+        if (this.accepted) {
+          UI.toast('Selesaikan tugas Mochi yang sedang berjalan terlebih dahulu.');
+          return;
+        }
+        this.accepted = true;
+        const quest = this.quests[this.index];
+        const dialogue = document.getElementById('cat-dialogue');
+        if (dialogue) dialogue.textContent = `${PetState.name}: ${quest.description} Aku percaya padamu!`;
+        this.render();
+      },
+
+      complete(action) {
+        const quest = this.quests[this.index];
+        if (!this.accepted || !quest || quest.action !== action) return;
+        this.accepted = false;
+        this.index++;
+        this.completed++;
+        PetState.coins += quest.reward;
+        gainXP(12);
+        UI.toast(`🐾 ${quest.title} selesai! +${quest.reward} koin.`);
+        this.render();
+        UI.refresh();
+      },
+
+      render() {
+        const quest = this.quests[this.index];
+        const progress = document.getElementById('cat-quest-progress');
+        const title = document.getElementById('cat-quest-title');
+        const description = document.getElementById('cat-quest-description');
+        const accept = document.getElementById('cat-quest-accept');
+        if (!progress || !title || !description || !accept) return;
+        progress.textContent = `Tugas Mochi · ${this.completed}/${this.quests.length}`;
+        if (!quest) {
+          title.textContent = 'Semua tugas selesai!';
+          description.textContent = 'Mochi senang sudah menjelajahi semua kegiatan bersamamu.';
+          accept.textContent = 'Tuntas';
+          accept.disabled = true;
+          return;
+        }
+        title.textContent = quest.title;
+        description.textContent = `${quest.description} Hadiah: ${quest.reward} koin + 12 XP.`;
+        accept.textContent = this.accepted ? 'Tugas Diterima' : 'Ambil Tugas';
+        accept.disabled = this.accepted;
+      }
+    };
+
+    function adjustStat(key, delta) {
+      PetState.stats[key] = Math.max(0, Math.min(100, PetState.stats[key] + delta));
+      UI.refresh();
+    }
+
+    function gainXP(pts) {
+      PetState.xp += pts;
+      if (PetState.xp >= PetState.xpNext) {
+        PetState.xp -= PetState.xpNext;
+        PetState.level++;
+        PetState.xpNext = Math.round(PetState.xpNext * 1.35);
+        PetState.coins += 50;
+        AudioFX.pop(940);
+        UI.toast(`⭐ LEVEL UP! ${PetState.name} mencapai Level ${PetState.level} (+50 Koin)!`);
+      }
+      UI.refresh();
+    }
+
+    const ShopItems = [
+      { id: 'salmon', icon: '🍣', name: 'Sushi Salmon Segar', desc: '+35 Hunger, +15 Happy', price: 30, run: () => { adjustStat('hunger', 35); adjustStat('happy', 15); CatActions.feed(); } },
+      { id: 'milk', icon: '🥛', name: 'Susu Kucing Organik', desc: '+35 Thirst, +10 Energy', price: 25, run: () => { adjustStat('thirst', 35); adjustStat('energy', 10); CatActions.drink(); } },
+      { id: 'catnip', icon: '🌿', name: 'Catnip Premium', desc: '+40 Happy, +25 Affection', price: 45, run: () => { adjustStat('happy', 40); adjustStat('affection', 25); CatRig.playHappyJump(); AudioFX.meow(true); } },
+      { id: 'bath', icon: '🧼', name: 'Shampoo Busa Wangi', desc: '+45 Cleanliness', price: 35, run: () => { adjustStat('clean', 45); WorldEngine.spawnParticles(CatRig.root.position, 0x8338ec); UI.toast('Bulu bersih & harum! ✨'); } },
+      { id: 'gold_bowl', icon: '🏆', name: 'Mangkuk Emas Royal', desc: 'Upgrade mangkuk makan', price: 120, run: () => { WorldEngine.foodBowl.material.color.setHex(0xffb703); UI.toast('Mangkuk Emas terpasang!'); } },
+      { id: 'cloud_bed', icon: '🛋️', name: 'Kasur Awan Pastel', desc: '+50 Energy saat tidur', price: 150, run: () => { WorldEngine.bedCushion.material.color.setHex(0xff7597); CatActions.sleep(); } }
+    ];
+
+    /* ==========================================================================
+       3. UI CONTROLLER
+       ========================================================================== */
+    const UI = {
+      toastTimer: null,
+
+      toast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        gsap.killTweensOf(el);
+        gsap.fromTo(el, { opacity: 0, y: -8 }, { opacity: 1, y: 0, duration: 0.25, ease: 'back.out(1.6)' });
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => gsap.to(el, { opacity: 0, duration: 0.3 }), 2600);
+      },
+
+      openModal(id) {
+        if (id === 'modal-shop') this.renderShop();
+        const m = document.getElementById(id);
+        m.style.display = 'flex';
+        gsap.fromTo(m.querySelector('.modal-box'), { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.24, ease: 'back.out(1.5)' });
+      },
+
+      closeModal(id) {
+        document.getElementById(id).style.display = 'none';
+      },
+
+      renderShop() {
+        const grid = document.getElementById('shop-grid');
+        grid.innerHTML = '';
+        ShopItems.forEach((it, idx) => {
+          const card = document.createElement('div');
+          card.className = 'card-unit';
+          card.innerHTML = `
+            <div style="font-size:28px;">${it.icon}</div>
+            <strong>${it.name}</strong>
+            <span style="font-size:11px; color:var(--muted);">${it.desc}</span>
+            <button class="btn-pill" ${PetState.coins < it.price ? 'disabled' : ''} onclick="UI.buyShopItem(${idx})">🪙 ${it.price}</button>
+          `;
+          grid.appendChild(card);
+        });
+      },
+
+      buyShopItem(idx) {
+        const item = ShopItems[idx];
+        if (!item || PetState.coins < item.price) return;
+        PetState.coins -= item.price;
+        AudioFX.pop(780);
+        item.run();
+        gainXP(20);
+        this.renderShop();
+        this.refresh();
+      },
+
+      refresh() {
+        const s = PetState.stats;
+        document.getElementById('ui-cat-name').textContent = PetState.name;
+        document.getElementById('ui-level').textContent = `LVL ${PetState.level}`;
+        document.getElementById('ui-coins').textContent = PetState.coins;
+        document.getElementById('ui-xp').textContent = `${PetState.xp}/${PetState.xpNext}`;
+
+        const keys = ['happy', 'hunger', 'thirst', 'energy', 'clean', 'affection'];
+        keys.forEach(k => {
+          const v = Math.round(s[k]);
+          document.getElementById(`txt-${k}`).textContent = `${v}%`;
+          document.getElementById(`fill-${k}`).style.width = `${v}%`;
+        });
+
+        const mood = document.getElementById('ui-mood');
+        if (PetState.pose === 'sleep') mood.textContent = '💤 Tidur Nyenyak';
+        else if (s.hunger < 30) mood.textContent = '😿 Lapar';
+        else if (s.thirst < 30) mood.textContent = '💧 Haus';
+        else if (s.energy < 25) mood.textContent = '🥱 Mengantuk';
+        else if (s.happy > 75) mood.textContent = '😻 Bahagia';
+        else mood.textContent = '😊 Santai';
+
+        const task = PetState.tasks[PetState.taskIndex];
+        if (task) {
+          document.getElementById('ui-care-task').textContent = task.text;
+          document.getElementById('ui-care-reward').textContent = `+${task.reward} 🪙`;
+        }
+      }
+    };
+
+    /* ==========================================================================
+       4. THREE.JS 3D WORLD ENGINE (5 ZONES, LIGHTING, PARTICLES, RAYCASTING)
+       ========================================================================== */
+    const WorldEngine = {
+      scene: null,
+      camera: null,
+      renderer: null,
+      controls: null,
+      raycaster: new THREE.Raycaster(),
+      pointer: new THREE.Vector2(),
+      hitMeshes: [],
+      movementObstacles: [],
+      particles: [],
+      foliage: [],
+      clouds: [],
+      lightMotes: null,
+      highQuality: true,
+      foodBowl: null,
+      waterBowl: null,
+      bedCushion: null,
+      yarnBall: null,
+
+      isCatPositionClear(x, z, radius = 0.48) {
+        if (x < -11.5 + radius || x > 11.5 - radius || z < -10.0 + radius || z > 9.0 - radius) {
+          return false;
+        }
+
+        for (const obstacle of this.movementObstacles) {
+          if (obstacle.type === 'circle') {
+            const combinedRadius = radius + obstacle.radius;
+            if ((x - obstacle.x) ** 2 + (z - obstacle.z) ** 2 < combinedRadius ** 2) return false;
+            continue;
+          }
+
+          const nearestX = THREE.MathUtils.clamp(x, obstacle.minX, obstacle.maxX);
+          const nearestZ = THREE.MathUtils.clamp(z, obstacle.minZ, obstacle.maxZ);
+          if ((x - nearestX) ** 2 + (z - nearestZ) ** 2 < radius ** 2) return false;
+        }
+
+        if (this.yarnBall) {
+          const combinedRadius = radius + 0.34;
+          if ((x - this.yarnBall.position.x) ** 2 + (z - this.yarnBall.position.z) ** 2 < combinedRadius ** 2) return false;
+        }
+
+        return true;
+      },
+
+      findNearestClearPoint(x, z, radius = 0.48) {
+        const originX = THREE.MathUtils.clamp(x, -11.5 + radius, 11.5 - radius);
+        const originZ = THREE.MathUtils.clamp(z, -10.0 + radius, 9.0 - radius);
+        if (this.isCatPositionClear(originX, originZ, radius)) return { x: originX, z: originZ };
+
+        for (let distance = 0.35; distance <= 4.2; distance += 0.35) {
+          for (let i = 0; i < 16; i++) {
+            const angle = (i / 16) * Math.PI * 2;
+            const candidateX = THREE.MathUtils.clamp(originX + Math.cos(angle) * distance, -11.5 + radius, 11.5 - radius);
+            const candidateZ = THREE.MathUtils.clamp(originZ + Math.sin(angle) * distance, -10.0 + radius, 9.0 - radius);
+            if (this.isCatPositionClear(candidateX, candidateZ, radius)) {
+              return { x: candidateX, z: candidateZ };
+            }
+          }
+        }
+
+        return { x: originX, z: originZ };
+      },
+
+      findWalkPath(startX, startZ, targetX, targetZ, radius = 0.48) {
+        const destination = this.findNearestClearPoint(targetX, targetZ, radius);
+        const minX = Math.min(startX, destination.x) - 5.5;
+        const maxX = Math.max(startX, destination.x) + 5.5;
+        const minZ = Math.min(startZ, destination.z) - 5.5;
+        const maxZ = Math.max(startZ, destination.z) + 5.5;
+        const obstacles = this.movementObstacles.slice();
+        if (this.yarnBall) {
+          obstacles.push({
+            type: 'circle',
+            x: this.yarnBall.position.x,
+            z: this.yarnBall.position.z,
+            radius: 0.34
+          });
+        }
+
+        const nodes = [{ x: startX, z: startZ }, destination];
+        const addNode = (x, z) => {
+          if (x < minX || x > maxX || z < minZ || z > maxZ || !this.isCatPositionClear(x, z, radius)) return;
+          if (!nodes.some(node => Math.hypot(node.x - x, node.z - z) < 0.08)) nodes.push({ x, z });
+        };
+
+        obstacles.forEach(obstacle => {
+          if (obstacle.type === 'circle') {
+            const clearance = radius + obstacle.radius + 0.14;
+            if (obstacle.x + clearance < minX || obstacle.x - clearance > maxX || obstacle.z + clearance < minZ || obstacle.z - clearance > maxZ) return;
+            for (let i = 0; i < 16; i++) {
+              const angle = (i / 16) * Math.PI * 2;
+              addNode(obstacle.x + Math.cos(angle) * clearance, obstacle.z + Math.sin(angle) * clearance);
+            }
+            return;
+          }
+
+          if (obstacle.maxX < minX || obstacle.minX > maxX || obstacle.maxZ < minZ || obstacle.minZ > maxZ) return;
+          const clearance = radius + 0.14;
+          addNode(obstacle.minX - clearance, obstacle.minZ - clearance);
+          addNode(obstacle.minX - clearance, obstacle.maxZ + clearance);
+          addNode(obstacle.maxX + clearance, obstacle.minZ - clearance);
+          addNode(obstacle.maxX + clearance, obstacle.maxZ + clearance);
+        });
+
+        const pathIsClear = (start, end) => {
+          const distance = Math.hypot(end.x - start.x, end.z - start.z);
+          const steps = Math.ceil(distance / 0.16);
+          for (let i = 1; i < steps; i++) {
+            const amount = i / steps;
+            const x = THREE.MathUtils.lerp(start.x, end.x, amount);
+            const z = THREE.MathUtils.lerp(start.z, end.z, amount);
+            if (!this.isCatPositionClear(x, z, radius)) return false;
+          }
+          return true;
+        };
+
+        const edges = nodes.map(() => []);
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            if (!pathIsClear(nodes[i], nodes[j])) continue;
+            const distance = Math.hypot(nodes[j].x - nodes[i].x, nodes[j].z - nodes[i].z);
+            edges[i].push({ index: j, distance });
+            edges[j].push({ index: i, distance });
+          }
+        }
+
+        const distances = new Array(nodes.length).fill(Infinity);
+        const previous = new Array(nodes.length).fill(-1);
+        const visited = new Array(nodes.length).fill(false);
+        distances[0] = 0;
+        for (let step = 0; step < nodes.length; step++) {
+          let current = -1;
+          for (let i = 0; i < nodes.length; i++) {
+            if (!visited[i] && (current === -1 || distances[i] < distances[current])) current = i;
+          }
+          if (current === -1 || !Number.isFinite(distances[current])) break;
+          if (current === 1) break;
+          visited[current] = true;
+          edges[current].forEach(edge => {
+            const candidateDistance = distances[current] + edge.distance;
+            if (candidateDistance < distances[edge.index]) {
+              distances[edge.index] = candidateDistance;
+              previous[edge.index] = current;
+            }
+          });
+        }
+
+        if (!Number.isFinite(distances[1])) return [];
+        const route = [];
+        for (let index = 1; index !== 0; index = previous[index]) {
+          if (index < 0) return [];
+          route.push(nodes[index]);
+        }
+        return route.reverse();
+      },
+
+      clampCamera() {
+        const target = this.controls.target;
+        target.x = THREE.MathUtils.clamp(target.x, -8.8, 8.8);
+        target.y = THREE.MathUtils.clamp(target.y, 0.45, 5.4);
+        target.z = THREE.MathUtils.clamp(target.z, -8.0, 7.5);
+
+        const position = this.camera.position;
+        position.x = THREE.MathUtils.clamp(position.x, -11.2, 11.2);
+        position.y = THREE.MathUtils.clamp(position.y, 1.25, 6.7);
+        position.z = THREE.MathUtils.clamp(position.z, -9.6, 9.0);
+      },
+
+      getPixelRatio() {
+        const mobile = window.matchMedia('(max-width: 680px)').matches;
+        return Math.min(window.devicePixelRatio || 1, mobile ? 1.25 : 1.75);
+      },
+
+      init() {
+        const container = document.getElementById('webgl-stage');
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xf4dfe2);
+        this.scene.fog = new THREE.FogExp2(0xf4dfe2, 0.0035);
+
+        this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 140);
+        this.camera.position.set(0, 5.9, 8.0);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+        this.renderer.setPixelRatio(this.getPixelRatio());
+        this.renderer.setSize(container.clientWidth || window.innerWidth, container.clientHeight || window.innerHeight);
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 0.9;
+        container.appendChild(this.renderer.domElement);
+
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.06;
+        this.controls.enablePan = false;
+        this.controls.minPolarAngle = 0.22;
+        this.controls.maxPolarAngle = 1.48;
+        this.controls.minDistance = 4.2;
+        this.controls.maxDistance = 14;
+        this.controls.target.set(0, 1.05, -0.8);
+
+        this.setupLights();
+        this.buildEnvironment();
+        this.onResize();
+        window.addEventListener('resize', () => this.onResize());
+      },
+
+      setupLights() {
+        const hemi = new THREE.HemisphereLight(0xfff0f3, 0x76565b, 1.08);
+        this.scene.add(hemi);
+
+        const sun = new THREE.DirectionalLight(0xffe6d8, 1.38);
+        sun.position.set(-5, 10, 4);
+        sun.castShadow = true;
+        const shadowResolution = window.matchMedia('(max-width: 680px)').matches ? 1024 : 2048;
+        sun.shadow.mapSize.set(shadowResolution, shadowResolution);
+        sun.shadow.camera.near = 1;
+        sun.shadow.camera.far = 48;
+        const d = 19;
+        sun.shadow.camera.left = -d;
+        sun.shadow.camera.right = d;
+        sun.shadow.camera.top = d;
+        sun.shadow.camera.bottom = -d;
+        sun.shadow.bias = -0.0005;
+        this.scene.add(sun);
+
+        const windowFill = new THREE.PointLight(0xa6e7f2, 0.75, 18, 2);
+        windowFill.position.set(0, 4.2, -7.5);
+        this.scene.add(windowFill);
+
+        const warmFill = new THREE.PointLight(0xffb5c3, 0.42, 16, 2);
+        warmFill.position.set(5.2, 4.4, 2.0);
+        this.scene.add(warmFill);
+      },
+
+      buildEnvironment() {
+        const addBox = (width, height, depth, color, x, y, z, options = {}) => {
+          const mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(width, height, depth),
+            new THREE.MeshStandardMaterial({
+              color,
+              map: options.map || null,
+              roughness: options.roughness ?? 0.82
+            })
+          );
+          mesh.position.set(x, y, z);
+          mesh.castShadow = options.castShadow !== false;
+          mesh.receiveShadow = options.receiveShadow !== false;
+          this.scene.add(mesh);
+          return mesh;
+        };
+
+        const addCylinder = (radiusTop, radiusBottom, height, color, x, y, z, segments = 20) => {
+          const mesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(radiusTop, radiusBottom, height, segments),
+            new THREE.MeshStandardMaterial({ color, roughness: 0.8 })
+          );
+          mesh.position.set(x, y, z);
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+          this.scene.add(mesh);
+          return mesh;
+        };
+
+        const addMovementBox = (x, z, width, depth) => {
+          this.movementObstacles.push({
+            minX: x - width / 2,
+            maxX: x + width / 2,
+            minZ: z - depth / 2,
+            maxZ: z + depth / 2
+          });
+        };
+        const addMovementCircle = (x, z, radius) => {
+          this.movementObstacles.push({ type: 'circle', x, z, radius });
+        };
+
+        const woodCanvas = document.createElement('canvas');
+        woodCanvas.width = 512;
+        woodCanvas.height = 128;
+        const woodContext = woodCanvas.getContext('2d');
+        woodContext.fillStyle = '#d7a28e';
+        woodContext.fillRect(0, 0, woodCanvas.width, woodCanvas.height);
+        for (let i = 0; i < 90; i++) {
+          const y = Math.random() * woodCanvas.height;
+          woodContext.strokeStyle = i % 3 === 0 ? 'rgba(111,65,57,0.12)' : 'rgba(255,235,219,0.2)';
+          woodContext.lineWidth = 1 + Math.random() * 2;
+          woodContext.beginPath();
+          woodContext.moveTo(0, y);
+          woodContext.bezierCurveTo(150, y - 10, 340, y + 9, woodCanvas.width, y + (Math.random() - 0.5) * 8);
+          woodContext.stroke();
+        }
+        const woodTexture = new THREE.CanvasTexture(woodCanvas);
+        woodTexture.encoding = THREE.sRGBEncoding;
+        woodTexture.wrapS = THREE.RepeatWrapping;
+        woodTexture.wrapT = THREE.RepeatWrapping;
+
+        const floor = addBox(24, 0.24, 20, 0x8d674e, 0, -0.12, -0.5);
+        floor.userData.zone = 'ground';
+        this.hitMeshes.push(floor);
+
+        const floorTones = [0xc78673, 0xd59b84, 0xe0aa91, 0xcf907b];
+        for (let row = 0; row < 20; row++) {
+          addBox(23.9, 0.035, 0.95, floorTones[row % floorTones.length], 0, 0.012, 9 - row * 0.95, {
+            castShadow: false,
+            map: woodTexture,
+            roughness: 0.9
+          });
+        }
+
+        const roomWidth = 24;
+        const roomDepth = 20;
+        const roomCenterZ = -0.5;
+        const backWallZ = -10.6;
+        const frontWallZ = 9.6;
+        const wallColor = 0xf0d4d8;
+        addBox(roomWidth, 7.2, 0.22, wallColor, 0, 3.5, backWallZ);
+        addBox(0.22, 7.2, roomDepth, 0xe9c9cf, -12.1, 3.5, roomCenterZ);
+        addBox(0.22, 7.2, roomDepth, 0xe9c9cf, 12.1, 3.5, roomCenterZ);
+        addBox(roomWidth, 7.2, 0.22, 0xe9c9cf, 0, 3.5, frontWallZ);
+        addBox(roomWidth, 0.24, roomDepth, 0xf7e8e8, 0, 7.15, roomCenterZ, { castShadow: false });
+
+        const baseboard = 0xb87e7a;
+        addBox(23.8, 0.32, 0.28, baseboard, 0, 0.18, -10.42);
+        addBox(0.28, 0.32, 19.8, baseboard, -11.92, 0.18, roomCenterZ);
+        addBox(0.28, 0.32, 19.8, baseboard, 11.92, 0.18, roomCenterZ);
+        addBox(23.8, 0.32, 0.28, baseboard, 0, 0.18, 9.42);
+
+        for (let i = 0; i < 16; i++) {
+          addBox(0.035, 5.8, 0.025, 0xdfb8bd, -11.25 + i * 1.5, 3.5, -10.465, { castShadow: false });
+        }
+        for (let i = 0; i < 13; i++) {
+          const z = -9.5 + i * 1.5;
+          addBox(0.025, 5.8, 0.035, 0xd9aeb5, -11.965, 3.5, z, { castShadow: false });
+          addBox(0.025, 5.8, 0.035, 0xd9aeb5, 11.965, 3.5, z, { castShadow: false });
+        }
+
+        const windowGlass = new THREE.MeshStandardMaterial({
+          color: 0xa8e5ee,
+          emissive: 0x73c8d4,
+          emissiveIntensity: 0.42,
+          roughness: 0.34
+        });
+        const glass = new THREE.Mesh(new THREE.BoxGeometry(5.6, 2.8, 0.08), windowGlass);
+        glass.position.set(0, 3.8, -10.43);
+        this.scene.add(glass);
+        addBox(5.95, 0.16, 0.16, 0xfff3e8, 0, 5.28, -10.32);
+        addBox(5.95, 0.16, 0.16, 0xfff3e8, 0, 2.32, -10.32);
+        addBox(0.16, 3.12, 0.16, 0xfff3e8, -3.0, 3.8, -10.32);
+        addBox(0.16, 3.12, 0.16, 0xfff3e8, 3.0, 3.8, -10.32);
+        addBox(0.12, 2.8, 0.18, 0xfff3e8, 0, 3.8, -10.27);
+        addBox(5.6, 0.12, 0.18, 0xfff3e8, 0, 3.8, -10.27);
+
+        addBox(0.2, 3.25, 0.32, 0xd88491, -3.35, 3.8, -10.12);
+        addBox(0.2, 3.25, 0.32, 0xd88491, 3.35, 3.8, -10.12);
+        addBox(6.1, 0.12, 0.3, 0x8b5e3c, 0, 5.48, -10.14);
+        addBox(2.2, 3.65, 0.12, 0x99624f, 0, 1.95, 9.42);
+        addBox(1.72, 3.1, 0.06, 0xb47c68, 0, 1.95, 9.34);
+        addBox(0.12, 0.12, 0.14, 0xf3cb76, 0.72, 1.9, 9.28);
+
+        for (let beam = -1; beam <= 1; beam++) {
+          addBox(23.8, 0.12, 0.18, 0xe5c7c7, 0, 6.94, roomCenterZ + beam * 6.2, { castShadow: false });
+        }
+
+        const rug = addBox(5.0, 0.045, 3.7, 0xa86d69, 0, 0.04, 1.0, { castShadow: false });
+        addBox(4.72, 0.025, 3.42, 0xe7c5aa, 0, 0.075, 1.0, { castShadow: false });
+        addBox(3.6, 0.012, 0.045, 0xc18a7b, 0, 0.09, -0.35, { castShadow: false });
+        addBox(3.6, 0.012, 0.045, 0xc18a7b, 0, 0.09, 2.35, { castShadow: false });
+        rug.userData.zone = 'rug';
+
+        const bedX = -3.25;
+        const bedZ = -2.55;
+        const bedBase = addBox(3.05, 0.34, 2.5, 0x8b5e3c, bedX, 0.24, bedZ);
+        bedBase.userData.zone = 'bed';
+        [[-1.35, -1.05], [1.35, -1.05], [-1.35, 1.05], [1.35, 1.05]].forEach(([dx, dz]) => {
+          addBox(0.18, 0.32, 0.18, 0x69452f, bedX + dx, 0.08, bedZ + dz);
+        });
+        this.bedCushion = addBox(2.78, 0.3, 2.24, 0xf0d4c6, bedX, 0.54, bedZ, { roughness: 0.96 });
+        this.bedCushion.userData.zone = 'bed';
+        addBox(1.08, 0.2, 0.64, 0xfff5e9, bedX, 0.78, bedZ - 0.7, { roughness: 0.98 });
+        addBox(2.66, 0.13, 1.12, 0xc87983, bedX, 0.74, bedZ + 0.43, { roughness: 0.96 });
+        addBox(2.56, 0.035, 0.14, 0xf1c5a5, bedX, 0.82, bedZ + 0.93, { castShadow: false });
+        this.scene.add(bedBase, this.bedCushion);
+        this.hitMeshes.push(this.bedCushion);
+
+        addBox(1.1, 0.82, 0.86, 0x9b6b48, -5.35, 0.43, -2.7);
+        addBox(1.18, 0.11, 0.94, 0xc89468, -5.35, 0.88, -2.7);
+        addBox(0.9, 0.19, 0.035, 0x6f4935, -5.35, 0.58, -2.24);
+        addCylinder(0.24, 0.24, 0.12, 0xb48c63, -5.35, 1.0, -2.7);
+        addCylinder(0.08, 0.12, 0.38, 0x786146, -5.35, 1.23, -2.7);
+        addCylinder(0.32, 0.08, 0.3, 0xf1d3a7, -5.35, 1.55, -2.7, 24);
+        const bedsideLamp = new THREE.PointLight(0xffcf91, 0.5, 6, 2);
+        bedsideLamp.position.set(-5.35, 1.7, -2.7);
+        this.scene.add(bedsideLamp);
+
+        addBox(2.5, 2.7, 0.95, 0xb58a67, 5.5, 1.35, -5.5);
+        addBox(2.62, 0.1, 1.04, 0xc99d76, 5.5, 2.75, -5.5);
+        addBox(1.1, 2.35, 0.07, 0xe1c6a5, 4.82, 1.42, -4.98);
+        addBox(1.1, 2.35, 0.07, 0xe1c6a5, 6.18, 1.42, -4.98);
+        addBox(0.06, 0.15, 0.08, 0x6c4a35, 5.45, 1.4, -4.91);
+        addBox(0.06, 0.15, 0.08, 0x6c4a35, 5.55, 1.4, -4.91);
+
+        addBox(3.6, 0.62, 1.24, 0x748ba4, 0.5, 0.4, -4.9);
+        addBox(3.6, 0.92, 0.32, 0x8299b0, 0.5, 1.08, -5.4);
+        addBox(1.45, 0.48, 0.68, 0xc8d4dc, -0.35, 0.78, -4.45);
+        addBox(1.45, 0.48, 0.68, 0xc8d4dc, 1.25, 0.78, -4.45);
+        [[-0.8, -5.15], [1.8, -5.15]].forEach(([x, z]) => {
+          const leg = addBox(0.16, 0.38, 0.16, 0x76513c, x, 0.19, z);
+          leg.castShadow = false;
+        });
+
+        const foodCounter = addBox(2.3, 0.72, 0.82, 0xb98d68, 4.7, 0.36, -3.4);
+        addBox(2.42, 0.12, 0.9, 0xe7c8a4, 4.7, 0.78, -3.4);
+        foodCounter.userData.zone = 'kitchen';
+        this.foodBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.32, 0.2, 24), new THREE.MeshStandardMaterial({ color: 0xd9797c, roughness: 0.42 }));
+        this.foodBowl.position.set(1.8, 0.13, -0.6);
+        this.foodBowl.castShadow = true;
+        this.foodBowl.userData.zone = 'food_bowl';
+        const kibble = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 12), new THREE.MeshStandardMaterial({ color: 0xbc6c25, roughness: 0.9 }));
+        kibble.scale.set(1, 0.45, 1);
+        kibble.position.y = 0.1;
+        this.foodBowl.add(kibble);
+        this.scene.add(this.foodBowl);
+        this.hitMeshes.push(this.foodBowl);
+
+        this.waterBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.32, 0.2, 24), new THREE.MeshStandardMaterial({ color: 0x709aab, roughness: 0.4 }));
+        this.waterBowl.position.set(2.75, 0.13, -0.6);
+        this.waterBowl.castShadow = true;
+        this.waterBowl.userData.zone = 'water_bowl';
+        const waterDisc = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.04, 20), new THREE.MeshStandardMaterial({ color: 0xbae6fd, metalness: 0.08, roughness: 0.2 }));
+        waterDisc.position.y = 0.1;
+        this.waterBowl.add(waterDisc);
+        this.scene.add(this.waterBowl);
+        this.hitMeshes.push(this.waterBowl);
+
+        this.yarnBall = new THREE.Mesh(new THREE.SphereGeometry(0.34, 24, 24), new THREE.MeshStandardMaterial({ color: 0xc76c76, roughness: 0.94 }));
+        this.yarnBall.position.set(-1.7, 0.39, 1.55);
+        this.yarnBall.castShadow = true;
+        this.yarnBall.userData.zone = 'toy_ball';
+        this.scene.add(this.yarnBall);
+        this.hitMeshes.push(this.yarnBall);
+
+        const towerX = 3.4;
+        const towerZ = 2.0;
+        addBox(1.25, 0.18, 1.15, 0x9a775e, towerX, 0.12, towerZ);
+        addCylinder(0.15, 0.17, 1.38, 0xb38a62, towerX, 0.9, towerZ);
+        for (let i = 0; i < 6; i++) {
+          addCylinder(0.18, 0.18, 0.065, 0xdbc39d, towerX, 0.42 + i * 0.19, towerZ, 16);
+        }
+        const topPlat = addBox(1.0, 0.18, 0.95, 0xc7838c, towerX, 1.66, towerZ);
+        addBox(0.72, 0.12, 0.68, 0xf0d4c6, towerX, 1.8, towerZ, { roughness: 0.96 });
+        topPlat.userData.zone = 'playground';
+        this.hitMeshes.push(topPlat);
+
+        [[-7.0, -5.4], [7.0, -5.3]].forEach(([x, z], index) => {
+          addCylinder(0.3, 0.4, 0.5, index ? 0xb97665 : 0x77835e, x, 0.25, z, 18);
+          const plant = new THREE.Group();
+          for (let i = 0; i < 5; i++) {
+            const leaf = new THREE.Mesh(
+              new THREE.SphereGeometry(0.22, 12, 10),
+              new THREE.MeshStandardMaterial({ color: i % 2 ? 0x6f8f62 : 0x8ba579, roughness: 0.86 })
+            );
+            leaf.position.set(Math.cos(i * 1.25) * 0.2, 0.68 + (i % 2) * 0.12, Math.sin(i * 1.25) * 0.2);
+            leaf.scale.set(0.8, 1.7, 0.7);
+            plant.add(leaf);
+          }
+          plant.position.set(x, 0, z);
+          this.scene.add(plant);
+        });
+
+        const portraitX = 4.9;
+        const portraitY = 4.0;
+        const wallArtFrame = addBox(1.72, 2.16, 0.12, 0x9c704d, portraitX, portraitY, -10.36);
+        addBox(1.6, 1.98, 0.035, 0xf4eadc, portraitX, portraitY, -10.285, { castShadow: false });
+        wallArtFrame.receiveShadow = false;
+        const portraitTexture = new THREE.TextureLoader().load('/portfolio/Aryasatya.jpg', undefined, (error) => {
+          console.error('Unable to load the bedroom wall portrait.', error);
+        });
+        portraitTexture.encoding = THREE.sRGBEncoding;
+        portraitTexture.anisotropy = Math.min(this.renderer.capabilities.getMaxAnisotropy(), 4);
+        const wallPortrait = new THREE.Mesh(
+          new THREE.PlaneGeometry(1.47, 1.8),
+          new THREE.MeshBasicMaterial({ map: portraitTexture, toneMapped: false })
+        );
+        wallPortrait.name = 'bedroom-wall-portrait';
+        wallPortrait.position.set(portraitX, portraitY, -10.262);
+        wallPortrait.castShadow = false;
+        wallPortrait.receiveShadow = false;
+        this.scene.add(wallPortrait);
+
+        addMovementBox(-3.25, -2.55, 3.15, 2.7);
+        addMovementBox(-5.35, -2.7, 1.4, 1.3);
+        addMovementBox(5.5, -5.5, 2.75, 1.2);
+        addMovementBox(0.5, -4.9, 4.0, 1.65);
+        addMovementBox(4.7, -3.4, 2.6, 1.05);
+        addMovementBox(3.4, 2.0, 1.35, 1.25);
+        addMovementCircle(-7.0, -5.4, 0.42);
+        addMovementCircle(7.0, -5.3, 0.42);
+        addMovementCircle(1.8, -0.6, 0.42);
+        addMovementCircle(2.75, -0.6, 0.42);
+
+        // A few warm dust motes catch the daylight from the bedroom window.
+        const geo = new THREE.BufferGeometry();
+        const count = 28;
+        const pos = new Float32Array(count * 3);
+        for (let i = 0; i < count * 3; i += 3) {
+          pos[i] = (Math.random() - 0.5) * 12;
+          pos[i + 1] = 0.6 + Math.random() * 3.2;
+          pos[i + 2] = (Math.random() - 0.5) * 9;
+        }
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        this.lightMotes = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xffedc4, size: 0.07, transparent: true, opacity: 0.32 }));
+        this.scene.add(this.lightMotes);
+      },
+
+      spawnParticles(pos, colorHex = 0xff7597) {
+        for (let i = 0; i < 8; i++) {
+          const mesh = new THREE.Mesh(
+            new THREE.OctahedronGeometry(0.11, 0),
+            new THREE.MeshBasicMaterial({ color: colorHex })
+          );
+          mesh.position.set(
+            pos.x + (Math.random() - 0.5) * 0.85,
+            pos.y + 1.05 + Math.random() * 0.45,
+            pos.z + (Math.random() - 0.5) * 0.85
+          );
+          this.scene.add(mesh);
+          this.particles.push({ mesh, life: 1.0, vy: 0.018 + Math.random() * 0.018 });
+        }
+      },
+
+      toggleQuality() {
+        this.highQuality = !this.highQuality;
+        this.renderer.shadowMap.enabled = this.highQuality;
+        this.renderer.setPixelRatio(this.highQuality ? this.getPixelRatio() : 1);
+        document.getElementById('btn-gfx').textContent = `✨ Kualitas Grafis: ${this.highQuality ? 'TINGGI (Shadows ON)' : 'RINGAN (Fast FPS)'}`;
+      },
+
+      onResize() {
+        const container = document.getElementById('webgl-stage');
+        const width = container.clientWidth || window.innerWidth;
+        const height = container.clientHeight || window.innerHeight;
+        if (!width || !height) return;
+        this.camera.aspect = width / height;
+        this.camera.fov = width / height < 0.7 ? 68 : width / height < 1 ? 64 : 60;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setPixelRatio(this.highQuality ? this.getPixelRatio() : 1);
+        this.renderer.setSize(width, height);
+      }
+    };
+
+    /* ==========================================================================
+       5. ARTICULATED 3D CAT RIG (Skeletal Hierarchy + Whiskers + IK Gait)
+       ========================================================================== */
+    const CatRig = {
+      root: new THREE.Group(),
+      torso: null,
+      headPivot: null,
+      head: null,
+      eyes: [],
+      ears: [],
+      legs: [],
+      tail: [],
+      accGroup: null,
+      furMat: new THREE.MeshPhysicalMaterial({
+        color: 0xd96f1c,
+        roughness: 0.44,
+        clearcoat: 0.2,
+        clearcoatRoughness: 0.3
+      }),
+      bellyMat: new THREE.MeshPhysicalMaterial({
+        color: 0xfff8ef,
+        roughness: 0.52,
+        clearcoat: 0.12,
+        clearcoatRoughness: 0.35
+      }),
+      markingMat: new THREE.MeshStandardMaterial({ color: 0xb14d10, roughness: 0.62 }),
+      targetPos: new THREE.Vector3(0, 0.12, 0.2),
+      route: [],
+      routeIndex: 0,
+      onArrive: null,
+      blinkTimer: 0,
+      sleepPoseApplied: false,
+      sleepTimeline: null,
+      jumpTween: null,
+      isJumping: false,
+
+      createFurTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const context = canvas.getContext('2d');
+        context.fillStyle = '#fffaf3';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let i = 0; i < 900; i++) {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const length = 1.5 + Math.random() * 3.5;
+          const light = Math.random() > 0.58;
+          context.strokeStyle = light
+            ? `rgba(255,255,255,${0.08 + Math.random() * 0.12})`
+            : `rgba(105,65,38,${0.025 + Math.random() * 0.065})`;
+          context.lineWidth = 0.25 + Math.random() * 0.35;
+          context.beginPath();
+          context.moveTo(x, y);
+          context.quadraticCurveTo(x + (Math.random() - 0.5) * 1.5, y + length * 0.5, x + (Math.random() - 0.5) * 2, y + length);
+          context.stroke();
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.encoding = THREE.sRGBEncoding;
+        texture.anisotropy = Math.min(WorldEngine.renderer.capabilities.getMaxAnisotropy(), 4);
+        return texture;
+      },
+
+      addCurve(parent, points, material, radius = 0.01) {
+        const curve = new THREE.CatmullRomCurve3(
+          points.map(([x, y, z]) => new THREE.Vector3(x, y, z))
+        );
+        const mesh = new THREE.Mesh(
+          new THREE.TubeGeometry(curve, Math.max(10, points.length * 6), radius, 5, false),
+          material
+        );
+        mesh.castShadow = false;
+        mesh.receiveShadow = false;
+        parent.add(mesh);
+        return mesh;
+      },
+
+      build() {
+        this.furMat.map = this.createFurTexture();
+        this.bellyMat.map = this.furMat.map;
+        this.furMat.needsUpdate = true;
+        this.bellyMat.needsUpdate = true;
+
+        this.torso = new THREE.Mesh(new THREE.SphereGeometry(0.55, 32, 24), this.furMat);
+        this.torso.scale.set(0.94, 0.88, 1.34);
+        this.torso.position.y = 0.69;
+        this.torso.castShadow = true;
+        this.torso.userData.zone = 'body';
+        this.root.add(this.torso);
+        WorldEngine.hitMeshes.push(this.torso);
+
+        // Chest Fur Patch
+        const chest = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 20), this.bellyMat);
+        chest.scale.set(0.72, 1.15, 0.82);
+        chest.position.set(0, -0.03, 0.43);
+        chest.userData.zone = 'body';
+        this.torso.add(chest);
+
+        // Head Pivot
+        this.headPivot = new THREE.Group();
+        this.headPivot.position.set(0, 1.13, 0.66);
+        this.root.add(this.headPivot);
+
+        this.head = new THREE.Mesh(new THREE.SphereGeometry(0.62, 36, 32), this.furMat);
+        this.head.scale.set(1.08, 1.02, 0.98);
+        this.head.castShadow = true;
+        this.head.userData.zone = 'head';
+        this.headPivot.add(this.head);
+        WorldEngine.hitMeshes.push(this.head);
+
+        const faceMaterial = new THREE.MeshStandardMaterial({ color: 0xfff6ea, roughness: 0.88, map: this.furMat.map });
+        const pinkMaterial = new THREE.MeshStandardMaterial({ color: 0xe98991, roughness: 0.58 });
+        const mouthMaterial = new THREE.MeshStandardMaterial({ color: 0x653d38, roughness: 0.78 });
+        const whiskerMaterial = new THREE.MeshStandardMaterial({ color: 0xfff5e7, roughness: 0.8 });
+
+        // Soft cheek pads, nose and a small natural smile.
+        [-1, 1].forEach(side => {
+          const cheek = new THREE.Mesh(new THREE.SphereGeometry(0.19, 20, 16), faceMaterial);
+          cheek.scale.set(1.1, 0.78, 0.76);
+          cheek.position.set(side * 0.13, -0.16, 0.53);
+          cheek.userData.zone = 'head';
+          this.head.add(cheek);
+        });
+
+        const nose = new THREE.Mesh(new THREE.SphereGeometry(0.06, 16, 12), pinkMaterial);
+        nose.scale.set(1.22, 0.78, 0.72);
+        nose.position.set(0, -0.065, 0.685);
+        this.head.add(nose);
+
+        this.addCurve(this.head, [[0, -0.11, 0.67], [0, -0.17, 0.67]], mouthMaterial, 0.009);
+        this.addCurve(this.head, [[0, -0.17, 0.67], [-0.07, -0.22, 0.65], [-0.15, -0.2, 0.62]], mouthMaterial, 0.009);
+        this.addCurve(this.head, [[0, -0.17, 0.67], [0.07, -0.22, 0.65], [0.15, -0.2, 0.62]], mouthMaterial, 0.009);
+
+        const whiskerDotMat = new THREE.MeshStandardMaterial({ color: 0x9a6846, roughness: 0.9 });
+        [-1, 1].forEach(side => {
+          [-0.13, -0.2, -0.27].forEach((wy, index) => {
+            const dot = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), whiskerDotMat);
+            dot.position.set(side * (0.25 + (index % 2) * 0.045), wy, 0.635 - index * 0.015);
+            this.head.add(dot);
+          });
+          this.addCurve(this.head, [
+            [side * 0.28, -0.15, 0.59],
+            [side * 0.47, -0.11, 0.55],
+            [side * 0.67, -0.08, 0.48]
+          ], whiskerMaterial, 0.006);
+          this.addCurve(this.head, [
+            [side * 0.29, -0.2, 0.58],
+            [side * 0.48, -0.23, 0.54],
+            [side * 0.65, -0.27, 0.46]
+          ], whiskerMaterial, 0.006);
+        });
+
+        // Layered amber eyes with glossy pupils and warm fur rims.
+        const socketMat = new THREE.MeshStandardMaterial({ color: 0xb97a43, roughness: 0.9 });
+        const scleraMat = new THREE.MeshStandardMaterial({ color: 0xfff4e3, roughness: 0.28 });
+        const irisMat = new THREE.MeshStandardMaterial({ color: 0xb96831, roughness: 0.24, metalness: 0.02 });
+        const irisInnerMat = new THREE.MeshStandardMaterial({ color: 0xe3aa55, roughness: 0.27 });
+        const pupilMat = new THREE.MeshStandardMaterial({ color: 0x211915, roughness: 0.12 });
+        const shineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        [-0.225, 0.225].forEach(ex => {
+          const eg = new THREE.Group();
+          eg.position.set(ex, 0.1, 0.5);
+          const socket = new THREE.Mesh(new THREE.SphereGeometry(0.22, 24, 20), socketMat);
+          socket.scale.set(1.02, 1.12, 0.4);
+          const sclera = new THREE.Mesh(new THREE.SphereGeometry(0.188, 24, 20), scleraMat);
+          sclera.scale.set(0.98, 1.08, 0.38);
+          sclera.position.z = 0.02;
+          const iris = new THREE.Mesh(new THREE.SphereGeometry(0.137, 22, 18), irisMat);
+          iris.scale.set(1.0, 1.0, 0.38);
+          iris.position.set(0, -0.006, 0.055);
+          const irisInner = new THREE.Mesh(new THREE.SphereGeometry(0.085, 20, 16), irisInnerMat);
+          irisInner.scale.set(1, 1, 0.34);
+          irisInner.position.set(0, -0.008, 0.076);
+          const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.109, 18, 16), pupilMat);
+          pupil.scale.set(0.92, 1.08, 0.32);
+          pupil.position.set(0, -0.006, 0.087);
+          const shine = new THREE.Mesh(new THREE.SphereGeometry(0.025, 12, 10), shineMat);
+          shine.position.set(-0.045, 0.06, 0.105);
+          const lowerShine = new THREE.Mesh(new THREE.SphereGeometry(0.014, 8, 8), shineMat);
+          lowerShine.position.set(0.045, -0.045, 0.238);
+          eg.add(socket, sclera, iris, irisInner, pupil, shine, lowerShine);
+          this.head.add(eg);
+          this.eyes.push(eg);
+        });
+
+        const makeEarShape = (width, height) => {
+          const shape = new THREE.Shape();
+          shape.moveTo(-width * 0.5, -height * 0.42);
+          shape.quadraticCurveTo(-width * 0.58, -height * 0.12, -width * 0.34, height * 0.3);
+          shape.quadraticCurveTo(0, height * 0.67, width * 0.34, height * 0.3);
+          shape.quadraticCurveTo(width * 0.58, -height * 0.12, width * 0.5, -height * 0.42);
+          shape.quadraticCurveTo(0, -height * 0.54, -width * 0.5, -height * 0.42);
+          return new THREE.ExtrudeGeometry(shape, {
+            depth: 0.045,
+            bevelEnabled: true,
+            bevelSegments: 2,
+            steps: 1,
+            bevelSize: 0.018,
+            bevelThickness: 0.018
+          });
+        };
+        const outerEarGeo = makeEarShape(0.48, 0.63);
+        const innerEarGeo = makeEarShape(0.3, 0.43);
+        const innerMat = new THREE.MeshStandardMaterial({ color: 0xe99199, roughness: 0.82, side: THREE.DoubleSide });
+        [-1, 1].forEach(side => {
+          const ep = new THREE.Group();
+          ep.position.set(side * 0.4, 0.43, -0.05);
+          ep.rotation.z = side * -0.12;
+          const outer = new THREE.Mesh(outerEarGeo, this.furMat);
+          outer.castShadow = true;
+          outer.userData.zone = 'head';
+          const inner = new THREE.Mesh(innerEarGeo, innerMat);
+          inner.position.set(0, 0.015, 0.075);
+          ep.add(outer, inner);
+          this.head.add(ep);
+          this.ears.push(ep);
+        });
+
+        // Soft tabby markings curve with the forehead and cheeks.
+        [
+          [[0, 0.59, 0.23], [0, 0.5, 0.38], [0, 0.39, 0.49]],
+          [[-0.18, 0.57, 0.2], [-0.18, 0.49, 0.35], [-0.14, 0.4, 0.47]],
+          [[0.18, 0.57, 0.2], [0.18, 0.49, 0.35], [0.14, 0.4, 0.47]],
+          [[-0.4, 0.12, 0.52], [-0.48, 0.06, 0.45], [-0.51, -0.02, 0.42]],
+          [[0.4, 0.12, 0.52], [0.48, 0.06, 0.45], [0.51, -0.02, 0.42]]
+        ].forEach(points => this.addCurve(this.head, points, this.markingMat, 0.014));
+
+        // Accessories
+        this.accGroup = new THREE.Group();
+        this.headPivot.add(this.accGroup);
+        CatCustomizer.setAccessory('bell');
+
+        // 4 Articulated Legs
+        const legCoords = [
+          { x: -0.26, z: 0.46 },
+          { x: 0.26, z: 0.46 },
+          { x: -0.28, z: -0.46 },
+          { x: 0.28, z: -0.46 }
+        ];
+        legCoords.forEach(lc => {
+          const lp = new THREE.Group();
+          lp.position.set(lc.x, 0.52, lc.z);
+          const limb = new THREE.Mesh(new THREE.SphereGeometry(0.15, 18, 14), this.furMat);
+          limb.scale.set(0.92, 1.68, 0.92);
+          limb.position.y = -0.2;
+          limb.castShadow = true;
+          const paw = new THREE.Mesh(new THREE.SphereGeometry(0.15, 18, 14), this.bellyMat);
+          paw.scale.set(1.05, 0.72, 1.28);
+          paw.position.set(0, -0.42, 0.04);
+          lp.add(limb, paw);
+          [-0.052, 0, 0.052].forEach(toeX => {
+            const toe = new THREE.Mesh(new THREE.SphereGeometry(0.012, 8, 6), pinkMaterial);
+            toe.scale.set(0.8, 1.35, 0.35);
+            toe.position.set(toeX, -0.425, 0.218);
+            lp.add(toe);
+          });
+          this.root.add(lp);
+          this.legs.push(lp);
+        });
+
+        const tailRoot = new THREE.Group();
+        tailRoot.position.set(0.12, 0.54, -0.58);
+        const tailCurve = new THREE.CatmullRomCurve3([
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0.02, 0.12, -0.06),
+          new THREE.Vector3(0.1, 0.29, -0.1),
+          new THREE.Vector3(0.25, 0.37, -0.08),
+          new THREE.Vector3(0.4, 0.28, -0.02),
+          new THREE.Vector3(0.48, 0.12, 0.08)
+        ]);
+        const tailSegments = 32;
+        const tailSides = 12;
+        const tailGeometry = new THREE.TubeGeometry(tailCurve, tailSegments, 0.13, tailSides, false);
+        const tailPositions = tailGeometry.attributes.position;
+        for (let ring = 0; ring <= tailSegments; ring++) {
+          const progress = ring / tailSegments;
+          const center = tailCurve.getPointAt(progress);
+          const taper = 0.24 + 0.76 * Math.pow(1 - progress, 0.8);
+          for (let side = 0; side <= tailSides; side++) {
+            const vertex = ring * (tailSides + 1) + side;
+            tailPositions.setXYZ(
+              vertex,
+              center.x + (tailPositions.getX(vertex) - center.x) * taper,
+              center.y + (tailPositions.getY(vertex) - center.y) * taper,
+              center.z + (tailPositions.getZ(vertex) - center.z) * taper
+            );
+          }
+        }
+        tailPositions.needsUpdate = true;
+        tailGeometry.computeVertexNormals();
+        const tail = new THREE.Mesh(tailGeometry, this.furMat);
+        tail.castShadow = true;
+        tailRoot.add(tail);
+        tailRoot.add(
+          new THREE.Mesh(
+            new THREE.SphereGeometry(0.032, 12, 10),
+            this.furMat
+          )
+        );
+        tailRoot.children[1].position.copy(tailCurve.getPointAt(1));
+        this.root.add(tailRoot);
+        this.tail.push(tailRoot);
+
+        this.root.position.set(0, 0.12, 0.2);
+        WorldEngine.scene.add(this.root);
+      },
+
+      setSleepPose(sleeping) {
+        this.sleepPoseApplied = sleeping;
+        this.torso.position.y = sleeping ? 0.48 : 0.69;
+        this.torso.scale.y = 0.88;
+        this.headPivot.position.y = sleeping ? 0.72 : 1.13;
+        this.root.rotation.z = sleeping ? 0.95 : 0;
+        if (sleeping) {
+          const roll = 0.95;
+          const verticalRadius = Math.sqrt(
+            (0.55 * 0.94 * Math.sin(roll)) ** 2 + (0.55 * 0.88 * Math.cos(roll)) ** 2
+          );
+          this.root.position.y = 0.69 - 0.48 * Math.cos(roll) + verticalRadius;
+        }
+        this.legs.forEach((leg, index) => {
+          leg.rotation.x = sleeping ? (index < 2 ? 0.7 : -0.7) : 0;
+        });
+        if (this.tail[0]) this.tail[0].position.y = sleeping ? 0.14 : 0.54;
+        this.eyes.forEach(eye => { eye.scale.y = sleeping ? 0.38 : 1; });
+        this.blinkTimer = 0;
+      },
+
+      wakeFromSleep() {
+        const interruptedSleep = Boolean(this.sleepTimeline);
+        if (this.sleepTimeline) {
+          this.sleepTimeline.kill();
+          this.sleepTimeline = null;
+        }
+        if (!interruptedSleep && !this.sleepPoseApplied && PetState.pose !== 'sleep') return;
+        this.setSleepPose(false);
+        this.root.position.set(-3.25, 0.12, -0.3);
+        this.root.rotation.y = 0;
+        this.route = [];
+        this.routeIndex = 0;
+        this.targetPos.copy(this.root.position);
+      },
+
+      stopMovement() {
+        this.route = [];
+        this.routeIndex = 0;
+        this.onArrive = null;
+        this.targetPos.copy(this.root.position);
+        if (PetState.pose === 'walk' || PetState.pose === 'run') PetState.pose = 'idle';
+      },
+
+      stopJump() {
+        if (this.jumpTween) this.jumpTween.kill();
+        this.jumpTween = null;
+        this.isJumping = false;
+        this.root.position.y = 0.12;
+        if (PetState.pose === 'jump' || PetState.pose === 'happy') PetState.pose = 'idle';
+      },
+
+      moveTo(x, z, callback = null, run = false) {
+        if (this.sleepPoseApplied || this.sleepTimeline || PetState.pose === 'sleep') this.wakeFromSleep();
+        if (this.jumpTween) this.stopJump();
+        this.route = WorldEngine.findWalkPath(this.root.position.x, this.root.position.z, x, z);
+        this.routeIndex = 0;
+        if (this.route.length === 0) {
+          this.targetPos.copy(this.root.position);
+          this.onArrive = null;
+          PetState.pose = 'idle';
+          return;
+        }
+        this.routeIndex = 1;
+        this.targetPos.set(this.route[0].x, 0.12, this.route[0].z);
+        this.onArrive = callback;
+        PetState.pose = run ? 'run' : 'walk';
+      },
+
+      playJump() {
+        if (this.isJumping) return false;
+        if (this.jumpTween) this.stopJump();
+        this.stopMovement();
+        this.root.position.y = 0.12;
+        this.isJumping = true;
+        PetState.pose = 'jump';
+        AudioFX.jump();
+        this.jumpTween = gsap.to(this.root.position, {
+          y: 1.5,
+          duration: 0.3,
+          yoyo: true,
+          repeat: 1,
+          ease: 'power2.out',
+          onComplete: () => {
+            this.root.position.y = 0.12;
+            this.jumpTween = null;
+            this.isJumping = false;
+            if (PetState.pose === 'jump') PetState.pose = 'idle';
+          }
+        });
+        return true;
+      },
+
+      playHappyJump() {
+        if (this.isJumping) return false;
+        if (this.jumpTween) this.stopJump();
+        PetState.pose = 'happy';
+        this.jumpTween = gsap.to(this.root.position, {
+          y: 0.55,
+          duration: 0.16,
+          yoyo: true,
+          repeat: 3,
+          onComplete: () => {
+            this.root.position.y = 0.12;
+            this.jumpTween = null;
+            if (PetState.pose === 'happy') PetState.pose = 'idle';
+          }
+        });
+        return true;
+      }
+    };
+
+    const CatCustomizer = {
+      setFur(mainHex, bellyHex) {
+        CatRig.furMat.color.set(mainHex);
+        CatRig.bellyMat.color.set(bellyHex);
+        CatRig.markingMat.color.copy(new THREE.Color(mainHex).multiplyScalar(0.68));
+        AudioFX.pop(660);
+        UI.toast('Warna bulu baru terlihat menggemaskan! 🎨');
+      },
+      setAccessory(type) {
+        const g = CatRig.accGroup;
+        while (g.children.length) g.remove(g.children[0]);
+        if (type === 'bell') {
+          const collar = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.045, 12, 24), new THREE.MeshStandardMaterial({ color: 0xff4d6d }));
+          collar.rotation.x = Math.PI / 2;
+          collar.position.set(0, -0.34, -0.05);
+          const bell = new THREE.Mesh(new THREE.SphereGeometry(0.09, 14, 14), new THREE.MeshStandardMaterial({ color: 0xffb703, metalness: 0.6, roughness: 0.2 }));
+          bell.position.set(0, -0.38, 0.32);
+          g.add(collar, bell);
+        } else if (type === 'bow') {
+          const mat = new THREE.MeshStandardMaterial({ color: 0xff4d6d });
+          const l = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.22, 12), mat);
+          l.rotation.z = -Math.PI / 2;
+          l.position.set(-0.12, 0.48, 0.12);
+          const r = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.22, 12), mat);
+          r.rotation.z = Math.PI / 2;
+          r.position.set(0.12, 0.48, 0.12);
+          g.add(l, r);
+        } else if (type === 'crown') {
+          const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.14, 0.18, 8), new THREE.MeshStandardMaterial({ color: 0xffb703, metalness: 0.7, roughness: 0.2 }));
+          crown.position.set(0, 0.56, 0);
+          g.add(crown);
+        }
+        AudioFX.pop(720);
+      },
+      applyName() {
+        const val = document.getElementById('input-name').value.trim();
+        if (val) {
+          PetState.name = val;
+          UI.refresh();
+          UI.toast(`Nama kucing diubah menjadi ${val}!`);
+        }
+      }
+    };
+
+    /* ==========================================================================
+       6. CAT INTERACTIONS, POINTER DRAGGING & CAMERA MODES
+       ========================================================================== */
+    const CatActions = {
+      isDragging: false,
+      isPlayingBall: false,
+      ballPlaySession: 0,
+      ballPlayTimer: null,
+      dragPlane: new THREE.Plane(new THREE.Vector3(0, 1, 0), -1.3),
+
+      cancelBallPlay() {
+        if (!this.isPlayingBall) return;
+        this.isPlayingBall = false;
+        this.ballPlaySession++;
+        if (this.ballPlayTimer) clearTimeout(this.ballPlayTimer);
+        this.ballPlayTimer = null;
+        gsap.killTweensOf(WorldEngine.yarnBall.position);
+        CatRig.onArrive = null;
+        CatRig.route = [];
+        CatRig.routeIndex = 0;
+        CatRig.targetPos.copy(CatRig.root.position);
+        if (PetState.pose === 'walk' || PetState.pose === 'run' || PetState.pose === 'happy') {
+          PetState.pose = 'idle';
+        }
+      },
+
+      feed() {
+        if (MiniGames.active) return;
+        this.cancelBallPlay();
+        CatRig.moveTo(0.8, 0.3, () => {
+          PetState.pose = 'eat';
+          AudioFX.eat();
+          adjustStat('hunger', 28);
+          adjustStat('happy', 10);
+          gainXP(15);
+          completeCareTask('feed_cat');
+          CatQuest.complete('feed_cat');
+          WorldEngine.spawnParticles(CatRig.root.position, 0xffb703);
+          UI.toast(`${PetState.name} makan dengan lahap! 🐟`);
+          setTimeout(() => { if (PetState.pose === 'eat') PetState.pose = 'idle'; }, 2200);
+        }, true);
+      },
+
+      drink() {
+        if (MiniGames.active) return;
+        this.cancelBallPlay();
+        CatRig.moveTo(3.4, 0.3, () => {
+          PetState.pose = 'drink';
+          AudioFX.eat();
+          adjustStat('thirst', 30);
+          gainXP(12);
+          WorldEngine.spawnParticles(CatRig.root.position, 0x38bdf8);
+          UI.toast(`${PetState.name} minum air segar! 💧`);
+          setTimeout(() => { if (PetState.pose === 'drink') PetState.pose = 'idle'; }, 2000);
+        }, true);
+      },
+
+      sleep() {
+        if (MiniGames.active) return;
+        this.cancelBallPlay();
+        CatRig.moveTo(-3.25, -0.3, () => {
+          PetState.pose = 'jump';
+          CatRig.sleepTimeline = gsap.timeline({
+            onComplete: () => {
+              CatRig.sleepTimeline = null;
+              CatRig.root.position.set(-3.25, 0.92, -2.55);
+              CatRig.root.rotation.y = Math.PI;
+              CatRig.setSleepPose(true);
+              PetState.pose = 'sleep';
+              adjustStat('energy', 45);
+              gainXP(15);
+              UI.refresh();
+              UI.toast(`${PetState.name} berbaring dan tertidur pulas... 💤`);
+            }
+          });
+          CatRig.sleepTimeline
+            .to(CatRig.root.position, { x: -3.25, z: -2.55, duration: 0.72, ease: 'sine.inOut' }, 0)
+            .to(CatRig.root.position, { y: 1.55, duration: 0.32, ease: 'power2.out' }, 0)
+            .to(CatRig.root.position, { y: 0.92, duration: 0.4, ease: 'bounce.out' }, 0.32);
+        });
+      },
+
+      playBall() {
+        if (MiniGames.active || this.isPlayingBall) return;
+        this.cancelBallPlay();
+        this.isPlayingBall = true;
+        const session = ++this.ballPlaySession;
+        const ball = WorldEngine.yarnBall;
+        const finish = () => {
+          if (session !== this.ballPlaySession) return;
+          this.isPlayingBall = false;
+          this.ballPlayTimer = null;
+          adjustStat('happy', 20);
+          adjustStat('energy', -8);
+          gainXP(15);
+          completeCareTask('play_ball');
+          CatQuest.complete('play_ball');
+          WorldEngine.spawnParticles(CatRig.root.position, 0xff7597);
+          UI.toast(`${PetState.name} berhasil mengejar bola wol! 🧶`);
+        };
+        const throwBall = (round) => {
+          if (session !== this.ballPlaySession) return;
+          if (round > 2) {
+            finish();
+            return;
+          }
+          const x = (Math.random() - 0.5) * 8;
+          const z = (Math.random() - 0.5) * 6;
+          gsap.to(ball.position, {
+            x,
+            z,
+            y: 0.92,
+            duration: 0.38,
+            ease: 'power2.out',
+            onComplete: () => {
+              if (session !== this.ballPlaySession) return;
+              gsap.to(ball.position, {
+                y: 0.39,
+                duration: 0.34,
+                ease: 'bounce.out',
+                onComplete: () => {
+                  if (session !== this.ballPlaySession) return;
+                  CatRig.moveTo(x + 0.9, z, () => {
+                    if (session !== this.ballPlaySession) return;
+                    CatRig.playHappyJump();
+                    AudioFX.meow(true);
+                    this.ballPlayTimer = setTimeout(() => throwBall(round + 1), 420);
+                  }, true);
+                }
+              });
+            }
+          });
+        };
+        CatRig.moveTo(ball.position.x + 0.9, ball.position.z, () => {
+          if (session !== this.ballPlaySession) return;
+          CatRig.playHappyJump();
+          AudioFX.meow(true);
+          UI.toast(`${PetState.name} mengejar bola wol!`);
+          throwBall(1);
+        }, true);
+      },
+
+      toggleBrush() {
+        this.cancelBallPlay();
+        PetState.brushActive = !PetState.brushActive;
+        document.getElementById('btn-brush-mode').classList.toggle('active', PetState.brushActive);
+        UI.toast(PetState.brushActive ? 'Mode Sisir Aktif: Klik/gesek badan kucing!' : 'Mode Sisir dimatikan.');
+      },
+
+      bindPointerEvents() {
+        const dom = WorldEngine.renderer.domElement;
+
+        const setNDC = (e) => {
+          const cx = e.touches ? e.touches[0].clientX : e.clientX;
+          const cy = e.touches ? e.touches[0].clientY : e.clientY;
+          WorldEngine.pointer.x = (cx / window.innerWidth) * 2 - 1;
+          WorldEngine.pointer.y = -(cy / window.innerHeight) * 2 + 1;
+        };
+
+        dom.addEventListener('pointerdown', (e) => {
+          if (!PetState.started) return;
+          setNDC(e);
+          WorldEngine.raycaster.setFromCamera(WorldEngine.pointer, WorldEngine.camera);
+
+          if (MiniGames.active) {
+            MiniGames.onPointerDown(WorldEngine.raycaster);
+            return;
+          }
+
+          const hits = WorldEngine.raycaster.intersectObjects(WorldEngine.hitMeshes, true);
+          if (hits.length === 0) return;
+
+          // Find zone from hit object or its parent
+          let obj = hits[0].object;
+          let zone = obj.userData.zone;
+          while (!zone && obj.parent) {
+            obj = obj.parent;
+            zone = obj.userData.zone;
+          }
+
+          if (zone === 'head') {
+            this.cancelBallPlay();
+            AudioFX.purr();
+            AudioFX.meow(true);
+            adjustStat('happy', 8);
+            adjustStat('affection', 10);
+            gainXP(8);
+            completeCareTask('pet_head');
+            CatQuest.complete('pet_head');
+            WorldEngine.spawnParticles(CatRig.root.position, 0xff7597);
+            CatRig.eyes.forEach(eye => gsap.to(eye.scale, { y: 0.14, duration: 0.15, yoyo: true, repeat: 3 }));
+            UI.toast(`${PetState.name} memejamkan mata & mendengkur! Purrrr~ 💕`);
+            return;
+          }
+
+          if (zone === 'body') {
+            if (PetState.brushActive) {
+              this.cancelBallPlay();
+              AudioFX.purr();
+              adjustStat('clean', 15);
+              adjustStat('happy', 8);
+              gainXP(10);
+              completeCareTask('brush_cat');
+              CatQuest.complete('brush_cat');
+              WorldEngine.spawnParticles(CatRig.root.position, 0x8338ec);
+              UI.toast(`Bulu ${PetState.name} disisir halus & berkilau! ✨`);
+            } else {
+              this.cancelBallPlay();
+              this.isDragging = true;
+              WorldEngine.controls.enabled = false;
+              PetState.pose = 'carried';
+              CatRig.route = [];
+              CatRig.routeIndex = 0;
+              AudioFX.meow(true);
+              gsap.to(CatRig.root.position, { y: 1.45, duration: 0.18 });
+              UI.toast(`Menggendong ${PetState.name}... Geser untuk memindahkan!`);
+            }
+            return;
+          }
+
+          if (zone === 'food_bowl') { this.feed(); return; }
+          if (zone === 'water_bowl') { this.drink(); return; }
+          if (zone === 'bed') { this.sleep(); return; }
+          if (zone === 'toy_ball') { this.playBall(); return; }
+          if (zone === 'playground') {
+            CatRig.moveTo(7.2, 4.5, () => CatRig.playJump(), true);
+            return;
+          }
+          if (zone === 'ground') {
+            const p = hits[0].point;
+            CatRig.moveTo(THREE.MathUtils.clamp(p.x, -11, 11), THREE.MathUtils.clamp(p.z, -9, 9), null, false);
+          }
+        });
+
+        dom.addEventListener('pointermove', (e) => {
+          setNDC(e);
+          if (MiniGames.active && MiniGames.type === 'laser' && MiniGames.laserMesh) {
+            WorldEngine.raycaster.setFromCamera(WorldEngine.pointer, WorldEngine.camera);
+            const pt = new THREE.Vector3();
+            if (!WorldEngine.raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.16), pt)) return;
+            const x = THREE.MathUtils.clamp(pt.x, -9, 9);
+            const z = THREE.MathUtils.clamp(pt.z, -8, 8);
+            MiniGames.laserMesh.position.set(x, 0.18, z);
+            const movedX = x - MiniGames.lastLaserGoal.x;
+            const movedZ = z - MiniGames.lastLaserGoal.z;
+            if (Math.hypot(movedX, movedZ) >= 0.5 && performance.now() - MiniGames.lastLaserPathAt >= 320) {
+              MiniGames.lastLaserGoal.set(x, 0.12, z);
+              MiniGames.lastLaserPathAt = performance.now();
+              CatRig.moveTo(x, z, null, true);
+            }
+          }
+
+          if (!this.isDragging) return;
+          WorldEngine.raycaster.setFromCamera(WorldEngine.pointer, WorldEngine.camera);
+          const pt = new THREE.Vector3();
+          if (WorldEngine.raycaster.ray.intersectPlane(this.dragPlane, pt)) {
+            CatRig.root.position.x = THREE.MathUtils.clamp(pt.x, -10.5, 10.5);
+            CatRig.root.position.z = THREE.MathUtils.clamp(pt.z, -8.5, 8.5);
+            CatRig.targetPos.copy(CatRig.root.position);
+          }
+        });
+
+        window.addEventListener('pointerup', () => {
+          if (this.isDragging) {
+            this.isDragging = false;
+            WorldEngine.controls.enabled = true;
+            gsap.to(CatRig.root.position, { y: 0.12, duration: 0.28, ease: 'bounce.out' });
+            PetState.pose = 'idle';
+            adjustStat('affection', 6);
+            gainXP(5);
+          }
+        });
+      }
+    };
+
+    const CameraRig = {
+      mode: 0, // 0: Free Orbit, 1: Follow Cat, 2: Close-up Interaction
+
+      focusZone(zone, tabEl) {
+        document.querySelectorAll('.zone-tab').forEach(t => t.classList.remove('active'));
+        if (tabEl) tabEl.classList.add('active');
+        AudioFX.pop(540);
+
+        const views = {
+          living: { pos: [0, 5.8, 7.8], target: [0, 1.0, -0.5] },
+          bedroom: { pos: [0, 5.6, 7.2], target: [0, 0.9, -2.3] },
+          kitchen: { pos: [3.8, 5.4, 7.4], target: [3.4, 0.8, -1.5] },
+          garden: { pos: [-5, 5.8, 7.5], target: [-6, 1.0, -4.5] },
+          playground: { pos: [3.4, 4.8, 6.8], target: [3.4, 1.2, 2] }
+        };
+        const v = views[zone];
+        gsap.to(WorldEngine.camera.position, { x: v.pos[0], y: v.pos[1], z: v.pos[2], duration: 0.95, ease: 'power3.inOut' });
+        gsap.to(WorldEngine.controls.target, { x: v.target[0], y: v.target[1], z: v.target[2], duration: 0.95, ease: 'power3.inOut' });
+      },
+
+      cycleMode() {
+        this.mode = (this.mode + 1) % 3;
+        const names = ['Kamera Bebas (Orbit)', 'Kamera Mengikuti Kucing', 'Kamera Dekat (Interaction View)'];
+        AudioFX.pop(680);
+        UI.toast(`🎥 ${names[this.mode]}`);
+      }
+    };
+
+    /* ==========================================================================
+       7. FIVE MINI-GAMES MODULE
+       ========================================================================== */
+    const MiniGames = {
+      active: false,
+      type: null,
+      score: 0,
+      timeLeft: 25,
+      timerId: null,
+      group: new THREE.Group(),
+      laserMesh: null,
+      mouseMesh: null,
+      mouseTarget: new THREE.Vector3(),
+      mouseRetargetTimer: 0,
+      lastLaserGoal: new THREE.Vector3(),
+      lastLaserPathAt: 0,
+      laserScoreCooldown: 0,
+      hurdle: null,
+      jumpReady: false,
+      hurdleEvaluated: false,
+      jumpLaneZ: 4.5,
+      lastJumpMessageAt: 0,
+      ballTween: null,
+      ballBusy: false,
+      ballOriginalPosition: null,
+      cameraSnapshot: null,
+
+      init() {
+        WorldEngine.scene.add(this.group);
+        window.addEventListener('keydown', (event) => {
+          if (!this.active || this.type !== 'jump' || event.repeat) return;
+          if (event.code === 'Space' || event.code === 'ArrowUp') {
+            event.preventDefault();
+            this.jump();
+          }
+        });
+      },
+
+      clear() {
+        for (const child of [...this.group.children]) {
+          this.group.remove(child);
+          child.traverse((part) => {
+            if (part.geometry) part.geometry.dispose();
+            const materials = Array.isArray(part.material)
+              ? part.material
+              : part.material
+                ? [part.material]
+                : [];
+            materials.forEach((material) => material.dispose());
+          });
+        }
+        this.laserMesh = null;
+        this.mouseMesh = null;
+        this.hurdle = null;
+      },
+
+      addScore(points) {
+        this.score += points;
+        document.getElementById('mg-score').textContent = this.score;
+      },
+
+      cleanupSession(restoreCamera = true) {
+        if (this.timerId !== null) {
+          clearInterval(this.timerId);
+          this.timerId = null;
+        }
+        if (this.ballTween) {
+          this.ballTween.kill();
+          this.ballTween = null;
+        }
+        if (WorldEngine.yarnBall) {
+          gsap.killTweensOf(WorldEngine.yarnBall.position);
+          if (this.ballOriginalPosition) WorldEngine.yarnBall.position.copy(this.ballOriginalPosition);
+        }
+        this.ballOriginalPosition = null;
+        CatRig.wakeFromSleep();
+        CatRig.stopJump();
+        CatRig.stopMovement();
+        gsap.killTweensOf(CatRig.root.position);
+        CatRig.root.position.y = 0.12;
+        if (CatActions.isDragging) {
+          CatActions.isDragging = false;
+          WorldEngine.controls.enabled = true;
+        }
+        PetState.pose = 'idle';
+        this.active = false;
+        this.type = null;
+        this.clear();
+        document.getElementById('mg-banner').style.display = 'none';
+        this.jumpReady = false;
+        this.hurdleEvaluated = false;
+        this.ballBusy = false;
+        this.laserScoreCooldown = 0;
+        this.mouseRetargetTimer = 0;
+        gsap.killTweensOf(WorldEngine.camera.position);
+        gsap.killTweensOf(WorldEngine.controls.target);
+
+        const cameraSnapshot = this.cameraSnapshot;
+        this.cameraSnapshot = null;
+        if (restoreCamera && cameraSnapshot) {
+          gsap.to(WorldEngine.camera.position, {
+            x: cameraSnapshot.position.x,
+            y: cameraSnapshot.position.y,
+            z: cameraSnapshot.position.z,
+            duration: 0.65,
+            ease: 'power2.inOut'
+          });
+          gsap.to(WorldEngine.controls.target, {
+            x: cameraSnapshot.target.x,
+            y: cameraSnapshot.target.y,
+            z: cameraSnapshot.target.z,
+            duration: 0.65,
+            ease: 'power2.inOut'
+          });
+          document.querySelectorAll('.zone-tab').forEach(tab => tab.classList.remove('active'));
+          if (cameraSnapshot.activeTab) cameraSnapshot.activeTab.classList.add('active');
+        }
+      },
+
+      start(type) {
+        const names = {
+          butterfly: '🦋 CATCH THE BUTTERFLY',
+          laser: '🔴 CHASE THE LASER',
+          mouse: '🐭 FIND THE MOUSE',
+          ball: '⚽ BALL ADVENTURE',
+          jump: '🪜 JUMPING CHALLENGE'
+        };
+        if (!Object.prototype.hasOwnProperty.call(names, type)) {
+          throw new RangeError(`Unknown mini-game type: ${type}`);
+        }
+
+        const cameraSnapshot = this.cameraSnapshot;
+        CatActions.cancelBallPlay();
+        this.cleanupSession(false);
+        CatRig.wakeFromSleep();
+        if (CatActions.isDragging) {
+          CatActions.isDragging = false;
+          WorldEngine.controls.enabled = true;
+        }
+        this.cameraSnapshot = cameraSnapshot || {
+          position: WorldEngine.camera.position.clone(),
+          target: WorldEngine.controls.target.clone(),
+          activeTab: document.querySelector('.zone-tab.active')
+        };
+        UI.closeModal('modal-minigames');
+        this.active = true;
+        this.type = type;
+        this.score = 0;
+        this.timeLeft = 25;
+        this.lastLaserPathAt = 0;
+        this.laserScoreCooldown = 0;
+        this.jumpReady = false;
+        this.hurdleEvaluated = false;
+        this.ballBusy = false;
+        document.getElementById('mg-label').textContent = names[type];
+        document.getElementById('mg-score').textContent = '0';
+        document.getElementById('mg-timer').textContent = '25';
+        document.getElementById('mg-banner').style.display = 'flex';
+        AudioFX.pop(820);
+
+        if (type === 'butterfly') {
+          CameraRig.focusZone('garden');
+          for (let i = 0; i < 6; i++) {
+            const bf = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), new THREE.MeshBasicMaterial({ color: i % 2 === 0 ? 0xffb703 : 0xc77dff }));
+            const x = (Math.random() - 0.5) * 10;
+            const z = 3 + Math.random() * 5;
+            bf.position.set(x, 1.4 + Math.random() * 1.1, z);
+            bf.userData.mgTag = 'butterfly';
+            bf.userData.baseX = x;
+            bf.userData.baseZ = z;
+            bf.userData.phase = Math.random() * Math.PI * 2;
+            this.group.add(bf);
+          }
+        } else if (type === 'laser') {
+          CameraRig.focusZone('living');
+          this.laserMesh = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), new THREE.MeshBasicMaterial({ color: 0xff0033 }));
+          this.laserMesh.position.set(0, 0.18, 1);
+          this.group.add(this.laserMesh);
+          UI.toast('Gerakkan kursor/jari di lantai agar kucing mengejar laser!');
+        } else if (type === 'mouse') {
+          CameraRig.focusZone('living');
+          const m = new THREE.Mesh(new THREE.ConeGeometry(0.32, 0.7, 16), new THREE.MeshStandardMaterial({ color: 0x94a3b8 }));
+          m.rotation.x = Math.PI / 2;
+          m.position.set(2.4, 0.35, 1.4);
+          m.userData.mgTag = 'mouse';
+          this.group.add(m);
+          this.mouseMesh = m;
+          this.mouseTarget.set(-2.2, 0.35, 0.8);
+          this.mouseRetargetTimer = 1.2;
+          UI.toast('Klik tikus mainan yang berlari sembunyi!');
+        } else if (type === 'ball') {
+          CameraRig.focusZone('living');
+          const hoop = new THREE.Mesh(new THREE.TorusGeometry(0.95, 0.1, 14, 28), new THREE.MeshBasicMaterial({ color: 0x40916c }));
+          hoop.position.set(0, 1.1, -1.5);
+          this.group.add(hoop);
+          this.ballOriginalPosition = WorldEngine.yarnBall.position.clone();
+          WorldEngine.yarnBall.position.set(-1.7, 0.39, 1.55);
+          UI.toast('Klik bola wol merah untuk menendangnya ke cincin hijau!');
+        } else if (type === 'jump') {
+          CameraRig.focusZone('playground');
+          const bar = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.45, 0.3), new THREE.MeshStandardMaterial({ color: 0xff4d6d }));
+          bar.position.set(7.2, 0.4, 8.5);
+          bar.userData.mgTag = 'hurdle';
+          this.group.add(bar);
+          this.hurdle = bar;
+          CatRig.moveTo(7.2, this.jumpLaneZ, () => {
+            if (!this.active || this.type !== 'jump') return;
+            this.jumpReady = true;
+            this.hurdle.position.z = 8.5;
+            UI.toast('Ketuk layar atau tekan Space saat rintangan mendekat!');
+          }, true);
+          if (CatRig.route.length === 0) {
+            UI.toast('Mochi belum menemukan jalur ke arena. Coba lagi dari lantai yang lapang.');
+          } else {
+            UI.toast('Mochi sedang menuju arena lompat...');
+          }
+        }
+
+        if (this.timerId !== null) clearInterval(this.timerId);
+        this.timerId = setInterval(() => {
+          if (!this.active) return;
+          this.timeLeft--;
+          document.getElementById('mg-timer').textContent = this.timeLeft;
+          if (this.timeLeft <= 0) this.stop(true);
+        }, 1000);
+      },
+
+      jump() {
+        if (!this.active || this.type !== 'jump') return;
+        if (!this.jumpReady) {
+          const now = performance.now();
+          if (now - this.lastJumpMessageAt > 1400) {
+            this.lastJumpMessageAt = now;
+            UI.toast('Tunggu Mochi sampai di arena, lalu lompat saat rintangan mendekat.');
+          }
+          return;
+        }
+        CatRig.playJump();
+      },
+
+      onPointerDown(ray) {
+        if (!this.active) return;
+        if (this.type === 'jump') {
+          this.jump();
+          return;
+        }
+        const hits = ray.intersectObjects([...this.group.children, WorldEngine.yarnBall], true);
+        if (hits.length > 0) {
+          const obj = hits[0].object;
+          if (obj.userData.mgTag === 'butterfly' || obj.userData.mgTag === 'mouse') {
+            const target = obj.position.clone();
+            AudioFX.meow(true);
+            this.addScore(15);
+            WorldEngine.spawnParticles(target, 0xffb703);
+            CatRig.moveTo(target.x, target.z, null, true);
+            const x = (Math.random() - 0.5) * (this.type === 'butterfly' ? 10 : 6.4);
+            const z = this.type === 'butterfly' ? 3 + Math.random() * 5 : (Math.random() - 0.5) * 4.5 + 0.2;
+            obj.position.set(x, this.type === 'butterfly' ? 1.5 : 0.35, z);
+            if (this.type === 'butterfly') {
+              obj.userData.baseX = x;
+              obj.userData.baseZ = z;
+              obj.userData.phase = Math.random() * Math.PI * 2;
+            } else {
+              this.mouseTarget.set((Math.random() - 0.5) * 6.4, 0.35, (Math.random() - 0.5) * 4.5 + 0.2);
+              this.mouseRetargetTimer = 1.2;
+            }
+          } else if (obj.userData.zone === 'toy_ball' && this.type === 'ball') {
+            if (this.ballBusy) return;
+            const ball = WorldEngine.yarnBall;
+            const ballStart = ball.position.clone();
+            this.ballBusy = true;
+            CatRig.moveTo(ballStart.x - 0.8, ballStart.z, () => {
+              if (!this.active || this.type !== 'ball') return;
+              CatRig.playJump();
+              this.ballTween = gsap.timeline({
+                onComplete: () => {
+                  if (!this.active || this.type !== 'ball') return;
+                  this.ballBusy = false;
+                  this.ballTween = null;
+                  ball.position.copy(ballStart);
+                }
+              });
+              this.ballTween
+                .to(ball.position, { x: 0, y: 1.2, z: -1.5, duration: 0.55, ease: 'power2.out' })
+                .to(ball.position, { y: 0.39, duration: 0.22, ease: 'bounce.out' })
+                .call(() => {
+                  if (!this.active || this.type !== 'ball') return;
+                  AudioFX.jump();
+                  this.addScore(20);
+                  WorldEngine.spawnParticles(new THREE.Vector3(0, 0.5, -1.5), 0x40916c);
+                  UI.toast('Tendangan tepat sasaran! ⚽');
+                })
+                .to(ball.position, {
+                  x: ballStart.x,
+                  y: ballStart.y,
+                  z: ballStart.z,
+                  duration: 0.5,
+                  ease: 'power1.inOut'
+                });
+            }, true);
+            if (CatRig.route.length === 0) {
+              this.ballBusy = false;
+              UI.toast('Mochi belum bisa menjangkau bola dari sini.');
+            }
+          }
+        }
+      },
+
+      stop(finished) {
+        if (!this.active) return;
+        const finalScore = this.score;
+        const coinsEarned = Math.max(15, Math.round(finalScore * 0.6));
+        this.cleanupSession(true);
+        PetState.coins += coinsEarned;
+        gainXP(35);
+        adjustStat('happy', 20);
+        completeCareTask('play_mg');
+        UI.refresh();
+        AudioFX.pop(900);
+        UI.toast(`${finished ? '🏆 Mini-Game Selesai!' : 'Mini-Game dihentikan.'} Skor: ${finalScore} (+${coinsEarned} Koin)`);
+      }
+    };
+
+    /* ==========================================================================
+       8. MAIN 60 FPS SIMULATION LOOP & AUTONOMOUS AI
+       ========================================================================== */
+    const clock = new THREE.Clock();
+    let autoTick = 0;
+
+    setInterval(() => {
+      if (!PetState.started || document.hidden) return;
+      adjustStat('hunger', -1.2);
+      adjustStat('thirst', -1.4);
+      adjustStat('clean', -0.8);
+      if (PetState.pose === 'sleep') adjustStat('energy', 4);
+      else adjustStat('energy', -1.0);
+
+      autoTick++;
+      if (autoTick % 4 === 0 && PetState.pose === 'idle' && !CatActions.isDragging && !MiniGames.active) {
+        if (PetState.stats.hunger < 30) {
+          UI.toast(`${PetState.name} lapar dan menghampiri mangkuk makanan! 😿`);
+          AudioFX.meow(false);
+          CatRig.moveTo(3.2, -1.2);
+        } else {
+          CatRig.moveTo((Math.random() - 0.5) * 6.5, (Math.random() - 0.5) * 4.5);
+        }
+      }
+    }, 3600);
+
+    function mainLoop() {
+      requestAnimationFrame(mainLoop);
+      if (document.hidden) {
+        clock.getDelta();
+        return;
+      }
+      const dt = Math.min(clock.getDelta(), 0.05);
+      const t = clock.getElapsedTime();
+
+      // Environment Animations
+      WorldEngine.foliage.forEach(f => { f.mesh.rotation.z = Math.sin(t * 2.2 + f.phase) * 0.14; });
+      WorldEngine.clouds.forEach(c => {
+        c.position.x += dt * 0.35;
+        if (c.position.x > 22) c.position.x = -22;
+      });
+      if (WorldEngine.lightMotes) WorldEngine.lightMotes.rotation.y = t * 0.04;
+
+      // Mini-Game Animations
+      if (MiniGames.active) {
+        if (MiniGames.type === 'butterfly') {
+          MiniGames.group.children.forEach((bf, i) => {
+            bf.position.y = 1.5 + Math.sin(t * 4 + i) * 0.38;
+            bf.position.x = bf.userData.baseX + Math.cos(t * 1.5 + bf.userData.phase) * 0.9;
+            bf.position.z = bf.userData.baseZ + Math.sin(t * 1.3 + bf.userData.phase) * 0.45;
+            bf.rotation.y += 0.08;
+          });
+        } else if (MiniGames.type === 'laser' && MiniGames.laserMesh) {
+          if (CatRig.root.position.distanceTo(MiniGames.laserMesh.position) < 0.9) {
+            MiniGames.laserScoreCooldown += dt;
+            if (MiniGames.laserScoreCooldown >= 0.5) {
+              MiniGames.addScore(1);
+              MiniGames.laserScoreCooldown = 0;
+            }
+          } else {
+            MiniGames.laserScoreCooldown = 0;
+          }
+        } else if (MiniGames.type === 'mouse' && MiniGames.mouseMesh) {
+          MiniGames.mouseRetargetTimer -= dt;
+          if (MiniGames.mouseRetargetTimer <= 0) {
+            MiniGames.mouseTarget.set((Math.random() - 0.5) * 6.4, 0.35, (Math.random() - 0.5) * 4.5 + 0.2);
+            MiniGames.mouseRetargetTimer = 1.1 + Math.random() * 1.1;
+          }
+          const dx = MiniGames.mouseTarget.x - MiniGames.mouseMesh.position.x;
+          const dz = MiniGames.mouseTarget.z - MiniGames.mouseMesh.position.z;
+          const distance = Math.hypot(dx, dz);
+          if (distance > 0.02) {
+            const step = Math.min(1.7 * dt, distance);
+            MiniGames.mouseMesh.position.x += (dx / distance) * step;
+            MiniGames.mouseMesh.position.z += (dz / distance) * step;
+            MiniGames.mouseMesh.rotation.y = Math.atan2(dx, dz);
+          }
+        } else if (MiniGames.type === 'jump' && MiniGames.hurdle) {
+          const previousZ = MiniGames.hurdle.position.z;
+          MiniGames.hurdle.position.z -= dt * 3.8;
+          if (MiniGames.jumpReady && !MiniGames.hurdleEvaluated && previousZ > MiniGames.jumpLaneZ + 0.4 && MiniGames.hurdle.position.z <= MiniGames.jumpLaneZ + 0.4) {
+            MiniGames.hurdleEvaluated = true;
+            if (CatRig.isJumping && CatRig.root.position.y > 0.55) {
+              MiniGames.addScore(10);
+              WorldEngine.spawnParticles(MiniGames.hurdle.position, 0xffb703);
+              UI.toast('Lompatan tepat waktu! 🪜');
+            } else {
+              UI.toast('Rintangan terlewat! Lompat saat palang mendekat.');
+            }
+          }
+          if (MiniGames.hurdle.position.z < MiniGames.jumpLaneZ - 1.4) {
+            MiniGames.hurdle.position.z = 8.5;
+            MiniGames.hurdleEvaluated = false;
+          }
+        }
+      }
+
+      // Cat Locomotion & Skeletal IK
+      if (CatRig.torso) {
+        let dx = CatRig.targetPos.x - CatRig.root.position.x;
+        let dz = CatRig.targetPos.z - CatRig.root.position.z;
+        let dist = Math.hypot(dx, dz);
+
+        if ((PetState.pose === 'walk' || PetState.pose === 'run') && dist <= 0.15 && CatRig.routeIndex < CatRig.route.length) {
+          const waypoint = CatRig.route[CatRig.routeIndex++];
+          CatRig.targetPos.set(waypoint.x, 0.12, waypoint.z);
+          dx = CatRig.targetPos.x - CatRig.root.position.x;
+          dz = CatRig.targetPos.z - CatRig.root.position.z;
+          dist = Math.hypot(dx, dz);
+        }
+
+        if ((PetState.pose === 'walk' || PetState.pose === 'run') && dist > 0.15 && !CatActions.isDragging) {
+          const spd = PetState.pose === 'run' ? 4.3 : 2.3;
+          const yaw = Math.atan2(dx, dz);
+          const step = Math.min(spd * dt, dist);
+          const offsets = [0, 0.55, -0.55, 1.05, -1.05, 1.55, -1.55, 2.1, -2.1];
+          let selectedYaw = null;
+          let bestProgress = -Infinity;
+          for (const offset of offsets) {
+            const candidateYaw = yaw + offset;
+            const nextX = CatRig.root.position.x + Math.sin(candidateYaw) * step;
+            const nextZ = CatRig.root.position.z + Math.cos(candidateYaw) * step;
+            if (!WorldEngine.isCatPositionClear(nextX, nextZ)) continue;
+
+            const progress = (dx * Math.sin(candidateYaw) + dz * Math.cos(candidateYaw)) / dist;
+            if (progress > bestProgress) {
+              bestProgress = progress;
+              selectedYaw = candidateYaw;
+            }
+          }
+
+          if (selectedYaw === null) {
+            CatRig.targetPos.copy(CatRig.root.position);
+            CatRig.route = [];
+            CatRig.routeIndex = 0;
+            CatRig.onArrive = null;
+            PetState.pose = 'idle';
+          } else {
+            CatRig.root.rotation.y = THREE.MathUtils.lerp(CatRig.root.rotation.y, selectedYaw, 0.15);
+            CatRig.root.position.x += Math.sin(selectedYaw) * step;
+            CatRig.root.position.z += Math.cos(selectedYaw) * step;
+          }
+
+          const freq = PetState.pose === 'run' ? 16 : 10;
+          CatRig.legs.forEach((leg, i) => {
+            const phase = (i === 0 || i === 3) ? 0 : Math.PI;
+            leg.rotation.x = Math.sin(t * freq + phase) * 0.55;
+          });
+          CatRig.torso.position.y = 0.72 + Math.abs(Math.sin(t * freq)) * 0.06;
+        } else {
+          if (PetState.pose === 'walk' || PetState.pose === 'run') {
+            PetState.pose = 'idle';
+            if (CatRig.onArrive) {
+              const fn = CatRig.onArrive;
+              CatRig.onArrive = null;
+              fn();
+            }
+          }
+          CatRig.legs.forEach((leg, index) => {
+            const restingAngle = PetState.pose === 'sleep' ? (index < 2 ? 0.32 : -0.32) : 0;
+            leg.rotation.x = THREE.MathUtils.lerp(leg.rotation.x, restingAngle, 0.15);
+          });
+          const breathFreq = PetState.pose === 'sleep' ? 1.8 : 3.2;
+          CatRig.torso.scale.y = 0.88 + Math.sin(t * breathFreq) * 0.025;
+        }
+
+        // Tail & Ears
+        const tailSway = PetState.pose === 'sleep' ? 0.035 : 0.18;
+        CatRig.tail.forEach((seg, idx) => { seg.rotation.z = Math.sin(t * 3.2 - idx * 0.5) * tailSway; });
+        CatRig.ears[0].rotation.x = Math.sin(t * 2.1) * 0.08;
+        CatRig.ears[1].rotation.x = Math.cos(t * 2.4) * 0.08;
+
+        // Head & Blinking
+        if (PetState.pose === 'eat' || PetState.pose === 'drink') {
+          CatRig.headPivot.rotation.x = 0.55 + Math.sin(t * 12) * 0.12;
+        } else if (PetState.pose === 'sleep') {
+          CatRig.headPivot.rotation.x = 0.18;
+          CatRig.blinkTimer = (CatRig.blinkTimer + dt) % 2.8;
+          const phase = CatRig.blinkTimer % 2.8;
+          const blink = phase < 0.24 ? 1 - Math.abs(phase / 0.12 - 1) : 0;
+          const eyeScale = 0.38 - blink * 0.3;
+          CatRig.eyes.forEach(e => { e.scale.y = eyeScale; });
+        } else {
+          CatRig.headPivot.rotation.x = THREE.MathUtils.lerp(CatRig.headPivot.rotation.x, Math.sin(t * 1.5) * 0.05, 0.1);
+          CatRig.blinkTimer += dt;
+          if (CatRig.blinkTimer > 3.8) {
+            CatRig.eyes.forEach(e => { e.scale.y = 0.1; });
+            if (CatRig.blinkTimer > 3.95) {
+              CatRig.eyes.forEach(e => { e.scale.y = 1.0; });
+              CatRig.blinkTimer = 0;
+            }
+          }
+        }
+      }
+
+      // Particles Update
+      for (let i = WorldEngine.particles.length - 1; i >= 0; i--) {
+        const p = WorldEngine.particles[i];
+        p.mesh.position.y += p.vy;
+        p.mesh.rotation.y += 0.06;
+        p.life -= dt * 1.1;
+        p.mesh.scale.setScalar(Math.max(0.01, p.life));
+        if (p.life <= 0) {
+          WorldEngine.scene.remove(p.mesh);
+          WorldEngine.particles.splice(i, 1);
+        }
+      }
+
+      // Dynamic Camera Tracking
+      if (PetState.started && !MiniGames.active) {
+        if (CameraRig.mode === 1) {
+          WorldEngine.controls.target.lerp(new THREE.Vector3(CatRig.root.position.x, CatRig.root.position.y + 0.8, CatRig.root.position.z), 0.08);
+        } else if (CameraRig.mode === 2) {
+          WorldEngine.controls.target.lerp(new THREE.Vector3(CatRig.root.position.x, CatRig.root.position.y + 0.9, CatRig.root.position.z), 0.12);
+          WorldEngine.camera.position.lerp(new THREE.Vector3(CatRig.root.position.x + 1.8, CatRig.root.position.y + 1.8, CatRig.root.position.z + 2.8), 0.08);
+        }
+      }
+
+      WorldEngine.controls.update();
+      WorldEngine.clampCamera();
+      WorldEngine.renderer.render(WorldEngine.scene, WorldEngine.camera);
+    }
+
+    // Bootstrap
+    WorldEngine.init();
+    CatRig.build();
+    MiniGames.init();
+    CatActions.bindPointerEvents();
+    mainLoop();
+
+    document.getElementById('btn-launch').addEventListener('click', () => {
+      AudioFX.init();
+      AudioFX.meow(true);
+      PetState.started = true;
+      gsap.to('#main-menu', {
+        opacity: 0,
+        duration: 0.5,
+        onComplete: () => {
+          document.getElementById('main-menu').style.display = 'none';
+          document.getElementById('hud').style.display = 'block';
+          UI.refresh();
+          UI.toast(`Selamat datang! Klik kepala ${PetState.name} untuk mengelusnya 🐾`);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
