@@ -189,6 +189,10 @@
       touch-action: none;
     }
 
+    #btn-hud-home {
+      min-width: 44px;
+    }
+
     @keyframes bobFloat {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-5px); }
@@ -283,6 +287,9 @@
             KREDIT
           </button>
         </div>
+        <button id="btn-return-portfolio" class="pixel-btn py-3 px-3 font-pixel text-[9px] sm:text-[10px]">
+          ← KEMBALI KE PORTOFOLIO • PROJECT GAME
+        </button>
       </div>
 
       <div id="save-preview-badge" class="hidden text-xs font-vt text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 rounded-lg py-1.5 px-3">
@@ -344,6 +351,9 @@
         </button>
         <button data-menu="settings" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center gap-1" title="Settings">
           ⚙️ <span id="hud-nav-settings" class="hidden lg:inline">Set</span>
+        </button>
+        <button id="btn-hud-home" class="pixel-btn px-2.5 py-2 text-xs font-vt text-base sm:text-lg flex items-center justify-center gap-1" title="Kembali ke menu permainan / Return to game menu" aria-label="Kembali ke menu permainan / Return to game menu">
+          <span aria-hidden="true">🏠</span><span id="hud-nav-home" class="hidden md:inline">Menu Utama</span>
         </button>
         <button id="btn-zoom-out" class="pixel-btn px-2 py-2 text-xs font-pixel hidden sm:inline-block" title="Zoom Out">-</button>
         <button id="btn-zoom-in" class="pixel-btn px-2 py-2 text-xs font-pixel hidden sm:inline-block" title="Zoom In">+</button>
@@ -644,6 +654,12 @@
         btn_guide: '📖 PANDUAN',
         btn_settings: '⚙️ PENGATURAN',
         btn_credits: 'KREDIT',
+        btn_return_portfolio: '← KEMBALI KE PORTOFOLIO • PROJECT GAME',
+        btn_game_menu: 'Menu Utama',
+        return_game_menu_title: 'KEMBALI KE MENU UTAMA?',
+        return_game_menu_body: 'Progres akan disimpan dan permainan dijeda. Kamu bisa melanjutkan lagi dari menu. Kembali sekarang?',
+        return_game_menu_confirm: 'SIMPAN & KEMBALI',
+        toast_menu_save_failed: 'Progres gagal disimpan. Kamu tetap berada di permainan.',
         btn_close: 'TUTUP',
         menu_controls_hint: 'Desktop: WASD/Panah Berlayar • Spasi Memancing • E Interaksi | Mobile: Analog & Tombol Sentuh',
         save_ready: 'Pelayaran Tersimpan: Hari {day} • {gold}g • {dex}/32 Spesies',
@@ -752,6 +768,12 @@
         btn_guide: '📖 GUIDE',
         btn_settings: '⚙️ SETTINGS',
         btn_credits: 'CREDITS',
+        btn_return_portfolio: '← BACK TO PORTFOLIO • GAME PROJECT',
+        btn_game_menu: 'Main Menu',
+        return_game_menu_title: 'RETURN TO MAIN MENU?',
+        return_game_menu_body: 'Your progress will be saved and the game paused. You can continue from the menu. Return now?',
+        return_game_menu_confirm: 'SAVE & RETURN',
+        toast_menu_save_failed: 'Could not save your progress. You are still in the game.',
         btn_close: 'CLOSE',
         menu_controls_hint: 'Desktop: WASD/Arrows to Sail • Space to Fish • E to Interact | Mobile: Touch Joystick & Buttons',
         save_ready: 'Saved Voyage: Day {day} • {gold}g • {dex}/32 Species',
@@ -1436,6 +1458,12 @@
           osc.stop(now + 1.2);
         }
       }, 950);
+    },
+
+    stopCozyMusic() {
+      if (!this.musicTimer) return;
+      clearInterval(this.musicTimer);
+      this.musicTimer = null;
     }
   };
 
@@ -2747,6 +2775,7 @@
       setTxt('btn-menu-guide', 'btn_guide');
       setTxt('btn-menu-settings', 'btn_settings');
       setTxt('btn-menu-credits', 'btn_credits');
+      setTxt('btn-return-portfolio', 'btn_return_portfolio');
       setTxt('menu-controls-hint', 'menu_controls_hint');
       setTxt('btn-close-drawer', 'btn_close');
 
@@ -2756,6 +2785,12 @@
       setTxt('hud-nav-boat', 'nav_boat');
       setTxt('hud-nav-guide', 'nav_guide');
       setTxt('hud-nav-settings', 'nav_settings');
+      setTxt('hud-nav-home', 'btn_game_menu');
+      const returnMenuButton = document.getElementById('btn-hud-home');
+      if (returnMenuButton) {
+        returnMenuButton.title = Localization.t('btn_game_menu');
+        returnMenuButton.setAttribute('aria-label', Localization.t('btn_game_menu'));
+      }
 
       setTxt('tab-lbl-inventory', 'tab_inventory');
       setTxt('tab-lbl-journal', 'tab_journal');
@@ -2890,6 +2925,15 @@
           [{ label: Localization.t('btn_close'), style: 'pixel-btn-gold', onClick: () => {} }]
         );
       });
+
+      document.getElementById('btn-return-portfolio').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        if (window.parent !== window) {
+          window.parent.postMessage({ type: 'portfolio:return-from-game' }, window.location.origin);
+          return;
+        }
+        window.location.assign('/#projects');
+      });
     },
 
     launchGameSession() {
@@ -2906,16 +2950,77 @@
           this.refreshHUD();
           if (!window.phaserGame) startPhaserInstance();
           else if (window.gameScene) {
+            window.gameScene.scene.wake();
             window.gameScene.boatSprite.setPosition(GameState.data.boatPos.x, GameState.data.boatPos.y);
+            window.gameScene.velocity = { x: 0, y: 0 };
             window.gameScene.updateBoatSprite();
           }
         }
       });
     },
 
+    async returnToMainMenu() {
+      const returnButton = document.getElementById('btn-hud-home');
+      if (returnButton) returnButton.disabled = true;
+
+      const scene = window.gameScene;
+      if (scene?.boatSprite) {
+        GameState.data.boatPos = {
+          x: Math.round(scene.boatSprite.x),
+          y: Math.round(scene.boatSprite.y)
+        };
+        scene.velocity = { x: 0, y: 0 };
+      }
+      if (FishingSystem.state !== 'IDLE') FishingSystem.cancelFishing();
+
+      const saved = await SaveSystem.save(GameState.data);
+      if (!saved) {
+        if (returnButton) returnButton.disabled = false;
+        this.toast(Localization.t('toast_menu_save_failed'), 'danger');
+        return;
+      }
+
+      this.closeAllModals();
+      if (scene) scene.scene.sleep();
+      SoundEngine.stopCozyMusic();
+      document.getElementById('hud-layer').classList.add('hidden');
+
+      const menu = document.getElementById('main-menu');
+      menu.classList.remove('hidden');
+      this.refreshMenuSavePreview();
+      gsap.fromTo(menu, { opacity: 0 }, { opacity: 1, duration: 0.35, clearProps: 'opacity' });
+      if (returnButton) returnButton.disabled = false;
+    },
+
+    refreshMenuSavePreview(savedData = GameState.data) {
+      if (!savedData) return;
+      const continueButton = document.getElementById('btn-continue-game');
+      const badge = document.getElementById('save-preview-badge');
+      if (!continueButton || !badge) return;
+
+      continueButton.classList.remove('hidden');
+      badge.textContent = Localization.t('save_ready', {
+        day: savedData.day || 1,
+        gold: savedData.gold || 0,
+        dex: Object.keys(savedData.journal || {}).length
+      });
+      badge.classList.remove('hidden');
+    },
+
     bindHudEvents() {
       document.querySelectorAll('[data-menu]').forEach(btn => {
         btn.addEventListener('click', () => { SoundEngine.playUiClick(); this.openDrawer(btn.getAttribute('data-menu')); });
+      });
+      document.getElementById('btn-hud-home').addEventListener('click', () => {
+        SoundEngine.playUiClick();
+        this.showConfirm(
+          Localization.t('return_game_menu_title'),
+          Localization.t('return_game_menu_body'),
+          [
+            { label: Localization.t('return_game_menu_confirm'), style: 'pixel-btn-gold', onClick: () => this.returnToMainMenu() },
+            { label: Localization.t('cancel_btn'), style: 'pixel-btn', onClick: () => {} }
+          ]
+        );
       });
       document.querySelectorAll('.drawer-tab').forEach(tab => {
         tab.addEventListener('click', () => { SoundEngine.playUiClick(); this.openDrawer(tab.getAttribute('data-drawer-tab')); });
@@ -4404,16 +4509,7 @@
         GameState.data.settings.lang = existingSave.settings.lang;
         UI.applyLanguageStaticTexts();
       }
-      const btnContinue = document.getElementById('btn-continue-game');
-      const badge = document.getElementById('save-preview-badge');
-      btnContinue.classList.remove('hidden');
-      badge.classList.remove('hidden');
-      const speciesCount = Object.keys(existingSave.journal || {}).length;
-      badge.textContent = Localization.t('save_ready', {
-        day: existingSave.day || 1,
-        gold: existingSave.gold || 0,
-        dex: speciesCount
-      });
+      UI.refreshMenuSavePreview(existingSave);
     }
   });
   </script>
