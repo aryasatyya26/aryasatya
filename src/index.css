@@ -4876,14 +4876,17 @@ body.game-open {
     backdrop-filter: none;
     opacity: 0;
     transform: translateY(-12px);
-    transition: 0.35s;
+    visibility: hidden;
+    transition: opacity 0.35s, transform 0.35s, visibility 0s linear 0.35s;
     pointer-events: none;
   }
 
   .site-header nav.open {
     opacity: 1;
     transform: none;
+    visibility: visible;
     pointer-events: auto;
+    transition-delay: 0s;
   }
 
   .site-header nav button {
@@ -4910,7 +4913,7 @@ body.game-open {
 
   .menu-button {
     display: grid;
-    width: 34px;
+    width: 44px;
     aspect-ratio: 1;
     place-items: center;
   }
@@ -5051,33 +5054,38 @@ body.game-open {
   }
 
   .site-header nav {
-    position: relative;
-    top: auto;
-    right: auto;
-    left: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(6px, 2.4vw, 12px);
-    width: 100%;
-    min-height: 36px;
-    max-height: none;
-    overflow: visible;
-    padding: 2px clamp(12px, 3vw, 20px);
+    position: fixed;
+    z-index: 70;
+    top: 58px;
+    right: 10px;
+    left: 10px;
+    display: grid;
+    gap: 0;
+    width: auto;
+    max-height: min(70svh, 480px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px 18px;
     border: 1px solid rgba(221, 231, 231, 0.12);
-    border-radius: 999px;
-    background: rgba(6, 11, 16, 0.14);
+    border-radius: 20px;
+    background: rgba(5, 10, 15, 0.96);
     box-shadow:
       0 6px 20px rgba(0, 0, 0, 0.14),
       inset 0 0 12px rgba(196, 154, 86, 0.035);
+    opacity: 0;
+    transform: translateY(-8px);
+    visibility: hidden;
+    pointer-events: none;
+    isolation: isolate;
+    transition: opacity 0.24s ease, transform 0.24s ease, visibility 0s linear 0.24s;
+  }
+
+  .site-header nav.open {
     opacity: 1;
     transform: none;
+    visibility: visible;
     pointer-events: auto;
-    isolation: isolate;
-    transition:
-      background-color 0.35s ease,
-      border-color 0.35s ease,
-      box-shadow 0.35s ease;
+    transition-delay: 0s;
   }
 
   html.page-scrolled .site-header nav {
@@ -5105,6 +5113,16 @@ body.game-open {
     box-shadow: 0 0 12px rgba(196, 154, 86, 0.16);
   }
 
+  .site-header nav::before,
+  .site-header nav::after {
+    animation-play-state: paused;
+  }
+
+  .site-header nav.open::before,
+  .site-header nav.open::after {
+    animation-play-state: running;
+  }
+
   .site-header nav::after {
     content: "";
     position: absolute;
@@ -5120,50 +5138,60 @@ body.game-open {
     pointer-events: none;
   }
 
-  html:not(.page-scrolled) .site-header nav {
-    border-color: transparent;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  html:not(.page-scrolled) .site-header nav::before {
-    border-color: transparent;
-    box-shadow: none;
-    opacity: 0;
-    animation: none;
-  }
-
-  html:not(.page-scrolled) .site-header nav::after {
-    background: none;
-    opacity: 0;
-    animation: none;
-  }
-
   .site-header nav button {
-    display: inline-flex;
-    flex: 0 0 auto;
+    display: flex;
+    width: 100%;
+    min-height: 48px;
     position: relative;
     z-index: 2;
-    justify-content: center;
-    min-height: 26px;
-    padding: 4px 0;
+    align-items: center;
+    gap: 14px;
+    padding: 11px 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    font-family: "Italiana", serif;
+    font-size: clamp(18px, 5vw, 22px);
+    letter-spacing: 0.02em;
+    text-align: left;
+    text-transform: capitalize;
+  }
+
+  .site-header nav button:last-child {
     border-bottom: 0;
-    font-family: "DM Sans", sans-serif;
-    font-size: clamp(7px, 2vw, 7.5px);
-    letter-spacing: 0.1em;
-    text-align: center;
   }
 
   .site-header nav button i {
-    display: none;
+    display: block;
+    min-width: 20px;
+    color: var(--amber);
+    font-family: "DM Sans", sans-serif;
+    font-size: 9px;
+    font-style: normal;
+    letter-spacing: 0.08em;
   }
 
   .site-header nav button::after {
-    display: block;
+    display: none;
   }
 
   .menu-button {
-    display: none;
+    position: fixed;
+    z-index: 72;
+    top: 6px;
+    right: 12px;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid rgba(221, 231, 231, 0.14);
+    border-radius: 50%;
+    background: rgba(6, 11, 16, 0.72);
+    color: var(--white);
+    touch-action: manipulation;
+  }
+
+  .menu-button svg {
+    width: 19px;
+    height: 19px;
   }
 
   section {
