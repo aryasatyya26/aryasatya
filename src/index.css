@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Italiana&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Italiana&family=Press+Start+2P&display=swap");
 @import "lenis/dist/lenis.css";
 @import "tailwindcss";
 
@@ -663,8 +663,8 @@ html.page-scrolling .horizon-cloud {
   overflow: hidden;
   text-align: center;
   background:
-    radial-gradient(circle at 50% 50%, rgba(28, 78, 124, 0.48), transparent 32%),
-    rgba(23, 3, 43, 0.96);
+    radial-gradient(circle at 50% 50%, rgba(161, 119, 4, 0.671), transparent 32%),
+    rgb(12, 1, 37);
   transition:
     opacity 0.9s ease,
     filter 0.9s ease,
@@ -698,7 +698,7 @@ html.page-scrolling .horizon-cloud {
   place-items: center;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 46%, rgba(45, 14, 94, 0.48), transparent 34%),
+    radial-gradient(circle at 50% 46%, rgba(28, 71, 61, 0.48), transparent 34%),
     radial-gradient(circle at 50% 100%, rgba(45, 125, 172, 0.2), transparent 45%),
     rgba(15, 2, 34, 0.98);
   animation: entryLoadingIn 0.7s ease both;
@@ -2095,6 +2095,23 @@ section {
   text-transform: uppercase;
 }
 
+.hero-game-launcher button {
+  font-family: "Press Start 2P", "Courier New", monospace;
+  font-size: 7px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  animation: gamePixelFramePulse 1.8s ease-in-out infinite;
+}
+
+.hero-game-launcher button > span:not(.launcher-star) {
+  color: #fff1f2;
+  text-shadow:
+    0 0 4px rgba(255, 42, 95, 0.95),
+    0 0 10px rgba(255, 42, 95, 0.78),
+    0 0 20px rgba(255, 23, 68, 0.56);
+  animation: gamePixelTextPulse 1.8s ease-in-out infinite;
+}
+
 .scroll-cue {
   position: absolute;
   z-index: 5;
@@ -2852,16 +2869,63 @@ blockquote {
 }
 
 .game-art-center strong {
-  font-family: "Italiana", serif;
+  font-family: "Press Start 2P", "Courier New", monospace;
   font-size: clamp(42px, 8vw, 108px);
   font-weight: 400;
-  line-height: 0.77;
-  letter-spacing: -0.07em;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
 }
 
 .game-art-bottom b {
   color: #ff536e;
   font-weight: 500;
+}
+
+.game-art-center strong {
+  color: #fff1f2;
+  text-shadow:
+    0 0 5px rgba(255, 42, 95, 0.96),
+    0 0 14px rgba(255, 42, 95, 0.82),
+    0 0 28px rgba(255, 23, 68, 0.6);
+  animation: gamePixelTextPulse 1.8s ease-in-out infinite;
+}
+
+.project-card-knowledge .project-visual,
+.project-card-serene .project-visual,
+.project-card-neon .project-visual,
+.project-card-shadow .project-visual,
+.project-card-cat .project-visual {
+  animation: gamePixelFramePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes gamePixelTextPulse {
+  0%, 100% {
+    text-shadow:
+      0 0 3px rgba(255, 42, 95, 0.74),
+      0 0 8px rgba(255, 42, 95, 0.52),
+      0 0 15px rgba(255, 23, 68, 0.34);
+  }
+  50% {
+    text-shadow:
+      0 0 5px rgba(255, 42, 95, 1),
+      0 0 15px rgba(255, 42, 95, 0.94),
+      0 0 30px rgba(255, 23, 68, 0.72);
+  }
+}
+
+@keyframes gamePixelFramePulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px rgba(255, 23, 68, 0.2),
+      0 0 24px rgba(255, 23, 68, 0.12),
+      inset 0 0 9px rgba(255, 23, 68, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(255, 23, 68, 0.48),
+      0 0 42px rgba(255, 23, 68, 0.28),
+      inset 0 0 15px rgba(255, 23, 68, 0.2);
+  }
 }
 
 .project-visual:hover img {
