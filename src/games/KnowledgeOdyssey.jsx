@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  COMPREHENSIVE_DICTIONARY_CATEGORIES,
+  COMPREHENSIVE_DICTIONARY_ENTRIES,
+  createNumberSearchEntry,
+} from './english-indonesian-dictionary.js';
+import {
   Compass, BookOpen, Trophy, Settings, Volume2, VolumeX, Sparkles,
   Swords, Puzzle, Scroll, Map as MapIcon, User, Play, RotateCcw,
   CheckCircle2, XCircle, Lightbulb, Star, Award, Shield, Flame,
@@ -4500,6 +4505,605 @@ const ExplorationCanvas25D = ({
   );
 };
 
+const ENGLISH_DICTIONARY_FAVORITES_KEY = 'knowledge-odyssey-english-dictionary-favorites-v1';
+const ENGLISH_DICTIONARY_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+const getDictionarySequence = (entry) => {
+  const cardinalMatch = entry.id.match(/^number-cardinal-(\d+)$/);
+  if (cardinalMatch) {
+    const value = Number(cardinalMatch[1]);
+    return [0, value === 0 ? 1000.5 : value - 1];
+  }
+  const ordinalMatch = entry.id.match(/^number-ordinal-(\d+)$/);
+  if (ordinalMatch) return [1, Number(ordinalMatch[1])];
+  return [2, entry.sequenceOrder ?? Number.MAX_SAFE_INTEGER];
+};
+const CURATED_DICTIONARY_ENTRY_COUNT = COMPREHENSIVE_DICTIONARY_ENTRIES.filter(
+  (entry) => entry.source === 'curated'
+).length;
+const GENERATED_DICTIONARY_ENTRY_COUNT = COMPREHENSIVE_DICTIONARY_ENTRIES.length - CURATED_DICTIONARY_ENTRY_COUNT;
+
+function ComprehensiveDictionaryPanel() {
+  const [query, setQuery] = useState('');
+  const [categoryId, setCategoryId] = useState('all');
+  const [letter, setLetter] = useState('ALL');
+  const [sortBy, setSortBy] = useState('sequence');
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const [favoritesLoaded, setFavoritesLoaded] = useState(false);
+  const [canSaveFavorites, setCanSaveFavorites] = useState(false);
+  const [storageMessage, setStorageMessage] = useState('');
+  const [speechMessage, setSpeechMessage] = useState('');
+  const [expandedExamples, setExpandedExamples] = useState({});
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches ? 4 : 8
+  );
+  const [pageInput, setPageInput] = useState('1');
+  const [pageJumpMessage, setPageJumpMessage] = useState('');
+  const pageNavigationRef = useRef(null);
+  const resultsRef = useRef(null);
+
+  useEffect(() => {
+    if (pageSize === 4 || pageSize === 8) return;
+    setPageSize(window.matchMedia('(max-width: 639px)').matches ? 4 : 8);
+    setPage(0);
+  }, [pageSize]);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(ENGLISH_DICTIONARY_FAVORITES_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (!Array.isArray(parsed) || parsed.some((id) => typeof id !== 'string')) {
+          throw new Error('Saved dictionary favorites have an invalid format.');
+        }
+        setFavorites(parsed);
+      }
+      setCanSaveFavorites(true);
+    } catch (error) {
+      console.error('Unable to load dictionary favorites.', error);
+      setStorageMessage('Favorit tidak dapat dimuat dari penyimpanan browser.');
+    } finally {
+      setFavoritesLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!favoritesLoaded || !canSaveFavorites) return;
+    try {
+      window.localStorage.setItem(ENGLISH_DICTIONARY_FAVORITES_KEY, JSON.stringify(favorites));
+      setStorageMessage((current) =>
+        current === 'Favorit berubah, tetapi gagal disimpan di browser ini.' ? '' : current
+      );
+    } catch (error) {
+      console.error('Unable to save dictionary favorites.', error);
+      setStorageMessage('Favorit berubah, tetapi gagal disimpan di browser ini.');
+    }
+  }, [canSaveFavorites, favorites, favoritesLoaded]);
+
+  const filteredEntries = useMemo(() => {
+    const trimmedQuery = query.trim();
+    const normalizedQuery = trimmedQuery.toLocaleLowerCase();
+    const numericQuery = /^\d{1,12}$/.test(trimmedQuery) ? Number(trimmedQuery) : null;
+    const entries = [...COMPREHENSIVE_DICTIONARY_ENTRIES];
+
+    if (numericQuery !== null && numericQuery > 1000 && categoryId !== 'all' && categoryId !== 'numbers') {
+      return [];
+    }
+    if (numericQuery !== null && numericQuery > 1000) {
+      const generatedEntry = createNumberSearchEntry(numericQuery);
+      if (generatedEntry) entries.push(generatedEntry);
+    }
+
+    return entries
+      .filter((entry) => categoryId === 'all' || entry.categoryId === categoryId)
+      .filter((entry) => letter === 'ALL' || entry.english.toLocaleUpperCase().startsWith(letter))
+      .filter((entry) => !favoritesOnly || favorites.includes(entry.id))
+      .filter((entry) => {
+        if (!normalizedQuery) return true;
+        return [
+          entry.indonesian,
+          entry.english,
+          entry.partOfSpeech,
+          entry.pronunciationIPA,
+          entry.usageNote,
+        ].some((value) => value?.toLocaleLowerCase().includes(normalizedQuery)) ||
+        (numericQuery !== null && entry.id === `number-cardinal-${numericQuery}`);
+      })
+      .sort((a, b) => {
+        if (sortBy === 'sequence') {
+          const [aGroup, aOrder] = getDictionarySequence(a);
+          const [bGroup, bOrder] = getDictionarySequence(b);
+          return aGroup - bGroup || aOrder - bOrder;
+        }
+        return a[sortBy].localeCompare(b[sortBy], sortBy === 'english' ? 'en' : 'id');
+      });
+  }, [categoryId, favorites, favoritesOnly, letter, query, sortBy]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredEntries.length / pageSize));
+  const visibleEntries = filteredEntries.slice(page * pageSize, (page + 1) * pageSize);
+  const paginationState = `${page}:${pageCount}`;
+  useEffect(() => {
+    if (page >= pageCount) {
+      setPage(pageCount - 1);
+      return;
+    }
+    setPageInput(String(page + 1));
+  }, [paginationState]);
+
+  const updateQuery = (value) => {
+    setQuery(value);
+    setPage(0);
+    setPageJumpMessage('');
+  };
+  const navigateToPage = (targetPage) => {
+    setPage(targetPage);
+    setPageJumpMessage('');
+    window.requestAnimationFrame(() => {
+      const results = resultsRef.current;
+      if (
+        results &&
+        window.matchMedia('(max-width: 639px)').matches &&
+        results.getBoundingClientRect().bottom <= window.innerHeight
+      ) {
+        return;
+      }
+      (resultsRef.current || pageNavigationRef.current)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      });
+    });
+  };
+  const toggleFavorite = (entryId) => {
+    setCanSaveFavorites(true);
+    setFavorites((current) =>
+      current.includes(entryId)
+        ? current.filter((id) => id !== entryId)
+        : [...current, entryId]
+    );
+  };
+  const goToPage = () => {
+    const requestedPage = Number(pageInput);
+    if (!Number.isInteger(requestedPage) || requestedPage < 1 || requestedPage > pageCount) {
+      setPageJumpMessage(`Masukkan nomor halaman dari 1 sampai ${pageCount}.`);
+      return;
+    }
+    navigateToPage(requestedPage - 1);
+  };
+  const speakEnglish = (entry) => {
+    if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+      setSpeechMessage('Fitur pengucapan audio tidak tersedia di browser ini.');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(entry.english);
+    utterance.lang = 'en-US';
+    utterance.onerror = () => setSpeechMessage('Audio pengucapan gagal diputar.');
+    utterance.onend = () => setSpeechMessage('');
+    window.speechSynthesis.speak(utterance);
+    setSpeechMessage(`Melafalkan: ${entry.english}`);
+  };
+
+  return (
+    <section className="animations-active dictionary-frame-glow space-y-1 rounded-2xl border border-amber-400/30 bg-gradient-to-br from-slate-900/95 via-indigo-950/80 to-slate-900/95 p-2 shadow-xl sm:space-y-4 sm:rounded-3xl sm:p-6">
+      <div className="flex items-start justify-between gap-2 lg:gap-3">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-amber-300 sm:gap-2 sm:px-3 sm:text-[10px]">
+            Materi pembuka • {COMPREHENSIVE_DICTIONARY_ENTRIES.length.toLocaleString('id-ID')} entri
+          </div>
+          <h3 className="dictionary-title-frame mt-1 flex w-fit max-w-full items-center gap-1 rounded-xl border border-amber-300/35 bg-amber-300/5 px-2 py-1.5 text-[13px] font-black leading-tight sm:mt-2 sm:gap-2 sm:px-3 sm:py-2 sm:text-2xl">
+            <Sparkles aria-hidden="true" className="dictionary-star-glint h-3.5 w-3.5 shrink-0 sm:h-5 sm:w-5" />
+            <span className="dictionary-title-text min-w-0 flex-1">KAMUS BAHASA INGGRIS LENGKAP</span>
+            <span aria-hidden="true" className="dictionary-thumbs-float shrink-0 text-sm sm:text-xl">👍</span>
+            <Sparkles aria-hidden="true" className="dictionary-star-glint h-3 w-3 shrink-0 sm:h-4 sm:w-4" style={{ animationDelay: '0.8s' }} />
+          </h3>
+          <p className="mt-1 hidden max-w-3xl text-xs leading-relaxed text-slate-300 sm:block sm:text-sm">
+            Indonesian – English Comprehensive Dictionary. Cari dari kedua bahasa, telusuri 18 kategori, simpan favorit, dan pelajari contoh kalimat.
+          </p>
+          <p className="mt-1 hidden text-[11px] leading-relaxed text-slate-400 sm:block">
+            Korpus awal: {CURATED_DICTIONARY_ENTRY_COUNT.toLocaleString('id-ID')} kosakata terkurasi + {GENERATED_DICTIONARY_ENTRY_COUNT.toLocaleString('id-ID')} entri bilangan. Data dapat diperluas bertahap.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setFavoritesOnly((current) => !current);
+            setPage(0);
+            setPageJumpMessage('');
+          }}
+          aria-pressed={favoritesOnly}
+          className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-extrabold transition sm:gap-2 sm:px-3.5 sm:py-2 sm:text-xs ${
+            favoritesOnly
+              ? 'bg-amber-300 text-slate-950'
+              : 'bg-white/10 text-amber-200 hover:bg-white/15'
+          }`}
+        >
+          <Star className={`h-4 w-4 ${favoritesOnly ? 'fill-current' : ''}`} />
+          {favoritesOnly ? 'Semua kosakata' : `Favorit (${favorites.length})`}
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-[minmax(0,1fr)_260px_170px]">
+        <label className="relative block">
+          <span className="sr-only">Cari kosakata Indonesia atau Inggris</span>
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => updateQuery(event.target.value)}
+            placeholder="Cari kata Indonesia atau English..."
+            className="w-full rounded-xl border border-white/15 bg-slate-950/80 py-2 pl-10 pr-3 text-xs text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none sm:py-2.5 sm:text-sm"
+          />
+        </label>
+        <label className="hidden text-xs font-bold text-slate-300 sm:block">
+          <span className="sr-only">Filter kategori kosakata</span>
+          <select
+            value={categoryId}
+            onChange={(event) => {
+              setCategoryId(event.target.value);
+              setPage(0);
+              setPageJumpMessage('');
+            }}
+            className="w-full rounded-xl border border-white/15 bg-slate-950/80 px-3 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none"
+          >
+            <option value="all">Semua kategori</option>
+            {COMPREHENSIVE_DICTIONARY_CATEGORIES.map((category) => (
+              <option key={category.id} value={category.id}>{category.label}</option>
+            ))}
+          </select>
+        </label>
+        <label className="hidden text-xs font-bold text-slate-300 sm:block">
+          <span className="sr-only">Urutkan kosakata A sampai Z</span>
+          <select
+            value={sortBy}
+            onChange={(event) => {
+              setSortBy(event.target.value);
+              setPage(0);
+              setPageJumpMessage('');
+            }}
+            className="w-full rounded-xl border border-white/15 bg-slate-950/80 px-3 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none"
+          >
+            <option value="sequence">Urutan materi (mulai dari 1)</option>
+            <option value="english">A–Z English</option>
+            <option value="indonesian">A–Z Indonesia</option>
+          </select>
+        </label>
+      </div>
+
+      <details className="group relative sm:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-white/10 bg-slate-950/70 px-3 py-2 text-[11px] font-bold text-slate-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">
+          Filter kategori, urutan, dan huruf
+          <ChevronRight className="h-4 w-4 text-amber-300 transition-transform group-open:rotate-90" />
+        </summary>
+        <div className="absolute left-0 right-0 top-full z-30 mt-2 grid grid-cols-1 gap-2 rounded-2xl border border-white/15 bg-slate-950 p-3 shadow-2xl">
+          <label className="text-[10px] font-bold text-slate-300">
+            Kategori
+            <select
+              value={categoryId}
+              onChange={(event) => {
+                setCategoryId(event.target.value);
+                setPage(0);
+                setPageJumpMessage('');
+                event.currentTarget.closest('details').open = false;
+              }}
+              className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-2.5 py-2 text-xs text-white"
+            >
+              <option value="all">Semua kategori</option>
+              {COMPREHENSIVE_DICTIONARY_CATEGORIES.map((category) => (
+                <option key={category.id} value={category.id}>{category.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-[10px] font-bold text-slate-300">
+            Urutan kosakata
+            <select
+              value={sortBy}
+              onChange={(event) => {
+                setSortBy(event.target.value);
+                setPage(0);
+                setPageJumpMessage('');
+                event.currentTarget.closest('details').open = false;
+              }}
+              className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-2.5 py-2 text-xs text-white"
+            >
+              <option value="sequence">Urutan materi (mulai dari 1)</option>
+              <option value="english">A–Z English</option>
+              <option value="indonesian">A–Z Indonesia</option>
+            </select>
+          </label>
+          <div className="flex flex-wrap gap-1" aria-label="Filter huruf awal bahasa Inggris">
+            {['ALL', ...ENGLISH_DICTIONARY_ALPHABET].map((initial) => (
+              <button
+                key={initial}
+                type="button"
+                onClick={(event) => {
+                  setLetter(initial);
+                  setPage(0);
+                  setPageJumpMessage('');
+                  event.currentTarget.closest('details').open = false;
+                }}
+                aria-pressed={letter === initial}
+                className={`min-w-7 rounded-md px-1.5 py-1 text-[9px] font-bold ${
+                  letter === initial ? 'bg-amber-400 text-slate-950' : 'bg-white/5 text-slate-300'
+                }`}
+              >
+                {initial === 'ALL' ? 'Semua' : initial}
+              </button>
+            ))}
+          </div>
+        </div>
+      </details>
+
+      <div className="hidden flex-wrap gap-1.5 sm:flex" aria-label="Filter huruf awal bahasa Inggris">
+        {['ALL', ...ENGLISH_DICTIONARY_ALPHABET].map((initial) => (
+          <button
+            key={initial}
+            type="button"
+            onClick={() => {
+              setLetter(initial);
+              setPage(0);
+              setPageJumpMessage('');
+            }}
+            aria-pressed={letter === initial}
+            className={`min-w-8 rounded-lg px-2 py-1 text-[10px] font-bold transition ${
+              letter === initial
+                ? 'bg-amber-400 text-slate-950'
+                : 'bg-white/5 text-slate-300 hover:bg-white/15'
+            }`}
+          >
+            {initial === 'ALL' ? 'Semua' : initial}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex min-h-4 flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400 sm:text-xs" aria-live="polite">
+        <span>
+          {filteredEntries.length
+            ? `Menampilkan ${page * pageSize + 1}–${Math.min((page + 1) * pageSize, filteredEntries.length)} dari ${filteredEntries.length.toLocaleString('id-ID')} kosakata`
+            : 'Tidak ada kosakata yang cocok.'}
+        </span>
+        {storageMessage && <span className="text-rose-300">{storageMessage}</span>}
+        {speechMessage && <span className="text-sky-300">{speechMessage}</span>}
+        {pageJumpMessage && <span className="text-rose-300">{pageJumpMessage}</span>}
+      </div>
+
+      <nav
+        ref={pageNavigationRef}
+        aria-label="Navigasi halaman kamus"
+        className="scroll-mt-28 sticky top-28 z-20 flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur-md sm:static sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3"
+      >
+        <p className="hidden text-[10px] leading-relaxed text-slate-400 sm:block sm:max-w-xs">
+          Bilangan 0–1.000, ordinal 1–100, hingga 999.999.999.999.
+        </p>
+        <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-1.5 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-2">
+          <label className="col-start-1 row-start-2 flex items-center justify-center gap-1 text-[9px] font-bold text-slate-300 sm:col-auto sm:row-auto sm:justify-start sm:gap-2 sm:text-[10px]">
+            <span className="sm:hidden">Per</span>
+            <span className="hidden sm:inline">Per halaman</span>
+            <select
+              value={pageSize}
+              onChange={(event) => {
+                setPageSize(Number(event.target.value));
+                setPage(0);
+                setPageJumpMessage('');
+              }}
+              aria-label="Jumlah kosakata per halaman"
+              className="w-12 rounded-lg border border-white/15 bg-slate-950 px-1.5 py-1 text-[10px] text-white focus:border-amber-400 focus:outline-none sm:w-auto sm:px-2 sm:py-1.5 sm:text-xs"
+            >
+              {[4, 8].map((size) => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => navigateToPage(Math.max(0, page - 1))}
+            className="col-start-1 row-start-1 w-full rounded-lg bg-white/10 px-1.5 py-1.5 text-[9px] font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-auto sm:row-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-xs"
+          >
+            Sebelumnya
+          </button>
+          <span className="col-start-2 row-start-1 justify-self-center text-[10px] font-bold text-slate-300 sm:col-auto sm:row-auto sm:self-center sm:text-xs">{page + 1}/{pageCount}</span>
+          <button
+            type="button"
+            disabled={page + 1 >= pageCount}
+            onClick={() => navigateToPage(Math.min(pageCount - 1, page + 1))}
+            className="col-start-3 row-start-1 w-full rounded-lg bg-white/10 px-1.5 py-1.5 text-[9px] font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-auto sm:row-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-xs"
+          >
+            Berikutnya
+          </button>
+          <label className="col-span-2 col-start-2 row-start-2 flex items-center justify-end gap-1 text-[9px] font-bold text-slate-300 sm:col-auto sm:row-auto sm:gap-2 sm:text-[10px]">
+            Ke halaman
+            <input
+              type="number"
+              min="1"
+              max={pageCount}
+              value={pageInput}
+              onChange={(event) => {
+                setPageInput(event.target.value);
+                setPageJumpMessage('');
+              }}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') goToPage();
+              }}
+              aria-label={`Nomor halaman, dari 1 sampai ${pageCount}`}
+              className="w-12 rounded-lg border border-white/15 bg-slate-950 px-1.5 py-1 text-[10px] text-white focus:border-amber-400 focus:outline-none sm:w-16 sm:px-2 sm:py-1.5 sm:text-xs"
+            />
+            <button
+              type="button"
+              onClick={goToPage}
+              className="rounded-lg bg-amber-400/15 px-2 py-1.5 text-[9px] font-bold text-amber-200 hover:bg-amber-400/25 sm:px-2.5 sm:py-1.5 sm:text-[10px]"
+            >
+              Buka
+            </button>
+          </label>
+        </div>
+      </nav>
+
+      {visibleEntries.length > 0 && (
+        <div ref={resultsRef} className="scroll-mt-64 grid grid-cols-2 gap-2 sm:scroll-mt-28 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {visibleEntries.map((entry) => {
+            const category = COMPREHENSIVE_DICTIONARY_CATEGORIES.find((item) => item.id === entry.categoryId);
+            const isFavorite = favorites.includes(entry.id);
+            const exampleIsOpen = Boolean(expandedExamples[entry.id]);
+            return (
+              <article
+                key={entry.id}
+                className={`flex min-w-0 flex-col justify-between gap-1 rounded-xl border border-white/10 bg-slate-950/55 p-2 transition hover:border-amber-400/35 sm:gap-2.5 sm:rounded-2xl sm:p-3.5 ${
+                  exampleIsOpen ? 'min-h-40' : 'aspect-square'
+                } sm:aspect-auto`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <span className={`hidden text-[10px] font-bold text-amber-300 sm:block`}>{category?.label}</span>
+                    <h4 className="break-words text-[10px] font-black leading-tight text-white sm:mt-1 sm:text-sm">{entry.indonesian}</h4>
+                    <p className="break-words text-[10px] font-bold leading-tight text-sky-200 sm:text-sm">{entry.english}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(entry.id)}
+                    aria-label={isFavorite ? `Hapus ${entry.indonesian} dari favorit` : `Simpan ${entry.indonesian} ke favorit`}
+                    aria-pressed={isFavorite}
+                    className={`shrink-0 rounded-md p-1 transition sm:rounded-lg sm:p-2 ${
+                      isFavorite ? 'bg-amber-400/20 text-amber-300' : 'bg-white/5 text-slate-400 hover:text-amber-300'
+                    }`}
+                  >
+                    <Star className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isFavorite ? 'fill-current' : ''}`} />
+                  </button>
+                </div>
+                <div className="flex min-w-0 flex-col gap-1 border-t border-white/10 pt-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:pt-2">
+                  <div className="min-w-0 flex-1">
+                    <span className="hidden text-[10px] uppercase tracking-wide text-violet-300 sm:block">{entry.partOfSpeech}</span>
+                    <p
+                      title={entry.pronunciationIPA}
+                      className="truncate whitespace-nowrap font-mono text-[8px] leading-tight text-amber-200 sm:whitespace-normal sm:text-[11px]"
+                    >
+                      {entry.pronunciationIPA}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 items-center justify-end gap-1">
+                    <button
+                      type="button"
+                      onClick={() => speakEnglish(entry)}
+                      aria-label={`Dengarkan pelafalan ${entry.english}`}
+                      className="rounded-md bg-sky-500/15 p-1.5 text-sky-200 hover:bg-sky-500/25 sm:rounded-lg sm:p-2"
+                    >
+                      <Volume1 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedExamples((current) => ({ ...current, [entry.id]: !current[entry.id] }))}
+                      aria-expanded={exampleIsOpen}
+                      className="rounded-md bg-indigo-500/15 px-2 py-1.5 text-[9px] font-bold text-indigo-200 hover:bg-indigo-500/25 sm:rounded-lg sm:px-2.5 sm:py-2 sm:text-[10px]"
+                    >
+                      <span className="sm:hidden">{exampleIsOpen ? 'Tutup' : 'Contoh'}</span>
+                      <span className="hidden sm:inline">{exampleIsOpen ? 'Tutup contoh' : 'Contoh kalimat'}</span>
+                    </button>
+                  </div>
+                </div>
+                {entry.usageNote && (
+                  <p className={`hidden text-[11px] leading-relaxed text-slate-400 sm:block ${exampleIsOpen ? '!block' : ''}`}>
+                    {entry.usageNote}
+                  </p>
+                )}
+                {exampleIsOpen && (
+                  <div className="space-y-1 rounded-xl border border-sky-400/20 bg-sky-500/10 p-3 text-xs leading-relaxed">
+                    <p className="text-sky-100">{entry.exampleEnglish}</p>
+                    <p className="text-slate-300">{entry.exampleIndonesian}</p>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+    </section>
+  );
+}
+
+const BASIC_OPERATION_ENTRIES = [
+  { id: 'dict-math-basic-1', label: 'Penjumlahan', symbol: '+' },
+  { id: 'dict-math-basic-2', label: 'Pengurangan', symbol: '−' },
+  { id: 'dict-math-basic-3', label: 'Perkalian', symbol: '×' },
+  { id: 'dict-math-basic-4', label: 'Pembagian', symbol: '÷' },
+];
+
+function BasicOperationsExplorer({ activeEntry, onSelectEntry }) {
+  const activeOperation = BASIC_OPERATION_ENTRIES.find((operation) => operation.id === activeEntry.id);
+  const [baseNumber, setBaseNumber] = useState(1);
+
+  if (!activeOperation) return null;
+
+  const numberRange = Array.from({ length: 100 }, (_, index) => index + 1);
+  const calculateResult = (number) => {
+    if (activeOperation.id === 'dict-math-basic-1') return baseNumber + number;
+    if (activeOperation.id === 'dict-math-basic-2') return baseNumber - number;
+    if (activeOperation.id === 'dict-math-basic-3') return baseNumber * number;
+    return Number((baseNumber / number).toFixed(3));
+  };
+
+  return (
+    <section className="space-y-3 rounded-2xl border border-violet-400/25 bg-violet-500/10 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h4 className="text-sm font-black text-violet-200">Latihan Operasi Dasar 1–100</h4>
+          <p className="mt-1 text-xs text-slate-300">Pilih operasi dan bilangan dasar untuk melihat 100 perhitungan.</p>
+        </div>
+        <label className="flex items-center gap-2 text-xs font-bold text-slate-200">
+          Bilangan dasar
+          <select
+            aria-label="Pilih bilangan dasar dari 1 sampai 100"
+            value={baseNumber}
+            onChange={(event) => setBaseNumber(Number(event.target.value))}
+            className="rounded-lg border border-white/15 bg-slate-950 px-2.5 py-1.5 text-amber-200"
+          >
+            {numberRange.map((number) => (
+              <option key={number} value={number}>{number}</option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      <div className="flex flex-wrap gap-2" aria-label="Pilih operasi matematika">
+        {BASIC_OPERATION_ENTRIES.map((operation) => {
+          const entry = KNOWLEDGE_DICTIONARY.find((item) => item.id === operation.id);
+          const isActive = operation.id === activeOperation.id;
+          return (
+            <button
+              key={operation.id}
+              type="button"
+              onClick={() => entry && onSelectEntry(entry)}
+              aria-pressed={isActive}
+              className={`rounded-lg px-3 py-1.5 text-xs font-extrabold transition ${
+                isActive
+                  ? 'bg-violet-400 text-slate-950'
+                  : 'bg-white/10 text-slate-200 hover:bg-white/20'
+              }`}
+            >
+              {operation.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div
+        className="grid max-h-56 grid-cols-2 gap-1.5 overflow-y-auto pr-1 sm:grid-cols-5 lg:grid-cols-10"
+        aria-label={`${activeOperation.label} dengan bilangan 1 sampai 100`}
+      >
+        {numberRange.map((number) => (
+          <div
+            key={number}
+            className="rounded-lg border border-white/10 bg-slate-950/60 px-2 py-1.5 text-center text-[10px] leading-relaxed text-slate-200"
+          >
+            <span className="block text-slate-400">{baseNumber} {activeOperation.symbol} {number}</span>
+            <span className="font-black text-amber-200">= {calculateResult(number)}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ============================================================================
 // 11. MAIN APPLICATION: KNOWLEDGE ODYSSEY
 // ============================================================================
@@ -5053,7 +5657,7 @@ export default function App() {
 
   return (
     <div
-      className={`knowledge-game min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-slate-100 font-sans relative overflow-x-hidden ${textSizeClass}`}
+      className={`knowledge-game min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-slate-100 font-sans relative overflow-x-clip ${textSizeClass}`}
     >
       <KnowledgeCursor />
       {/* REMOTION-INSPIRED PROCEDURAL KEYFRAMES & THEMATIC MOTION ENGINE (NO LINES/GRID) */}
@@ -5365,7 +5969,7 @@ export default function App() {
       )}
 
       {/* MAIN CONTENT CONTAINER */}
-      <main className={`relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 ${settings.reducedMotion ? 'rm-reduced' : ''}`}>
+      <main className={`relative z-10 max-w-6xl mx-auto px-4 sm:px-6 ${screen === 'library' ? 'py-1.5 sm:py-8' : 'py-6 sm:py-8'} ${settings.reducedMotion ? 'rm-reduced' : ''}`}>
         {/* ===================================================================
             SCREEN 1: WELCOME / PORTO MAIN ADVENTURE MENU
            =================================================================== */}
@@ -6251,27 +6855,40 @@ export default function App() {
           const alphabet = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
 
           return (
-            <div className="space-y-6 rm-scene-enter">
+            <div className="space-y-2 rm-scene-enter sm:space-y-6">
               {/* Header & Back */}
-              <div className="bg-slate-900/85 border border-white/15 rounded-3xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2.5">
-                    <BookOpen className="w-7 h-7 text-amber-400" />
+              <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/15 bg-slate-900/85 p-2.5 sm:gap-4 sm:rounded-3xl sm:p-5">
+                <div className="min-w-0">
+                  <h2 className="flex items-center gap-1.5 text-base font-black text-white sm:gap-2.5 sm:text-3xl">
+                    <BookOpen className="h-4 w-4 shrink-0 text-amber-400 sm:h-7 sm:w-7" />
                     <span>{t.knowledgeLibrary}</span>
                   </h2>
-                  <p className="text-xs sm:text-sm text-slate-300 mt-1">
+                  <p className="mt-1 hidden text-xs text-slate-300 sm:block sm:text-sm">
                     Jelajahi Kamus Bahasa Inggris lengkap (IPA, Phrasal Verbs, Irregular Verbs, Idioms) serta Ensiklopedia Lintas Disiplin Ilmu.
                   </p>
                 </div>
                 <button
                   onClick={handleGoBack}
-                  className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1.5 self-start sm:self-auto"
+                  className="flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] font-extrabold hover:bg-white/20 sm:gap-1.5 sm:self-auto sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-xs"
                 >
-                  <ChevronLeft className="w-4 h-4" />
+                  <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   <span>Kembali</span>
                 </button>
               </div>
 
+              <ComprehensiveDictionaryPanel />
+
+              <details className="group rounded-2xl border border-white/10 bg-slate-900/70 p-1 sm:rounded-3xl sm:p-5">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">
+                  <span>
+                    <span className="block text-xs font-black text-white sm:text-sm">Materi dan pustaka lainnya</span>
+                    <span className="mt-1 hidden text-xs leading-relaxed text-slate-400 sm:block">
+                      Verb, Academic Vocabulary, Resilient Adjective, grammar, dan ensiklopedia
+                    </span>
+                  </span>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-amber-300 transition-transform group-open:rotate-90 sm:h-5 sm:w-5" />
+                </summary>
+                <div className="mt-4 space-y-6">
               {/* Search & Discipline Filter Pills */}
               <div className="bg-slate-900/85 border border-white/15 rounded-3xl p-5 space-y-4">
                 <div className="relative">
@@ -6370,6 +6987,8 @@ export default function App() {
                   );
                 })}
               </div>
+                </div>
+              </details>
 
               {/* DETAIL READER MODAL ("MODE BACA & PAHAMI") */}
               {selectedDictEntry && (
@@ -6439,6 +7058,11 @@ export default function App() {
                           </div>
                         </div>
                       )}
+
+                      <BasicOperationsExplorer
+                        activeEntry={selectedDictEntry}
+                        onSelectEntry={setSelectedDictEntry}
+                      />
 
                       <div className="flex flex-wrap gap-2 pt-1 border-t border-white/10">
                         <button
