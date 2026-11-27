@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import {
   COMPREHENSIVE_DICTIONARY_CATEGORIES,
@@ -4650,6 +4650,12 @@ function ComprehensiveDictionaryPanel() {
     setPage(0);
     setPageJumpMessage('');
   };
+  const updateCategory = (value) => {
+    setCategoryId(value);
+    if (value === 'numbers') setSortBy('sequence');
+    setPage(0);
+    setPageJumpMessage('');
+  };
   const navigateToPage = (targetPage) => {
     setPage(targetPage);
     setPageJumpMessage('');
@@ -4754,9 +4760,7 @@ function ComprehensiveDictionaryPanel() {
           <select
             value={categoryId}
             onChange={(event) => {
-              setCategoryId(event.target.value);
-              setPage(0);
-              setPageJumpMessage('');
+              updateCategory(event.target.value);
             }}
             className="w-full rounded-xl border border-white/15 bg-slate-950/80 px-3 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none"
           >
@@ -4777,9 +4781,11 @@ function ComprehensiveDictionaryPanel() {
             }}
             className="w-full rounded-xl border border-white/15 bg-slate-950/80 px-3 py-2.5 text-sm text-white focus:border-amber-400 focus:outline-none"
           >
-            <option value="sequence">Urutan materi (mulai dari 1)</option>
-            <option value="english">A–Z English</option>
-            <option value="indonesian">A–Z Indonesia</option>
+            <option value="sequence">
+              {categoryId === 'numbers' ? 'Urutan angka (1, 2, 3...)' : 'Urutan materi (mulai dari 1)'}
+            </option>
+            <option value="english" disabled={categoryId === 'numbers'}>A–Z English</option>
+            <option value="indonesian" disabled={categoryId === 'numbers'}>A–Z Indonesia</option>
           </select>
         </label>
       </div>
@@ -4795,9 +4801,7 @@ function ComprehensiveDictionaryPanel() {
             <select
               value={categoryId}
               onChange={(event) => {
-                setCategoryId(event.target.value);
-                setPage(0);
-                setPageJumpMessage('');
+                updateCategory(event.target.value);
                 event.currentTarget.closest('details').open = false;
               }}
               className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-2.5 py-2 text-xs text-white"
@@ -4820,9 +4824,11 @@ function ComprehensiveDictionaryPanel() {
               }}
               className="mt-1 w-full rounded-lg border border-white/15 bg-slate-900 px-2.5 py-2 text-xs text-white"
             >
-              <option value="sequence">Urutan materi (mulai dari 1)</option>
-              <option value="english">A–Z English</option>
-              <option value="indonesian">A–Z Indonesia</option>
+              <option value="sequence">
+                {categoryId === 'numbers' ? 'Urutan angka (1, 2, 3...)' : 'Urutan materi (mulai dari 1)'}
+              </option>
+              <option value="english" disabled={categoryId === 'numbers'}>A–Z English</option>
+              <option value="indonesian" disabled={categoryId === 'numbers'}>A–Z Indonesia</option>
             </select>
           </label>
           <div className="flex flex-wrap gap-1" aria-label="Filter huruf awal bahasa Inggris">
@@ -5155,6 +5161,12 @@ export default function App() {
       return hist.slice(0, -1);
     });
   }, []);
+
+  useLayoutEffect(() => {
+    if (screen === 'library') {
+      window.scrollTo(0, 0);
+    }
+  }, [screen]);
 
   // Player Persistent Profile & Adaptive State
   const [hasSave, setHasSave] = useState(false);
@@ -5798,10 +5810,13 @@ export default function App() {
           animation: none !important;
           transition-duration: 0.05s !important;
         }
+        .rm-paused * {
+          animation-play-state: paused !important;
+        }
       `}</style>
 
       {/* THEMATIC REMOTION COSMIC AURORA, BOKEH ORBS & ASTROLABE RINGS (NO GRID LINES) */}
-      <div className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${settings.reducedMotion ? 'rm-reduced' : ''}`}>
+      <div className={`fixed inset-0 pointer-events-none overflow-hidden z-0 ${settings.reducedMotion ? 'rm-reduced' : ''} ${screen === 'library' ? 'rm-paused' : ''}`}>
         {/* Flowing Nebula Aurora Clouds */}
         <div
           className="rm-aurora absolute -top-32 -left-24 w-[500px] h-[500px] rounded-full blur-[120px]"
@@ -6239,13 +6254,6 @@ export default function App() {
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={handleGoBack}
-                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1.5"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Kembali</span>
-                </button>
-                <button
                   onClick={() => {
                     setLibraryFilter(activeZone.id === 'language' ? 'english_dict' : activeZone.id);
                     setScreen('library');
@@ -6282,13 +6290,6 @@ export default function App() {
               {/* Battle Top Status */}
               <div className="bg-slate-900/85 backdrop-blur-md border border-white/15 rounded-3xl p-4 flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleGoBack}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold flex items-center gap-1"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>Kembali</span>
-                  </button>
                   <span className="px-3 py-1 rounded-full bg-indigo-500/25 text-indigo-200 text-xs font-extrabold">
                     Soal {quizIndex + 1} / {quizQueue.length}
                   </span>
@@ -6466,13 +6467,6 @@ export default function App() {
                     <span>{pData.title[lang]}</span>
                   </h2>
                 </div>
-                <button
-                  onClick={handleGoBack}
-                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Kembali</span>
-                </button>
               </div>
 
               <p className="text-sm text-slate-300">{pData.instruction[lang]}</p>
@@ -6531,21 +6525,13 @@ export default function App() {
                     {t.checkSolution}
                   </button>
                 ) : (
-                  <>
-                    <button
-                      onClick={startZonePuzzle}
-                      className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-sm shadow-lg flex items-center justify-center gap-1.5"
-                    >
-                      <RefreshCw className="w-4 h-4" />
-                      <span>Teka-Teki Berikutnya</span>
-                    </button>
-                    <button
-                      onClick={handleGoBack}
-                      className="px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-black text-sm"
-                    >
-                      Kembali
-                    </button>
-                  </>
+                  <button
+                    onClick={startZonePuzzle}
+                    className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-slate-950 font-black text-sm shadow-lg flex items-center justify-center gap-1.5"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    <span>Teka-Teki Berikutnya</span>
+                  </button>
                 )}
               </div>
             </div>
@@ -6573,13 +6559,6 @@ export default function App() {
                     <span>{t.storyMission}</span>
                   </h2>
                 </div>
-                <button
-                  onClick={handleGoBack}
-                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Kembali</span>
-                </button>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center gap-5 bg-white/5 border border-white/10 rounded-2xl p-5">
@@ -6642,12 +6621,6 @@ export default function App() {
                     >
                       <RefreshCw className="w-4 h-4" />
                       <span>Misi Cerita Berikutnya</span>
-                    </button>
-                    <button
-                      onClick={handleGoBack}
-                      className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-black text-sm"
-                    >
-                      Kembali
                     </button>
                   </div>
                 </div>
@@ -6720,13 +6693,6 @@ export default function App() {
                 <Sliders className="w-6 h-6 text-indigo-400" />
                 <span>{t.customTraining}</span>
               </h2>
-              <button
-                onClick={handleGoBack}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Kembali</span>
-              </button>
             </div>
 
             <div className="space-y-2">
@@ -6910,7 +6876,7 @@ export default function App() {
           };
 
           return (
-            <div className="space-y-2 rm-scene-enter sm:space-y-6">
+            <div className="space-y-2 sm:space-y-6">
               {/* Header & Back */}
               <div className="flex items-center justify-between gap-2 rounded-2xl border border-white/15 bg-slate-900/85 p-2.5 sm:gap-4 sm:rounded-3xl sm:p-5">
                 <div className="min-w-0">
@@ -6922,13 +6888,6 @@ export default function App() {
                     Jelajahi Kamus Bahasa Inggris lengkap (IPA, Phrasal Verbs, Irregular Verbs, Idioms) serta Ensiklopedia Lintas Disiplin Ilmu.
                   </p>
                 </div>
-                <button
-                  onClick={handleGoBack}
-                  className="flex shrink-0 items-center gap-1 rounded-lg bg-white/10 px-2 py-1.5 text-[10px] font-extrabold hover:bg-white/20 sm:gap-1.5 sm:self-auto sm:rounded-xl sm:px-4 sm:py-2.5 sm:text-xs"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>Kembali</span>
-                </button>
               </div>
 
               <ComprehensiveDictionaryPanel />
@@ -7256,13 +7215,6 @@ export default function App() {
           <div className="space-y-6 rm-scene-enter">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl sm:text-3xl font-black text-white">{t.heroProfile}</h2>
-              <button
-                onClick={handleGoBack}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Kembali</span>
-              </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -7434,13 +7386,6 @@ export default function App() {
                 <Settings className="w-6 h-6 text-purple-400" />
                 <span>{t.settings}</span>
               </h2>
-              <button
-                onClick={handleGoBack}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-extrabold flex items-center gap-1"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span>Kembali</span>
-              </button>
             </div>
 
             {/* Language & Text Size */}
