@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Compass, BookOpen, Trophy, Settings, Volume2, VolumeX, Sparkles,
   Swords, Puzzle, Scroll, Map as MapIcon, User, Play, RotateCcw,
@@ -6372,86 +6373,99 @@ export default function App() {
 
               {/* DETAIL READER MODAL ("MODE BACA & PAHAMI") */}
               {selectedDictEntry && (
-                <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-lg flex items-center justify-center p-4">
-                  <div className="max-w-2xl w-full bg-slate-900 border border-amber-400/40 rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl max-h-[88vh] overflow-y-auto rm-scene-enter">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <span className="px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-extrabold">
-                          {selectedDictEntry.tag}
-                        </span>
-                        <h3 className="text-2xl font-black text-white mt-2">{selectedDictEntry.term}</h3>
-                        <div className="text-xs font-mono text-amber-300">{selectedDictEntry.pronunciation}</div>
-                      </div>
-                      <button
-                        onClick={() => setSelectedDictEntry(null)}
-                        className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-3 text-sm text-slate-200 leading-relaxed">
-                      <p className="font-semibold text-white">{selectedDictEntry.definition}</p>
-                      <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                        <div className="text-xs font-extrabold uppercase text-indigo-300 mb-1">Pemahaman Mendalam</div>
-                        <p className="text-xs sm:text-sm">{selectedDictEntry.deepContext}</p>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-400/30">
-                        <div className="text-xs font-extrabold uppercase text-sky-300 mb-1">Contoh & Penerapan</div>
-                        <p className="text-xs sm:text-sm">{selectedDictEntry.example}</p>
-                      </div>
-                      <div className="p-4 rounded-2xl bg-amber-400/10 border border-amber-400/30">
-                        <div className="text-xs font-extrabold uppercase text-amber-300 mb-1">Fakta Menarik</div>
-                        <p className="text-xs sm:text-sm">{selectedDictEntry.funFact}</p>
-                      </div>
-                    </div>
-
-                    {selectedDictEntry.relatedTerms && selectedDictEntry.relatedTerms.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="text-xs font-extrabold uppercase text-slate-400">Istilah Terkait</div>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedDictEntry.relatedTerms.map((rel) => (
-                            <button
-                              key={rel}
-                              onClick={() => {
-                                const found = KNOWLEDGE_DICTIONARY.find(
-                                  (d) => d.term.toLowerCase() === rel.toLowerCase()
-                                );
-                                if (found) setSelectedDictEntry(found);
-                              }}
-                              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-xs font-bold transition"
-                            >
-                              {rel}
-                            </button>
-                          ))}
+                createPortal(
+                  <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-lg flex items-center justify-center overflow-y-auto p-3 sm:p-5">
+                    <div className="max-w-3xl w-full bg-slate-900 border border-amber-400/40 rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl max-h-[calc(100dvh-1.5rem)] overflow-y-auto rm-scene-enter">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <span className="inline-flex px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-extrabold">
+                            {selectedDictEntry.tag}
+                          </span>
+                          <h3 className="text-xl sm:text-2xl font-black text-white mt-2">{selectedDictEntry.term}</h3>
+                          <div className="text-xs font-mono text-amber-300">{selectedDictEntry.pronunciation}</div>
                         </div>
+                        <button
+                          onClick={() => setSelectedDictEntry(null)}
+                          className="shrink-0 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200"
+                          aria-label="Tutup materi"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
                       </div>
-                    )}
 
-                    <div className="flex flex-wrap gap-3 pt-2">
-                      <button
-                        onClick={() => speakTerm(selectedDictEntry.term)}
-                        className="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 font-extrabold text-xs flex items-center gap-1.5"
-                      >
-                        <Volume1 className="w-4 h-4" />
-                        <span>Lafalkan</span>
-                      </button>
-                      <button
-                        onClick={() => toggleMasterEntry(selectedDictEntry)}
-                        className="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 font-extrabold text-xs flex items-center gap-1.5"
-                      >
-                        <BookmarkCheck className="w-4 h-4" />
-                        <span>Tandai Dipahami (+15 XP)</span>
-                      </button>
-                      <button
-                        onClick={() => setSelectedDictEntry(null)}
-                        className="ml-auto px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs"
-                      >
-                        Tutup
-                      </button>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-200 leading-relaxed">
+                        <div className="sm:col-span-2 rounded-2xl bg-amber-400/10 border border-amber-400/25 px-4 py-3">
+                          <div className="text-xs font-extrabold uppercase text-amber-300 mb-1">Makna Utama</div>
+                          <p className="font-semibold text-white">{selectedDictEntry.definition}</p>
+                        </div>
+                        {selectedDictEntry.deepContext && (
+                          <div className="sm:col-span-2 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-400/25">
+                            <div className="text-xs font-extrabold uppercase text-indigo-300 mb-1">Pemahaman Mendalam</div>
+                            <p className="text-xs sm:text-sm">{selectedDictEntry.deepContext}</p>
+                          </div>
+                        )}
+                        {selectedDictEntry.example && (
+                          <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-400/30">
+                            <div className="text-xs font-extrabold uppercase text-sky-300 mb-1">Contoh & Penerapan</div>
+                            <p className="text-xs sm:text-sm">{selectedDictEntry.example}</p>
+                          </div>
+                        )}
+                        {selectedDictEntry.funFact && (
+                          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-400/25">
+                            <div className="text-xs font-extrabold uppercase text-emerald-300 mb-1">Fakta Menarik</div>
+                            <p className="text-xs sm:text-sm">{selectedDictEntry.funFact}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {selectedDictEntry.relatedTerms && selectedDictEntry.relatedTerms.length > 0 && (
+                        <div className="space-y-2">
+                          <div className="text-xs font-extrabold uppercase text-slate-400">Istilah Terkait</div>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedDictEntry.relatedTerms.map((rel) => (
+                              <button
+                                key={rel}
+                                onClick={() => {
+                                  const found = KNOWLEDGE_DICTIONARY.find(
+                                    (d) => d.term.toLowerCase() === rel.toLowerCase()
+                                  );
+                                  if (found) setSelectedDictEntry(found);
+                                }}
+                                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-xs font-bold transition"
+                              >
+                                {rel}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap gap-2 pt-1 border-t border-white/10">
+                        <button
+                          onClick={() => speakTerm(selectedDictEntry.term)}
+                          className="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 font-extrabold text-xs flex items-center gap-1.5"
+                        >
+                          <Volume1 className="w-4 h-4" />
+                          <span>Lafalkan</span>
+                        </button>
+                        <button
+                          onClick={() => toggleMasterEntry(selectedDictEntry)}
+                          className="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 font-extrabold text-xs flex items-center gap-1.5"
+                        >
+                          <BookmarkCheck className="w-4 h-4" />
+                          <span>Tandai Dipahami (+15 XP)</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedDictEntry(null)}
+                          className="ml-auto px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs"
+                        >
+                          Tutup
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </div>,
+                  document.body
+                )
               )}
             </div>
           );
