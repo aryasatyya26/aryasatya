@@ -2962,6 +2962,26 @@ blockquote {
   animation: dictionaryThumbFloat 3.4s ease-in-out infinite;
 }
 
+@media (max-width: 639px) {
+  .dictionary-frame-glow,
+  .dictionary-title-frame,
+  .dictionary-title-text,
+  .dictionary-star-glint,
+  .dictionary-thumbs-float {
+    animation: none;
+  }
+
+  .dictionary-frame-glow {
+    box-shadow: 0 0 16px rgba(234, 179, 8, 0.12);
+  }
+
+  .dictionary-title-frame {
+    box-shadow:
+      0 0 10px rgba(234, 179, 8, 0.14),
+      inset 0 0 8px rgba(250, 204, 21, 0.05);
+  }
+}
+
 @keyframes dictionaryFramePulse {
   0%, 100% {
     border-color: rgba(253, 224, 71, 0.42);

@@ -4649,7 +4649,7 @@ function ComprehensiveDictionaryPanel() {
         return;
       }
       (resultsRef.current || pageNavigationRef.current)?.scrollIntoView({
-        behavior: 'smooth',
+        behavior: window.matchMedia('(max-width: 639px)').matches ? 'auto' : 'smooth',
         block: 'start',
       });
     });
@@ -4870,7 +4870,7 @@ function ComprehensiveDictionaryPanel() {
       <nav
         ref={pageNavigationRef}
         aria-label="Navigasi halaman kamus"
-        className="scroll-mt-28 sticky top-28 z-20 flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur-md sm:static sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3"
+        className="scroll-mt-28 flex flex-col gap-1.5 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur-md sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-3"
       >
         <p className="hidden text-[10px] leading-relaxed text-slate-400 sm:block sm:max-w-xs">
           Bilangan 0–1.000, ordinal 1–100, hingga 999.999.999.999.
@@ -4940,7 +4940,7 @@ function ComprehensiveDictionaryPanel() {
       </nav>
 
       {visibleEntries.length > 0 && (
-        <div ref={resultsRef} className="scroll-mt-64 grid grid-cols-2 gap-2 sm:scroll-mt-28 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div ref={resultsRef} className="scroll-mt-28 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visibleEntries.map((entry) => {
             const category = COMPREHENSIVE_DICTIONARY_CATEGORIES.find((item) => item.id === entry.categoryId);
             const isFavorite = favorites.includes(entry.id);
@@ -4948,9 +4948,7 @@ function ComprehensiveDictionaryPanel() {
             return (
               <article
                 key={entry.id}
-                className={`flex min-w-0 flex-col justify-between gap-1 rounded-xl border border-white/10 bg-slate-950/55 p-2 transition hover:border-amber-400/35 sm:gap-2.5 sm:rounded-2xl sm:p-3.5 ${
-                  exampleIsOpen ? 'min-h-40' : 'aspect-square'
-                } sm:aspect-auto`}
+                className="flex min-w-0 min-h-36 flex-col justify-between gap-2 rounded-xl border border-white/10 bg-slate-950/55 p-3 transition hover:border-amber-400/35 sm:gap-2.5 sm:rounded-2xl sm:p-3.5"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
@@ -5207,6 +5205,10 @@ export default function App() {
   const [libraryFilter, setLibraryFilter] = useState('all');
   const [librarySearch, setLibrarySearch] = useState('');
   const [libraryLetter, setLibraryLetter] = useState('ALL');
+  const [libraryPage, setLibraryPage] = useState(0);
+  const [libraryPageSize] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches ? 6 : 8
+  );
   const [selectedDictEntry, setSelectedDictEntry] = useState(null);
   const [libraryTab, setLibraryTab] = useState('dictionary'); // dictionary | questions
 
@@ -6853,6 +6855,20 @@ export default function App() {
           });
 
           const alphabet = ['ALL', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+          const libraryPageCount = Math.max(1, Math.ceil(filteredDict.length / libraryPageSize));
+          const visibleLibraryEntries = filteredDict.slice(
+            libraryPage * libraryPageSize,
+            (libraryPage + 1) * libraryPageSize
+          );
+          const navigateLibraryPage = (targetPage) => {
+            setLibraryPage(targetPage);
+            window.requestAnimationFrame(() => {
+              document.getElementById('library-material-results')?.scrollIntoView({
+                behavior: window.matchMedia('(max-width: 639px)').matches ? 'auto' : 'smooth',
+                block: 'start',
+              });
+            });
+          };
 
           return (
             <div className="space-y-2 rm-scene-enter sm:space-y-6">
@@ -6878,41 +6894,48 @@ export default function App() {
 
               <ComprehensiveDictionaryPanel />
 
-              <details className="group rounded-2xl border border-white/10 bg-slate-900/70 p-1 sm:rounded-3xl sm:p-5">
+              <details className="group dictionary-frame-glow rounded-2xl border border-amber-400/30 bg-gradient-to-br from-slate-900/95 via-indigo-950/80 to-slate-900/95 p-2 shadow-xl sm:rounded-3xl sm:p-5">
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">
                   <span>
-                    <span className="block text-xs font-black text-white sm:text-sm">Materi dan pustaka lainnya</span>
-                    <span className="mt-1 hidden text-xs leading-relaxed text-slate-400 sm:block">
-                      Verb, Academic Vocabulary, Resilient Adjective, grammar, dan ensiklopedia
+                    <span className="block text-sm font-black text-amber-100 sm:text-lg">Materi dan pustaka lainnya</span>
+                    <span className="mt-1 block text-[10px] leading-relaxed text-slate-300 sm:text-xs">
+                      Jelajahi kosakata, istilah lintas disiplin, makna, pelafalan, dan contoh penerapan dalam format katalog kamus.
                     </span>
                   </span>
                   <ChevronRight className="h-4 w-4 shrink-0 text-amber-300 transition-transform group-open:rotate-90 sm:h-5 sm:w-5" />
                 </summary>
-                <div className="mt-4 space-y-6">
+                <div className="mt-3 space-y-3 sm:mt-4 sm:space-y-5">
               {/* Search & Discipline Filter Pills */}
-              <div className="bg-slate-900/85 border border-white/15 rounded-3xl p-5 space-y-4">
+              <div className="space-y-3 rounded-2xl border border-amber-400/20 bg-slate-950/65 p-3 sm:space-y-4 sm:rounded-3xl sm:p-5">
                 <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-300/70 sm:left-4" />
                   <input
                     type="text"
                     value={librarySearch}
-                    onChange={(e) => setLibrarySearch(e.target.value)}
+                    onChange={(e) => {
+                      setLibrarySearch(e.target.value);
+                      setLibraryPage(0);
+                    }}
                     placeholder="Cari istilah bahasa Inggris, rumus matematika, konsep AI, sejarah, atau sains..."
-                    className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-950/80 border border-white/15 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
+                    className="w-full rounded-xl border border-white/15 bg-slate-950/80 py-2.5 pl-10 pr-3 text-xs text-white placeholder:text-slate-400 focus:border-amber-400 focus:outline-none sm:rounded-2xl sm:py-3 sm:pl-11 sm:pr-4 sm:text-sm"
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex gap-1.5 overflow-x-auto pb-1 sm:flex-wrap sm:gap-2 sm:overflow-visible sm:pb-0" aria-label="Filter bidang materi">
                   {DICTIONARY_DISCIPLINES.map((disc) => (
                     <button
                       key={disc.id}
-                      onClick={() => setLibraryFilter(disc.id)}
-                      className={`px-3.5 py-1.5 rounded-full text-xs font-extrabold transition ${
+                      type="button"
+                      onClick={() => {
+                        setLibraryFilter(disc.id);
+                        setLibraryPage(0);
+                      }}
+                      aria-pressed={libraryFilter === disc.id}
+                      className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-extrabold transition sm:px-3.5 sm:text-xs ${
                         libraryFilter === disc.id
-                          ? 'text-slate-950 shadow-md'
-                          : 'bg-white/10 hover:bg-white/20 text-slate-200'
+                          ? 'bg-amber-300 text-slate-950 shadow-md'
+                          : 'bg-white/10 text-slate-200 hover:bg-white/20'
                       }`}
-                      style={libraryFilter === disc.id ? { backgroundColor: disc.color } : {}}
                     >
                       {disc.label}
                     </button>
@@ -6920,12 +6943,17 @@ export default function App() {
                 </div>
 
                 {/* Alphabet A-Z Quick Filter */}
-                <div className="flex flex-wrap gap-1 pt-1">
+                <div className="flex gap-1 overflow-x-auto pb-1 pt-1 sm:flex-wrap sm:overflow-visible sm:pb-0" aria-label="Filter huruf awal istilah">
                   {alphabet.map((lt) => (
                     <button
                       key={lt}
-                      onClick={() => setLibraryLetter(lt)}
-                      className={`px-2 py-1 rounded-lg text-[11px] font-bold ${
+                      type="button"
+                      onClick={() => {
+                        setLibraryLetter(lt);
+                        setLibraryPage(0);
+                      }}
+                      aria-pressed={libraryLetter === lt}
+                      className={`min-w-8 shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold sm:text-[11px] ${
                         libraryLetter === lt
                           ? 'bg-amber-400 text-slate-950'
                           : 'bg-white/5 hover:bg-white/15 text-slate-300'
@@ -6937,41 +6965,56 @@ export default function App() {
                 </div>
               </div>
 
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-slate-400 sm:text-xs" aria-live="polite">
+                <span>
+                  {filteredDict.length
+                    ? `Menampilkan ${libraryPage * libraryPageSize + 1}–${Math.min((libraryPage + 1) * libraryPageSize, filteredDict.length)} dari ${filteredDict.length} materi`
+                    : 'Tidak ada materi yang cocok dengan pencarian.'}
+                </span>
+                {filteredDict.length > 0 && (
+                  <span className="text-amber-200">Halaman {libraryPage + 1} / {libraryPageCount}</span>
+                )}
+              </div>
+
               {/* Dictionary Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredDict.map((entry) => {
+              <div id="library-material-results" className="scroll-mt-24 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2">
+                {visibleLibraryEntries.map((entry) => {
                   const mastered = player.discoveredLore.some((l) => l.id === entry.id);
                   return (
                     <div
                       key={entry.id}
-                      className="bg-slate-900/85 border border-white/15 hover:border-amber-400/50 rounded-3xl p-5 flex flex-col justify-between space-y-3 shadow-lg transition"
+                      className="flex min-w-0 flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/55 p-3 shadow-lg transition hover:border-amber-400/45 sm:rounded-3xl sm:p-5"
                     >
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full bg-amber-400/15 text-amber-300 text-[11px] font-bold">
+                          <span className="min-w-0 rounded-full bg-amber-400/15 px-2.5 py-1 text-[9px] font-bold text-amber-300 sm:text-[11px]">
                             {entry.tag}
                           </span>
                           <button
+                            type="button"
                             onClick={() => speakTerm(entry.term)}
-                            className="p-1.5 rounded-lg bg-white/10 hover:bg-sky-500/30 text-sky-300 transition"
+                            aria-label={`Dengarkan pelafalan ${entry.term}`}
+                            className="shrink-0 rounded-lg bg-sky-500/10 p-2 text-sky-200 transition hover:bg-sky-500/25"
                             title="Dengarkan Pelafalan"
                           >
                             <Volume1 className="w-4 h-4" />
                           </button>
                         </div>
-                        <h3 className="text-lg font-black text-white">{entry.term}</h3>
-                        <div className="text-xs font-mono text-amber-300/90">{entry.pronunciation}</div>
-                        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">{entry.definition}</p>
+                        <h3 className="break-words text-base font-black leading-snug text-white sm:text-lg">{entry.term}</h3>
+                        <div className="break-words font-mono text-[10px] text-amber-200/90 sm:text-xs">{entry.pronunciation}</div>
+                        <p className="text-xs leading-relaxed text-slate-200 sm:text-sm">{entry.definition}</p>
                       </div>
 
-                      <div className="pt-2 flex items-center justify-between gap-2 border-t border-white/10">
+                      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-2">
                         <button
+                          type="button"
                           onClick={() => setSelectedDictEntry(entry)}
-                          className="px-3.5 py-2 rounded-xl bg-indigo-500/25 hover:bg-indigo-500/40 text-indigo-200 font-extrabold text-xs"
+                          className="rounded-lg bg-amber-400/15 px-3 py-2 text-[10px] font-extrabold text-amber-100 transition hover:bg-amber-400/25 sm:rounded-xl sm:px-3.5 sm:text-xs"
                         >
                           Baca Mendalam
                         </button>
                         <button
+                          type="button"
                           onClick={() => toggleMasterEntry(entry)}
                           className={`px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ${
                             mastered
@@ -6987,6 +7030,29 @@ export default function App() {
                   );
                 })}
               </div>
+              {libraryPageCount > 1 && (
+                <nav className="flex items-center justify-center gap-2" aria-label="Navigasi halaman materi">
+                  <button
+                    type="button"
+                    disabled={libraryPage === 0}
+                    onClick={() => navigateLibraryPage(Math.max(0, libraryPage - 1))}
+                    className="min-h-10 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Sebelumnya
+                  </button>
+                  <span className="min-w-16 text-center text-xs font-bold text-amber-200">
+                    {libraryPage + 1} / {libraryPageCount}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={libraryPage + 1 >= libraryPageCount}
+                    onClick={() => navigateLibraryPage(Math.min(libraryPageCount - 1, libraryPage + 1))}
+                    className="min-h-10 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Berikutnya
+                  </button>
+                </nav>
+              )}
                 </div>
               </details>
 
@@ -7018,8 +7084,8 @@ export default function App() {
                           <p className="font-semibold text-white">{selectedDictEntry.definition}</p>
                         </div>
                         {selectedDictEntry.deepContext && (
-                          <div className="sm:col-span-2 p-4 rounded-2xl bg-indigo-500/10 border border-indigo-400/25">
-                            <div className="text-xs font-extrabold uppercase text-indigo-300 mb-1">Pemahaman Mendalam</div>
+                          <div className="sm:col-span-2 rounded-2xl border border-amber-400/20 bg-amber-400/5 p-4">
+                            <div className="mb-1 text-xs font-extrabold uppercase text-amber-200">Pemahaman Mendalam</div>
                             <p className="text-xs sm:text-sm">{selectedDictEntry.deepContext}</p>
                           </div>
                         )}
