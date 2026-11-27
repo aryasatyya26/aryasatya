@@ -112,6 +112,89 @@ const UI_TEXT = {
   }
 };
 
+function KnowledgeCursor() {
+  const cursorRef = useRef(null);
+  const targetRef = useRef({ x: -100, y: -100 });
+  const currentRef = useRef({ x: -100, y: -100 });
+
+  useEffect(() => {
+    const finePointer = window.matchMedia('(pointer: fine)').matches;
+    if (!finePointer) return undefined;
+
+    let frame = 0;
+    let lastTime = performance.now();
+
+    const render = (now) => {
+      frame = 0;
+      const elapsed = Math.min(Math.max(now - lastTime, 0), 50);
+      const smoothing = 1 - Math.pow(0.78, elapsed / (1000 / 60));
+      lastTime = now;
+
+      currentRef.current.x += (targetRef.current.x - currentRef.current.x) * smoothing;
+      currentRef.current.y += (targetRef.current.y - currentRef.current.y) * smoothing;
+
+      if (cursorRef.current) {
+        cursorRef.current.style.transform =
+          `translate3d(${currentRef.current.x}px, ${currentRef.current.y}px, 0)`;
+      }
+
+      if (
+        Math.abs(targetRef.current.x - currentRef.current.x) > 0.1 ||
+        Math.abs(targetRef.current.y - currentRef.current.y) > 0.1
+      ) {
+        frame = requestAnimationFrame(render);
+      }
+    };
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(render);
+    };
+
+    const move = (event) => {
+      if (event.pointerType === 'touch') return;
+      targetRef.current = { x: event.clientX, y: event.clientY };
+      cursorRef.current?.classList.add('knowledge-cursor-visible');
+      schedule();
+    };
+    const down = (event) => {
+      if (event.pointerType === 'touch') return;
+      cursorRef.current?.classList.add('knowledge-cursor-click');
+    };
+    const up = () => cursorRef.current?.classList.remove('knowledge-cursor-click');
+    const over = (event) => {
+      const interactive = event.target.closest(
+        'a, button, input, textarea, [role="button"], [data-cursor-pointer], canvas'
+      );
+      cursorRef.current?.classList.toggle('knowledge-cursor-hover', Boolean(interactive));
+    };
+    const leave = () => cursorRef.current?.classList.remove('knowledge-cursor-visible');
+
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerdown', down);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointerover', over);
+    document.documentElement.addEventListener('mouseleave', leave);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerdown', down);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointerover', over);
+      document.documentElement.removeEventListener('mouseleave', leave);
+    };
+  }, []);
+
+  return (
+    <div ref={cursorRef} className="knowledge-cursor" aria-hidden="true">
+      <span className="knowledge-cursor-orbit" />
+      <span className="knowledge-cursor-core" />
+      <span className="knowledge-cursor-spark knowledge-cursor-spark-a" />
+      <span className="knowledge-cursor-spark knowledge-cursor-spark-b" />
+    </div>
+  );
+}
+
 // ============================================================================
 // 4. INTERACTIVE PUZZLES & STORY MISSIONS PER ZONE (MULTI-VARIANT ROTATING POOL)
 // ============================================================================
@@ -4969,8 +5052,9 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-slate-100 font-sans relative overflow-x-hidden ${textSizeClass}`}
+      className={`knowledge-game min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-slate-100 font-sans relative overflow-x-hidden ${textSizeClass}`}
     >
+      <KnowledgeCursor />
       {/* REMOTION-INSPIRED PROCEDURAL KEYFRAMES & THEMATIC MOTION ENGINE (NO LINES/GRID) */}
       <style>{`
         @keyframes remotionSpringReveal {

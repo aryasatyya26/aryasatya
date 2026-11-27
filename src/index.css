@@ -532,6 +532,125 @@ html.page-scrolling .horizon-cloud {
   filter: drop-shadow(0 0 14px var(--amber));
 }
 
+.knowledge-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(-100px, -100px, 0);
+  transition: opacity 180ms ease;
+  will-change: transform;
+}
+
+.knowledge-cursor-visible {
+  opacity: 1;
+}
+
+.knowledge-cursor-orbit {
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgba(251, 191, 36, 0.88);
+  border-radius: 50%;
+  box-shadow:
+    0 0 14px rgba(251, 191, 36, 0.28),
+    inset 0 0 12px rgba(129, 140, 248, 0.22);
+  transition: transform 180ms ease, border-color 180ms ease;
+  animation: knowledgeCursorOrbit 5s linear infinite;
+}
+
+.knowledge-cursor-orbit::before,
+.knowledge-cursor-orbit::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(165, 180, 252, 0.5);
+  border-radius: 50%;
+  transform: rotate(45deg);
+}
+
+.knowledge-cursor-orbit::after {
+  inset: 12px;
+  border-color: rgba(255, 255, 255, 0.72);
+}
+
+.knowledge-cursor-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fde68a;
+  box-shadow: 0 0 10px #fbbf24;
+  transform: translate(-50%, -50%);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.knowledge-cursor-spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #f8fafc;
+  box-shadow: 0 0 8px #c4b5fd;
+}
+
+.knowledge-cursor-spark-a {
+  top: 2px;
+  right: 5px;
+  animation: knowledgeCursorSpark 1.6s ease-in-out infinite;
+}
+
+.knowledge-cursor-spark-b {
+  bottom: 3px;
+  left: 4px;
+  animation: knowledgeCursorSpark 1.6s 0.8s ease-in-out infinite;
+}
+
+.knowledge-cursor-hover .knowledge-cursor-orbit {
+  transform: scale(1.22);
+  border-color: #fde68a;
+  box-shadow:
+    0 0 22px rgba(251, 191, 36, 0.48),
+    inset 0 0 16px rgba(129, 140, 248, 0.3);
+}
+
+.knowledge-cursor-hover .knowledge-cursor-core {
+  transform: translate(-50%, -50%) scale(1.45);
+  box-shadow: 0 0 16px #fbbf24;
+}
+
+.knowledge-cursor-click .knowledge-cursor-orbit {
+  transform: scale(0.72);
+  border-color: #ffffff;
+}
+
+.knowledge-cursor-click .knowledge-cursor-core {
+  transform: translate(-50%, -50%) scale(0.7);
+}
+
+@keyframes knowledgeCursorOrbit {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes knowledgeCursorSpark {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.55);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.35);
+  }
+}
+
 .intro {
   position: fixed;
   inset: 0;
@@ -4309,9 +4428,18 @@ body.game-open {
   textarea {
     cursor: none;
   }
+
+  .knowledge-game,
+  .knowledge-game * {
+    cursor: none !important;
+  }
 }
 
 @media (pointer: coarse), (max-width: 680px) {
+  .knowledge-cursor {
+    display: none;
+  }
+
   html,
   body {
     overscroll-behavior-y: none;

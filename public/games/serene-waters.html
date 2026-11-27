@@ -300,6 +300,115 @@
       animation: bobFloat 2.8s ease-in-out infinite;
     }
 
+    #quest-reward-overlay {
+      z-index: 90;
+      background:
+        radial-gradient(circle at center, rgba(250, 204, 21, 0.12), transparent 32%),
+        rgba(4, 12, 24, 0.72);
+      backdrop-filter: blur(8px);
+    }
+
+    .quest-reward-card {
+      position: relative;
+      width: min(420px, calc(100vw - 2rem));
+      overflow: hidden;
+      border: 3px solid #fbbf24;
+      background:
+        linear-gradient(180deg, rgba(30, 58, 80, 0.98), rgba(8, 28, 43, 0.98));
+      box-shadow:
+        0 18px 55px rgba(0, 0, 0, 0.58),
+        0 0 38px rgba(250, 204, 21, 0.22),
+        inset 0 0 0 2px rgba(254, 240, 138, 0.12);
+    }
+
+    .quest-reward-card::before,
+    .quest-reward-card::after {
+      content: "";
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border: 1px solid rgba(251, 191, 36, 0.18);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: questRewardRing 3.8s ease-out infinite;
+    }
+
+    .quest-reward-card::after {
+      animation-delay: 1.2s;
+    }
+
+    .quest-reward-medal {
+      position: relative;
+      width: 82px;
+      height: 82px;
+      margin: 0 auto;
+      display: grid;
+      place-items: center;
+      border: 3px solid #fde047;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #fef08a 0%, #f59e0b 58%, #b45309 100%);
+      box-shadow:
+        0 8px 0 #713f12,
+        0 0 28px rgba(250, 204, 21, 0.7);
+      color: #78350f;
+      font-size: 38px;
+      text-shadow: 0 2px 0 rgba(255, 255, 255, 0.55);
+    }
+
+    .quest-reward-medal::after {
+      content: "";
+      position: absolute;
+      inset: -13px;
+      border: 2px dashed rgba(254, 240, 138, 0.48);
+      border-radius: 50%;
+      animation: questRewardSpin 12s linear infinite;
+    }
+
+    .quest-reward-gold {
+      color: #fde68a;
+      text-shadow:
+        0 3px 0 #92400e,
+        0 0 16px rgba(251, 191, 36, 0.72);
+    }
+
+    .quest-reward-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 2px;
+      background: #fde68a;
+      box-shadow: 0 0 10px #f59e0b;
+      pointer-events: none;
+      animation: questRewardParticle 2.4s ease-out infinite;
+    }
+
+    @keyframes questRewardSpin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes questRewardRing {
+      0% { opacity: 0.8; transform: translate(-50%, -50%) scale(0.35); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(4.2); }
+    }
+
+    @keyframes questRewardParticle {
+      0% { opacity: 0; transform: translate(0, 18px) scale(0.4) rotate(0deg); }
+      18% { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--particle-x), var(--particle-y)) scale(1) rotate(240deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #quest-reward-overlay *,
+      #quest-reward-overlay *::before,
+      #quest-reward-overlay *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+
     @keyframes pulseGlow {
       0%, 100% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
       50% { box-shadow: 0 0 18px rgba(56, 189, 248, 0.85); }
@@ -681,6 +790,36 @@
 
   <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed top-20 left-1/2 -translate-x-1/2 z-[70] flex flex-col items-center gap-1.5 pointer-events-none w-full max-w-md px-3"></div>
+
+  <!-- =========================================================
+       QUEST REWARD ACHIEVEMENT OVERLAY
+  ========================================================= -->
+  <div id="quest-reward-overlay" class="fixed inset-0 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="quest-reward-title">
+    <div id="quest-reward-card" class="quest-reward-card pixel-panel p-5 sm:p-7 text-center">
+      <div id="quest-reward-particles" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+      <div class="quest-reward-medal" aria-hidden="true">★</div>
+      <div class="relative mt-4">
+        <div class="font-pixel text-[10px] sm:text-xs text-emerald-300 tracking-widest">QUEST COMPLETE</div>
+        <h2 id="quest-reward-title" class="font-pixel text-sm sm:text-base text-amber-300 mt-2 leading-relaxed">
+          TUGAS TERSELESAIKAN
+        </h2>
+        <p id="quest-reward-name" class="font-vt text-xl text-sky-100 mt-2"></p>
+      </div>
+
+      <div class="relative mt-5 rounded-xl border border-amber-300/35 bg-slate-950/55 px-4 py-4">
+        <div class="font-vt text-lg text-slate-300">REWARD DITERIMA</div>
+        <div class="flex items-baseline justify-center gap-2 mt-1">
+          <span class="text-3xl" aria-hidden="true">🪙</span>
+          <span id="quest-reward-gold" class="quest-reward-gold font-pixel text-2xl sm:text-3xl">+0g</span>
+        </div>
+        <div id="quest-reward-extras" class="font-vt text-lg text-emerald-300 mt-2"></div>
+      </div>
+
+      <button id="btn-close-quest-reward" class="relative pixel-btn pixel-btn-gold mt-5 w-full py-2.5 font-pixel text-[10px]">
+        LANJUTKAN PETUALANGAN
+      </button>
+    </div>
+  </div>
 
   <script>
   /**
@@ -1806,6 +1945,7 @@
 
       SoundEngine.playCatchSuccess();
       UI.toast(`Completed "${def.title}" (+${def.rewardGold}g)!`, 'gold');
+      UI.showQuestReward(def);
       SaveSystem.save(this.data);
       UI.refreshHUD();
       return true;
@@ -2765,8 +2905,15 @@
       this.bindHudEvents();
       this.bindFishingControls();
       this.bindSwipeControls();
+      this.bindQuestRewardEvents();
       this.applyControlModeLayout();
       window.addEventListener('resize', () => this.applyControlModeLayout());
+    },
+
+    bindQuestRewardEvents() {
+      document.getElementById('btn-close-quest-reward')?.addEventListener('click', () => {
+        this.closeQuestReward();
+      });
     },
 
     applyControlModeLayout() {
@@ -3256,8 +3403,9 @@
         if (activeQ && activeQ.progress >= activeQ.targetCount) {
           addChoice(`★ Complete Quest: "${questDef.title}" (Claim +${questDef.rewardGold}g)`, 'pixel-btn-emerald', () => {
             GameState.claimQuestReward(questDef.id);
-            document.getElementById('npc-dialogue-text').textContent = `"Splendid work, friend! The waters are brighter with anglers like you."`;
-            this.openNpcDialogue(npc);
+            const dialogue = document.getElementById('dialogue-modal');
+            dialogue.classList.add('hidden');
+            dialogue.classList.remove('flex');
           });
         } else if (activeQ) {
           addChoice(`📜 Check Quest Progress: ${questDef.title} (${activeQ.progress}/${activeQ.targetCount})`, '', () => {
@@ -4256,16 +4404,94 @@
     },
 
     isAnyModalOpen() {
-      const ids = ['catch-modal', 'dialogue-modal', 'confirm-modal', 'drawer-modal'];
+      const ids = ['catch-modal', 'dialogue-modal', 'confirm-modal', 'drawer-modal', 'quest-reward-overlay'];
       return ids.some(id => !document.getElementById(id).classList.contains('hidden'));
     },
 
     closeAllModals() {
-      ['dialogue-modal', 'confirm-modal', 'drawer-modal'].forEach(id => {
+      ['dialogue-modal', 'confirm-modal', 'drawer-modal', 'quest-reward-overlay'].forEach(id => {
         const el = document.getElementById(id);
         el.classList.add('hidden');
         el.classList.remove('flex');
       });
+    },
+
+    showQuestReward(def) {
+      const overlay = document.getElementById('quest-reward-overlay');
+      const card = document.getElementById('quest-reward-card');
+      const name = document.getElementById('quest-reward-name');
+      const gold = document.getElementById('quest-reward-gold');
+      const extras = document.getElementById('quest-reward-extras');
+      const particles = document.getElementById('quest-reward-particles');
+
+      if (!overlay || !card || !name || !gold || !extras) return;
+
+      name.textContent = def.title;
+      gold.textContent = '+0g';
+      extras.textContent = [
+        `🌿 +${def.rewardEco || 5}% Eco`,
+        def.rewardItem ? `🎁 ${def.rewardItem.count}x reward item` : ''
+      ].filter(Boolean).join('   •   ');
+
+      particles.innerHTML = '';
+      for (let i = 0; i < 28; i++) {
+        const particle = document.createElement('span');
+        particle.className = 'quest-reward-particle';
+        const angle = (Math.PI * 2 * i) / 28 + Math.random() * 0.25;
+        const distance = 150 + Math.random() * 190;
+        particle.style.left = `${50 + (Math.random() - 0.5) * 12}%`;
+        particle.style.top = `${48 + (Math.random() - 0.5) * 12}%`;
+        particle.style.setProperty('--particle-x', `${Math.cos(angle) * distance}px`);
+        particle.style.setProperty('--particle-y', `${Math.sin(angle) * distance}px`);
+        particle.style.animationDelay = `${Math.random() * 0.65}s`;
+        particles.appendChild(particle);
+      }
+
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+      gsap.killTweensOf([overlay, card]);
+      gsap.set(overlay, { opacity: 0 });
+      gsap.set(card, { opacity: 0, y: 28, scale: 0.92, rotateX: 5 });
+      gsap.timeline()
+        .to(overlay, { opacity: 1, duration: 0.28, ease: 'power2.out' })
+        .to(card, { opacity: 1, y: 0, scale: 1, rotateX: 0, duration: 0.58, ease: 'back.out(1.45)' }, '-=0.08')
+        .call(() => {
+          const counter = { value: 0 };
+          gsap.to(counter, {
+            value: def.rewardGold,
+            duration: 0.9,
+            ease: 'power2.out',
+            onUpdate: () => {
+              gold.textContent = `+${Math.round(counter.value)}g`;
+            },
+            onComplete: () => {
+              gold.textContent = `+${def.rewardGold}g`;
+            }
+          });
+        });
+
+      clearTimeout(this.questRewardTimer);
+      this.questRewardTimer = setTimeout(() => this.closeQuestReward(), 5200);
+    },
+
+    closeQuestReward() {
+      const overlay = document.getElementById('quest-reward-overlay');
+      const card = document.getElementById('quest-reward-card');
+      if (!overlay || overlay.classList.contains('hidden')) return;
+      clearTimeout(this.questRewardTimer);
+      gsap.killTweensOf([overlay, card]);
+      gsap.timeline()
+        .to(card, { opacity: 0, y: 18, scale: 0.96, duration: 0.24, ease: 'power2.in' })
+        .to(overlay, {
+          opacity: 0,
+          duration: 0.22,
+          ease: 'power1.out',
+          onComplete: () => {
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+            gsap.set([overlay, card], { clearProps: 'all' });
+          }
+        });
     },
 
     toast(msg, tone = 'info') {
