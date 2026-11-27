@@ -4535,8 +4535,11 @@ function ComprehensiveDictionaryPanel() {
   const [speechMessage, setSpeechMessage] = useState('');
   const [expandedExamples, setExpandedExamples] = useState({});
   const [page, setPage] = useState(0);
+  const [isMobileLayout, setIsMobileLayout] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+  );
   const [pageSize, setPageSize] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches ? 4 : 8
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches ? 4 : 6
   );
   const [pageInput, setPageInput] = useState('1');
   const [pageJumpMessage, setPageJumpMessage] = useState('');
@@ -4544,10 +4547,21 @@ function ComprehensiveDictionaryPanel() {
   const resultsRef = useRef(null);
 
   useEffect(() => {
-    if (pageSize === 4 || pageSize === 8) return;
-    setPageSize(window.matchMedia('(max-width: 639px)').matches ? 4 : 8);
-    setPage(0);
-  }, [pageSize]);
+    const mobileQuery = window.matchMedia('(max-width: 639px)');
+    const syncLayout = () => {
+      setIsMobileLayout(mobileQuery.matches);
+      setPageSize(mobileQuery.matches ? 4 : 6);
+      setPage(0);
+    };
+
+    if (mobileQuery.addEventListener) {
+      mobileQuery.addEventListener('change', syncLayout);
+      return () => mobileQuery.removeEventListener('change', syncLayout);
+    }
+
+    mobileQuery.addListener(syncLayout);
+    return () => mobileQuery.removeListener(syncLayout);
+  }, []);
 
   useEffect(() => {
     try {
@@ -4712,7 +4726,7 @@ function ComprehensiveDictionaryPanel() {
             setPageJumpMessage('');
           }}
           aria-pressed={favoritesOnly}
-          className={`inline-flex shrink-0 items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-extrabold transition sm:gap-2 sm:px-3.5 sm:py-2 sm:text-xs ${
+          className={`dictionary-bubble-button inline-flex shrink-0 items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-[10px] font-extrabold sm:gap-2 sm:px-3.5 sm:py-2 sm:text-xs ${
             favoritesOnly
               ? 'bg-amber-300 text-slate-950'
               : 'bg-white/10 text-amber-200 hover:bg-white/15'
@@ -4823,7 +4837,7 @@ function ComprehensiveDictionaryPanel() {
                   event.currentTarget.closest('details').open = false;
                 }}
                 aria-pressed={letter === initial}
-                className={`min-w-7 rounded-md px-1.5 py-1 text-[9px] font-bold ${
+                className={`dictionary-bubble-button min-w-7 rounded-md px-1.5 py-1 text-[9px] font-bold ${
                   letter === initial ? 'bg-amber-400 text-slate-950' : 'bg-white/5 text-slate-300'
                 }`}
               >
@@ -4845,7 +4859,7 @@ function ComprehensiveDictionaryPanel() {
               setPageJumpMessage('');
             }}
             aria-pressed={letter === initial}
-            className={`min-w-8 rounded-lg px-2 py-1 text-[10px] font-bold transition ${
+            className={`dictionary-bubble-button min-w-8 rounded-lg px-2 py-1 text-[10px] font-bold ${
               letter === initial
                 ? 'bg-amber-400 text-slate-950'
                 : 'bg-white/5 text-slate-300 hover:bg-white/15'
@@ -4889,7 +4903,7 @@ function ComprehensiveDictionaryPanel() {
               aria-label="Jumlah kosakata per halaman"
               className="w-12 rounded-lg border border-white/15 bg-slate-950 px-1.5 py-1 text-[10px] text-white focus:border-amber-400 focus:outline-none sm:w-auto sm:px-2 sm:py-1.5 sm:text-xs"
             >
-              {[4, 8].map((size) => (
+              {(isMobileLayout ? [4, 8] : [6]).map((size) => (
                 <option key={size} value={size}>{size}</option>
               ))}
             </select>
@@ -4898,7 +4912,7 @@ function ComprehensiveDictionaryPanel() {
             type="button"
             disabled={page === 0}
             onClick={() => navigateToPage(Math.max(0, page - 1))}
-            className="col-start-1 row-start-1 w-full rounded-lg bg-white/10 px-1.5 py-1.5 text-[9px] font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-auto sm:row-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-xs"
+            className="dictionary-bubble-button col-start-1 row-start-1 w-full rounded-lg bg-white/10 px-1.5 py-1.5 text-[9px] font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-auto sm:row-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-xs"
           >
             Sebelumnya
           </button>
@@ -4907,7 +4921,7 @@ function ComprehensiveDictionaryPanel() {
             type="button"
             disabled={page + 1 >= pageCount}
             onClick={() => navigateToPage(Math.min(pageCount - 1, page + 1))}
-            className="col-start-3 row-start-1 w-full rounded-lg bg-white/10 px-1.5 py-1.5 text-[9px] font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-auto sm:row-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-xs"
+            className="dictionary-bubble-button col-start-3 row-start-1 w-full rounded-lg bg-white/10 px-1.5 py-1.5 text-[9px] font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40 sm:col-auto sm:row-auto sm:w-auto sm:px-3 sm:py-1.5 sm:text-xs"
           >
             Berikutnya
           </button>
@@ -4931,7 +4945,7 @@ function ComprehensiveDictionaryPanel() {
             <button
               type="button"
               onClick={goToPage}
-              className="rounded-lg bg-amber-400/15 px-2 py-1.5 text-[9px] font-bold text-amber-200 hover:bg-amber-400/25 sm:px-2.5 sm:py-1.5 sm:text-[10px]"
+              className="dictionary-bubble-button rounded-lg bg-amber-400/15 px-2 py-1.5 text-[9px] font-bold text-amber-200 hover:bg-amber-400/25 sm:px-2.5 sm:py-1.5 sm:text-[10px]"
             >
               Buka
             </button>
@@ -4940,7 +4954,7 @@ function ComprehensiveDictionaryPanel() {
       </nav>
 
       {visibleEntries.length > 0 && (
-        <div ref={resultsRef} className="scroll-mt-28 grid grid-cols-1 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <div ref={resultsRef} className="scroll-mt-28 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-2 xl:grid-cols-3">
           {visibleEntries.map((entry) => {
             const category = COMPREHENSIVE_DICTIONARY_CATEGORIES.find((item) => item.id === entry.categoryId);
             const isFavorite = favorites.includes(entry.id);
@@ -4948,7 +4962,9 @@ function ComprehensiveDictionaryPanel() {
             return (
               <article
                 key={entry.id}
-                className="flex min-w-0 min-h-36 flex-col justify-between gap-2 rounded-xl border border-white/10 bg-slate-950/55 p-3 transition hover:border-amber-400/35 sm:gap-2.5 sm:rounded-2xl sm:p-3.5"
+                className={`dictionary-bubble-card flex min-w-0 flex-col justify-between gap-2 rounded-xl border border-white/10 bg-slate-950/55 p-2.5 sm:gap-2.5 sm:rounded-2xl sm:p-3.5 ${
+                  exampleIsOpen ? 'is-bubble-active min-h-40' : 'aspect-square'
+                } sm:aspect-auto`}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
@@ -4961,14 +4977,14 @@ function ComprehensiveDictionaryPanel() {
                     onClick={() => toggleFavorite(entry.id)}
                     aria-label={isFavorite ? `Hapus ${entry.indonesian} dari favorit` : `Simpan ${entry.indonesian} ke favorit`}
                     aria-pressed={isFavorite}
-                    className={`shrink-0 rounded-md p-1 transition sm:rounded-lg sm:p-2 ${
+                    className={`dictionary-bubble-button shrink-0 rounded-md p-1 sm:rounded-lg sm:p-2 ${
                       isFavorite ? 'bg-amber-400/20 text-amber-300' : 'bg-white/5 text-slate-400 hover:text-amber-300'
                     }`}
                   >
                     <Star className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isFavorite ? 'fill-current' : ''}`} />
                   </button>
                 </div>
-                <div className="flex min-w-0 flex-col gap-1 border-t border-white/10 pt-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2 sm:pt-2">
+                <div className="flex min-w-0 items-center justify-between gap-2 border-t border-white/10 pt-1.5 sm:flex-wrap sm:gap-2 sm:pt-2">
                   <div className="min-w-0 flex-1">
                     <span className="hidden text-[10px] uppercase tracking-wide text-violet-300 sm:block">{entry.partOfSpeech}</span>
                     <p
@@ -4983,7 +4999,7 @@ function ComprehensiveDictionaryPanel() {
                       type="button"
                       onClick={() => speakEnglish(entry)}
                       aria-label={`Dengarkan pelafalan ${entry.english}`}
-                      className="rounded-md bg-sky-500/15 p-1.5 text-sky-200 hover:bg-sky-500/25 sm:rounded-lg sm:p-2"
+                      className="dictionary-bubble-button rounded-md bg-sky-500/15 p-1.5 text-sky-200 hover:bg-sky-500/25 sm:rounded-lg sm:p-2"
                     >
                       <Volume1 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     </button>
@@ -4991,24 +5007,25 @@ function ComprehensiveDictionaryPanel() {
                       type="button"
                       onClick={() => setExpandedExamples((current) => ({ ...current, [entry.id]: !current[entry.id] }))}
                       aria-expanded={exampleIsOpen}
-                      className="rounded-md bg-indigo-500/15 px-2 py-1.5 text-[9px] font-bold text-indigo-200 hover:bg-indigo-500/25 sm:rounded-lg sm:px-2.5 sm:py-2 sm:text-[10px]"
+                      className="dictionary-bubble-button rounded-md bg-indigo-500/15 px-2 py-1.5 text-[9px] font-bold text-indigo-200 hover:bg-indigo-500/25 sm:rounded-lg sm:px-2.5 sm:py-2 sm:text-[10px]"
                     >
                       <span className="sm:hidden">{exampleIsOpen ? 'Tutup' : 'Contoh'}</span>
                       <span className="hidden sm:inline">{exampleIsOpen ? 'Tutup contoh' : 'Contoh kalimat'}</span>
                     </button>
                   </div>
                 </div>
-                {entry.usageNote && (
-                  <p className={`hidden text-[11px] leading-relaxed text-slate-400 sm:block ${exampleIsOpen ? '!block' : ''}`}>
-                    {entry.usageNote}
-                  </p>
-                )}
-                {exampleIsOpen && (
-                  <div className="space-y-1 rounded-xl border border-sky-400/20 bg-sky-500/10 p-3 text-xs leading-relaxed">
-                    <p className="text-sky-100">{entry.exampleEnglish}</p>
-                    <p className="text-slate-300">{entry.exampleIndonesian}</p>
+                <div
+                  aria-hidden={!exampleIsOpen}
+                  className={`dictionary-example-reveal ${exampleIsOpen ? 'is-open' : ''}`}
+                >
+                  <div className="dictionary-example-content">
+                    <div className="space-y-1 rounded-xl border border-sky-400/20 bg-sky-500/10 p-2.5 text-xs leading-relaxed sm:p-3">
+                      {entry.usageNote && <p className="text-slate-400">{entry.usageNote}</p>}
+                      <p className="text-sky-100">{entry.exampleEnglish}</p>
+                      <p className="text-slate-300">{entry.exampleIndonesian}</p>
+                    </div>
                   </div>
-                )}
+                </div>
               </article>
             );
           })}
@@ -5206,11 +5223,33 @@ export default function App() {
   const [librarySearch, setLibrarySearch] = useState('');
   const [libraryLetter, setLibraryLetter] = useState('ALL');
   const [libraryPage, setLibraryPage] = useState(0);
-  const [libraryPageSize] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches ? 6 : 8
+  const [libraryIsMobile, setLibraryIsMobile] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches
+  );
+  const [libraryPageSize, setLibraryPageSize] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches ? 4 : 6
   );
   const [selectedDictEntry, setSelectedDictEntry] = useState(null);
+  const [dictionaryReaderClosing, setDictionaryReaderClosing] = useState(false);
   const [libraryTab, setLibraryTab] = useState('dictionary'); // dictionary | questions
+  const closeDictionaryReader = () => setDictionaryReaderClosing(true);
+
+  useEffect(() => {
+    const mobileQuery = window.matchMedia('(max-width: 639px)');
+    const syncLibraryLayout = () => {
+      setLibraryIsMobile(mobileQuery.matches);
+      setLibraryPageSize(mobileQuery.matches ? 4 : 6);
+      setLibraryPage(0);
+    };
+
+    if (mobileQuery.addEventListener) {
+      mobileQuery.addEventListener('change', syncLibraryLayout);
+      return () => mobileQuery.removeEventListener('change', syncLibraryLayout);
+    }
+
+    mobileQuery.addListener(syncLibraryLayout);
+    return () => mobileQuery.removeListener(syncLibraryLayout);
+  }, []);
 
   // Puzzle Runtime State
   const [activePuzzleIdx, setActivePuzzleIdx] = useState(0);
@@ -6895,9 +6934,15 @@ export default function App() {
               <ComprehensiveDictionaryPanel />
 
               <details className="group dictionary-frame-glow rounded-2xl border border-amber-400/30 bg-gradient-to-br from-slate-900/95 via-indigo-950/80 to-slate-900/95 p-2 shadow-xl sm:rounded-3xl sm:p-5">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">
-                  <span>
-                    <span className="block text-sm font-black text-amber-100 sm:text-lg">Materi dan pustaka lainnya</span>
+                <summary className="dictionary-bubble-button flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-400">
+                  <span className="min-w-0">
+                    <span className="dictionary-title-frame inline-flex w-fit max-w-full items-center gap-1.5 rounded-xl border border-amber-300/35 bg-amber-300/5 px-2 py-1.5 sm:gap-2 sm:px-3 sm:py-2">
+                      <Sparkles aria-hidden="true" className="dictionary-star-glint h-3.5 w-3.5 shrink-0 sm:h-5 sm:w-5" />
+                      <span className="dictionary-title-text min-w-0 text-[11px] font-black leading-tight sm:text-lg">
+                        Materi dan pustaka lainnya
+                      </span>
+                      <Sparkles aria-hidden="true" className="dictionary-star-glint h-3 w-3 shrink-0 sm:h-4 sm:w-4" />
+                    </span>
                     <span className="mt-1 block text-[10px] leading-relaxed text-slate-300 sm:text-xs">
                       Jelajahi kosakata, istilah lintas disiplin, makna, pelafalan, dan contoh penerapan dalam format katalog kamus.
                     </span>
@@ -6906,7 +6951,7 @@ export default function App() {
                 </summary>
                 <div className="mt-3 space-y-3 sm:mt-4 sm:space-y-5">
               {/* Search & Discipline Filter Pills */}
-              <div className="space-y-3 rounded-2xl border border-amber-400/20 bg-slate-950/65 p-3 sm:space-y-4 sm:rounded-3xl sm:p-5">
+              <div className="dictionary-bubble-card space-y-3 rounded-2xl border border-amber-400/20 bg-slate-950/65 p-3 sm:space-y-4 sm:rounded-3xl sm:p-5">
                 <div className="relative">
                   <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-amber-300/70 sm:left-4" />
                   <input
@@ -6931,7 +6976,7 @@ export default function App() {
                         setLibraryPage(0);
                       }}
                       aria-pressed={libraryFilter === disc.id}
-                      className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-extrabold transition sm:px-3.5 sm:text-xs ${
+                      className={`dictionary-bubble-button shrink-0 rounded-full px-3 py-1.5 text-[10px] font-extrabold sm:px-3.5 sm:text-xs ${
                         libraryFilter === disc.id
                           ? 'bg-amber-300 text-slate-950 shadow-md'
                           : 'bg-white/10 text-slate-200 hover:bg-white/20'
@@ -6953,7 +6998,7 @@ export default function App() {
                         setLibraryPage(0);
                       }}
                       aria-pressed={libraryLetter === lt}
-                      className={`min-w-8 shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold sm:text-[11px] ${
+                      className={`dictionary-bubble-button min-w-8 shrink-0 rounded-lg px-2 py-1.5 text-[10px] font-bold sm:text-[11px] ${
                         libraryLetter === lt
                           ? 'bg-amber-400 text-slate-950'
                           : 'bg-white/5 hover:bg-white/15 text-slate-300'
@@ -6983,7 +7028,9 @@ export default function App() {
                   return (
                     <div
                       key={entry.id}
-                      className="flex min-w-0 flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-slate-950/55 p-3 shadow-lg transition hover:border-amber-400/45 sm:rounded-3xl sm:p-5"
+                      className={`dictionary-bubble-card flex min-w-0 flex-col gap-2 rounded-2xl border border-white/10 bg-slate-950/55 p-2.5 shadow-lg sm:rounded-3xl sm:p-4 ${
+                        selectedDictEntry?.id === entry.id ? 'is-bubble-active' : ''
+                      }`}
                     >
                       <div className="space-y-2">
                         <div className="flex items-center justify-between gap-2">
@@ -6994,7 +7041,7 @@ export default function App() {
                             type="button"
                             onClick={() => speakTerm(entry.term)}
                             aria-label={`Dengarkan pelafalan ${entry.term}`}
-                            className="shrink-0 rounded-lg bg-sky-500/10 p-2 text-sky-200 transition hover:bg-sky-500/25"
+                            className="dictionary-bubble-button shrink-0 rounded-lg bg-sky-500/10 p-2 text-sky-200 hover:bg-sky-500/25"
                             title="Dengarkan Pelafalan"
                           >
                             <Volume1 className="w-4 h-4" />
@@ -7008,15 +7055,18 @@ export default function App() {
                       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/10 pt-2">
                         <button
                           type="button"
-                          onClick={() => setSelectedDictEntry(entry)}
-                          className="rounded-lg bg-amber-400/15 px-3 py-2 text-[10px] font-extrabold text-amber-100 transition hover:bg-amber-400/25 sm:rounded-xl sm:px-3.5 sm:text-xs"
+                          onClick={() => {
+                            setDictionaryReaderClosing(false);
+                            setSelectedDictEntry(entry);
+                          }}
+                          className="dictionary-bubble-button rounded-lg bg-amber-400/15 px-3 py-1.5 text-[10px] font-extrabold text-amber-100 hover:bg-amber-400/25 sm:rounded-xl sm:px-3.5 sm:py-2 sm:text-xs"
                         >
                           Baca Mendalam
                         </button>
                         <button
                           type="button"
                           onClick={() => toggleMasterEntry(entry)}
-                          className={`px-3.5 py-2 rounded-xl text-xs font-extrabold flex items-center gap-1 ${
+                          className={`dictionary-bubble-button flex items-center gap-1 rounded-xl px-3 py-1.5 text-[10px] font-extrabold sm:px-3.5 sm:py-2 sm:text-xs ${
                             mastered
                               ? 'bg-emerald-500/25 text-emerald-300'
                               : 'bg-white/10 hover:bg-emerald-500/25 text-slate-200'
@@ -7031,12 +7081,28 @@ export default function App() {
                 })}
               </div>
               {libraryPageCount > 1 && (
-                <nav className="flex items-center justify-center gap-2" aria-label="Navigasi halaman materi">
+                <nav className="flex flex-wrap items-center justify-center gap-2" aria-label="Navigasi halaman materi">
+                  <label className="flex items-center gap-1.5 text-[10px] font-bold text-slate-300">
+                    <span>Per halaman</span>
+                    <select
+                      value={libraryPageSize}
+                      onChange={(event) => {
+                        setLibraryPageSize(Number(event.target.value));
+                        setLibraryPage(0);
+                      }}
+                      aria-label="Jumlah materi per halaman"
+                      className="rounded-lg border border-white/15 bg-slate-950 px-2 py-2 text-xs text-white focus:border-amber-400 focus:outline-none"
+                    >
+                      {(libraryIsMobile ? [4, 8] : [6]).map((size) => (
+                        <option key={size} value={size}>{size}</option>
+                      ))}
+                    </select>
+                  </label>
                   <button
                     type="button"
                     disabled={libraryPage === 0}
                     onClick={() => navigateLibraryPage(Math.max(0, libraryPage - 1))}
-                    className="min-h-10 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="dictionary-bubble-button min-h-10 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Sebelumnya
                   </button>
@@ -7047,7 +7113,7 @@ export default function App() {
                     type="button"
                     disabled={libraryPage + 1 >= libraryPageCount}
                     onClick={() => navigateLibraryPage(Math.min(libraryPageCount - 1, libraryPage + 1))}
-                    className="min-h-10 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="dictionary-bubble-button min-h-10 rounded-lg bg-white/10 px-3 py-2 text-xs font-bold text-slate-200 hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     Berikutnya
                   </button>
@@ -7059,19 +7125,35 @@ export default function App() {
               {/* DETAIL READER MODAL ("MODE BACA & PAHAMI") */}
               {selectedDictEntry && (
                 createPortal(
-                  <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-lg flex items-center justify-center overflow-y-auto p-3 sm:p-5">
-                    <div className="max-w-3xl w-full bg-slate-900 border border-amber-400/40 rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl max-h-[calc(100dvh-1.5rem)] overflow-y-auto rm-scene-enter">
+                  <div className={`dictionary-reader-backdrop fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/85 p-3 backdrop-blur-lg sm:p-5 ${dictionaryReaderClosing ? 'is-closing' : ''}`}>
+                    <div
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby="dictionary-reader-title"
+                      className={`dictionary-reader-bubble max-h-[calc(100dvh-1.5rem)] w-full max-w-3xl space-y-3 overflow-y-auto rounded-3xl border border-amber-400/40 bg-slate-900 p-3 shadow-2xl sm:space-y-4 sm:p-6 ${dictionaryReaderClosing ? 'is-closing' : ''}`}
+                      onAnimationEnd={(event) => {
+                        if (
+                          dictionaryReaderClosing &&
+                          event.target === event.currentTarget &&
+                          event.animationName === 'dictionaryBubblePopOut'
+                        ) {
+                          setSelectedDictEntry(null);
+                          setDictionaryReaderClosing(false);
+                        }
+                      }}
+                    >
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <span className="inline-flex px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs font-extrabold">
                             {selectedDictEntry.tag}
                           </span>
-                          <h3 className="text-xl sm:text-2xl font-black text-white mt-2">{selectedDictEntry.term}</h3>
+                          <h3 id="dictionary-reader-title" className="mt-2 text-xl font-black text-white sm:text-2xl">{selectedDictEntry.term}</h3>
                           <div className="text-xs font-mono text-amber-300">{selectedDictEntry.pronunciation}</div>
                         </div>
                         <button
-                          onClick={() => setSelectedDictEntry(null)}
-                          className="shrink-0 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200"
+                          type="button"
+                          onClick={closeDictionaryReader}
+                          className="dictionary-bubble-button shrink-0 rounded-xl bg-white/10 p-2 text-slate-200 hover:bg-white/20"
                           aria-label="Tutup materi"
                         >
                           <X className="w-5 h-5" />
@@ -7079,24 +7161,24 @@ export default function App() {
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-slate-200 leading-relaxed">
-                        <div className="sm:col-span-2 rounded-2xl bg-amber-400/10 border border-amber-400/25 px-4 py-3">
+                        <div className="dictionary-bubble-card sm:col-span-2 rounded-2xl bg-amber-400/10 px-4 py-3">
                           <div className="text-xs font-extrabold uppercase text-amber-300 mb-1">Makna Utama</div>
                           <p className="font-semibold text-white">{selectedDictEntry.definition}</p>
                         </div>
                         {selectedDictEntry.deepContext && (
-                          <div className="sm:col-span-2 rounded-2xl border border-amber-400/20 bg-amber-400/5 p-4">
+                          <div className="dictionary-bubble-card sm:col-span-2 rounded-2xl bg-amber-400/5 p-4">
                             <div className="mb-1 text-xs font-extrabold uppercase text-amber-200">Pemahaman Mendalam</div>
                             <p className="text-xs sm:text-sm">{selectedDictEntry.deepContext}</p>
                           </div>
                         )}
                         {selectedDictEntry.example && (
-                          <div className="p-4 rounded-2xl bg-sky-500/10 border border-sky-400/30">
+                          <div className="dictionary-bubble-card rounded-2xl bg-sky-500/10 p-4">
                             <div className="text-xs font-extrabold uppercase text-sky-300 mb-1">Contoh & Penerapan</div>
                             <p className="text-xs sm:text-sm">{selectedDictEntry.example}</p>
                           </div>
                         )}
                         {selectedDictEntry.funFact && (
-                          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-400/25">
+                          <div className="dictionary-bubble-card rounded-2xl bg-emerald-500/10 p-4">
                             <div className="text-xs font-extrabold uppercase text-emerald-300 mb-1">Fakta Menarik</div>
                             <p className="text-xs sm:text-sm">{selectedDictEntry.funFact}</p>
                           </div>
@@ -7114,9 +7196,12 @@ export default function App() {
                                   const found = KNOWLEDGE_DICTIONARY.find(
                                     (d) => d.term.toLowerCase() === rel.toLowerCase()
                                   );
-                                  if (found) setSelectedDictEntry(found);
+                                  if (found) {
+                                    setDictionaryReaderClosing(false);
+                                    setSelectedDictEntry(found);
+                                  }
                                 }}
-                                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-amber-400 hover:text-slate-950 text-xs font-bold transition"
+                                className="dictionary-bubble-button rounded-xl bg-white/10 px-3 py-1.5 text-xs font-bold hover:bg-amber-400 hover:text-slate-950"
                               >
                                 {rel}
                               </button>
@@ -7132,22 +7217,25 @@ export default function App() {
 
                       <div className="flex flex-wrap gap-2 pt-1 border-t border-white/10">
                         <button
+                          type="button"
                           onClick={() => speakTerm(selectedDictEntry.term)}
-                          className="px-4 py-2.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 font-extrabold text-xs flex items-center gap-1.5"
+                          className="dictionary-bubble-button flex items-center gap-1.5 rounded-xl bg-sky-500/20 px-4 py-2.5 text-xs font-extrabold text-sky-200 hover:bg-sky-500/30"
                         >
                           <Volume1 className="w-4 h-4" />
                           <span>Lafalkan</span>
                         </button>
                         <button
+                          type="button"
                           onClick={() => toggleMasterEntry(selectedDictEntry)}
-                          className="px-4 py-2.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 font-extrabold text-xs flex items-center gap-1.5"
+                          className="dictionary-bubble-button flex items-center gap-1.5 rounded-xl bg-emerald-500/20 px-4 py-2.5 text-xs font-extrabold text-emerald-200 hover:bg-emerald-500/30"
                         >
                           <BookmarkCheck className="w-4 h-4" />
                           <span>Tandai Dipahami (+15 XP)</span>
                         </button>
                         <button
-                          onClick={() => setSelectedDictEntry(null)}
-                          className="ml-auto px-5 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs"
+                          type="button"
+                          onClick={closeDictionaryReader}
+                          className="dictionary-bubble-button ml-auto rounded-xl bg-amber-400 px-5 py-2.5 text-xs font-black text-slate-950"
                         >
                           Tutup
                         </button>

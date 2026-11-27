@@ -2929,8 +2929,26 @@ blockquote {
 }
 
 .dictionary-frame-glow {
+  position: relative;
   border-color: rgba(253, 224, 71, 0.58);
-  animation: dictionaryFramePulse 3.4s ease-in-out infinite;
+  box-shadow: 0 0 16px rgba(234, 179, 8, 0.12);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+
+.dictionary-frame-glow::after {
+  position: absolute;
+  inset: -2px;
+  border: 1px solid rgba(125, 211, 252, 0.5);
+  border-radius: inherit;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dictionary-frame-glow:hover::after,
+.dictionary-frame-glow:focus-within::after,
+.dictionary-frame-glow:active::after {
+  animation: dictionaryBubbleRipple 680ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .dictionary-title-frame {
@@ -2938,7 +2956,6 @@ blockquote {
   box-shadow:
     0 0 12px rgba(234, 179, 8, 0.18),
     inset 0 0 10px rgba(250, 204, 21, 0.08);
-  animation: dictionaryTitleFramePulse 2.8s ease-in-out infinite;
 }
 
 .dictionary-title-text {
@@ -2946,105 +2963,155 @@ blockquote {
   text-shadow:
     0 0 5px rgba(250, 204, 21, 0.62),
     0 0 12px rgba(234, 179, 8, 0.32);
-  animation: dictionaryTitleGlow 2.8s ease-in-out infinite;
 }
 
 .dictionary-star-glint {
   color: #fef08a;
   filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.9));
-  animation: dictionaryStarTwinkle 2.2s ease-in-out infinite;
 }
 
 .dictionary-thumbs-float {
   display: inline-block;
   filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.64));
   transform-origin: 50% 70%;
-  animation: dictionaryThumbFloat 3.4s ease-in-out infinite;
 }
 
-@media (max-width: 639px) {
-  .dictionary-frame-glow,
-  .dictionary-title-frame,
-  .dictionary-title-text,
-  .dictionary-star-glint,
-  .dictionary-thumbs-float {
-    animation: none;
-  }
+.dictionary-bubble-card {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.15rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
 
-  .dictionary-frame-glow {
-    box-shadow: 0 0 16px rgba(234, 179, 8, 0.12);
-  }
+.dictionary-bubble-card::after {
+  position: absolute;
+  inset: -2px;
+  border: 1px solid rgba(125, 211, 252, 0.55);
+  border-radius: inherit;
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+}
 
-  .dictionary-title-frame {
+.dictionary-bubble-card:hover::after,
+.dictionary-bubble-card:focus-within::after,
+.dictionary-bubble-card:active::after,
+.dictionary-bubble-card.is-bubble-active::after {
+  animation: dictionaryBubbleRipple 680ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dictionary-bubble-button {
+  touch-action: manipulation;
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.dictionary-example-reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: scale(0.96);
+  transform-origin: top center;
+  transition:
+    grid-template-rows 300ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 220ms ease,
+    transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+}
+
+.dictionary-example-reveal.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.dictionary-example-content {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.dictionary-reader-backdrop {
+  animation: dictionaryBackdropIn 180ms ease-out both;
+}
+
+.dictionary-reader-backdrop.is-closing {
+  animation: dictionaryBackdropOut 220ms ease-in both;
+}
+
+.dictionary-reader-bubble {
+  transform-origin: center;
+  animation: dictionaryBubblePop 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.dictionary-reader-bubble.is-closing {
+  animation: dictionaryBubblePopOut 220ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@media (hover: hover) {
+  .dictionary-bubble-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(251, 191, 36, 0.32);
     box-shadow:
-      0 0 10px rgba(234, 179, 8, 0.14),
-      inset 0 0 8px rgba(250, 204, 21, 0.05);
+      0 8px 20px rgba(2, 6, 23, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 }
 
-@keyframes dictionaryFramePulse {
-  0%, 100% {
-    border-color: rgba(253, 224, 71, 0.42);
-    box-shadow:
-      0 0 12px rgba(234, 179, 8, 0.12),
-      inset 0 0 12px rgba(250, 204, 21, 0.04);
+.dictionary-bubble-button:active {
+  transform: scale(0.94);
+}
+
+@keyframes dictionaryBubbleRipple {
+  0% {
+    opacity: 0.68;
+    transform: scale(0.985);
   }
-  50% {
-    border-color: rgba(254, 240, 138, 0.94);
-    box-shadow:
-      0 0 26px rgba(234, 179, 8, 0.3),
-      0 0 48px rgba(250, 204, 21, 0.14),
-      inset 0 0 18px rgba(250, 204, 21, 0.1);
+  100% {
+    opacity: 0;
+    transform: scale(1.035);
   }
 }
 
-@keyframes dictionaryTitleFramePulse {
-  0%, 100% {
-    border-color: rgba(253, 224, 71, 0.42);
-    box-shadow:
-      0 0 10px rgba(234, 179, 8, 0.12),
-      inset 0 0 8px rgba(250, 204, 21, 0.04);
-  }
-  50% {
-    border-color: rgba(254, 240, 138, 0.96);
-    box-shadow:
-      0 0 18px rgba(234, 179, 8, 0.32),
-      0 0 30px rgba(250, 204, 21, 0.18),
-      inset 0 0 14px rgba(250, 204, 21, 0.12);
-  }
+@keyframes dictionaryBackdropIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes dictionaryTitleGlow {
-  0%, 100% {
-    text-shadow:
-      0 0 4px rgba(250, 204, 21, 0.46),
-      0 0 9px rgba(234, 179, 8, 0.22);
-  }
-  50% {
-    text-shadow:
-      0 0 7px rgba(254, 240, 138, 0.88),
-      0 0 17px rgba(234, 179, 8, 0.56),
-      0 0 28px rgba(250, 204, 21, 0.26);
-  }
+@keyframes dictionaryBackdropOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-@keyframes dictionaryStarTwinkle {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(0.88) rotate(-8deg);
+@keyframes dictionaryBubblePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
   }
-  50% {
+  70% {
     opacity: 1;
-    transform: scale(1.12) rotate(8deg);
+    transform: scale(1.015) translateY(-1px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-@keyframes dictionaryThumbFloat {
-  0%, 100% {
-    transform: translateY(0) rotate(-4deg);
+@keyframes dictionaryBubblePopOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
-  50% {
-    transform: translateY(-4px) rotate(5deg);
+  to {
+    opacity: 0;
+    transform: scale(0.94) translateY(6px);
   }
 }
 
